@@ -1,0 +1,14 @@
+Manufacturer,Medtronic,,
+Model,MM16C-SP05X-000,,
+Type,Depth,,
+Subtype,DBS,,
+Name,4-lead DBS electrode,,
+ElectrodeDiameter,1.3,,
+ElectrodeDiameterUnits,mm,,
+ElectrodeWidth,1.57,,
+ElectrodeWidthUnits,mm,,
+ElectrodeSpacing,5,,
+ElectrodeSpacingUnits,mm,,
+,,,
+GridElectrode,GridRow,GridColumn,GridBank
+1,0,0,0

@@ -1,0 +1,17 @@
+Manufacturer,Medtronic,,
+Model,3389,,
+Type,Depth,,
+Subtype,MacroRing,,
+Name,16-Contact Macro-Micro Depth (Macros),,
+ElectrodeDiameter,1.3,,
+ElectrodeDiameterUnits,mm,,
+ElectrodeWidth,1.57,,
+ElectrodeWidthUnits,mm,,
+ElectrodeSpacing,5,,
+ElectrodeSpacingUnits,mm,,
+,,,
+GridElectrode,GridRow,GridColumn,GridBank
+1,0,0,0
+2,0,1,0
+3,0,2,0
+4,0,3,0

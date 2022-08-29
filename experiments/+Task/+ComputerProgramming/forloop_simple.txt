@@ -1,0 +1,4 @@
+x = X_START;
+for k = LOOP_START:LOOP_END
+    x = x X_OPERATION X_INCR;
+end

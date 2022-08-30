@@ -1,0 +1,8 @@
+GridId,Template,Location,Hemisphere,GridLabel
+0,Integra4x5,Temporal,Left,LT
+1,Integra1x6,AnteriorSuperiorTemporal,Left,LAST
+2,Integra1x6,PosteriorSuperiorTemporal,Left,LPST
+3,Integra4x5,Temporal,Right,RT
+4,Integra1x6,AnteriorSuperiorTemporal,Right,RAST
+5,Integra1x6,PosteriorSuperiorTemporal,Right,RPST
+6,Adtech8x8,MotorSensory,Left,MG

@@ -1,0 +1,17 @@
+Manufacturer,Integra,
+Model,1x6,
+Type,SubduralStrip,
+Subtype,MacroContact,
+Name,1x6 Strip,
+ElectrodeDiameter,2.3,
+ElectrodeDiameterUnits,mm,
+ElectrodeSpacing,10,
+ElectrodeSpacingUnits,mm,
+,,,
+GridElectrode,GridRow,GridColumn,GridBank
+1,0,0,0
+2,0,1,0
+3,0,2,0
+4,0,3,0
+5,0,4,0
+6,0,5,0

@@ -1,0 +1,21 @@
+Manufacturer,Adtech,
+Model,SD10R-SP10X-000,
+Type,Depth,
+Subtype,MacroContact,
+Name,Spencer Electrodes,
+ElectrodeDiameter,1.12,
+ElectrodeDiameterUnits,mm,
+ElectrodeWidth,2.41,
+ElectrodeWidthUnits,mm,
+ElectrodeSpacing,5,
+ElectrodeSpacingUnits,mm,
+,,
+GridElectrode,GridRow,GridColumn,GridBank
+1,0,0,0
+2,0,1,0
+3,0,2,0
+4,0,3,0
+5,0,4,0
+6,0,5,0
+7,0,6,0
+8,0,7,0

@@ -1,0 +1,6 @@
+x = X_START;
+y = Y_START;
+z = Z_START;
+x = x XXY_OPERATION y;
+y = x YXZ_OPERATION z;
+z = x ZXY_OPERATION y;

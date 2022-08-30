@@ -1,0 +1,23 @@
+Manufacturer,Adtech,
+Model,MM16C-SP05X-000,
+Type,Depth,
+Subtype,MicroContact,
+Name,16-Contact Macro-Micro Depth (Micros),
+ElectrodeDiameter,50,
+ElectrodeDiameterUnits,um,
+ElectrodeSpacingRows,1,
+ElectrodeSpacingRowsUnits,mm,
+ElectrodeSpacingColumns,5,
+ElectrodeSpacingColumnsUnits,mm,
+,,,
+GridElectrode,GridRow,GridColumn,GridBank
+1,0,0,0
+2,1,0,0
+3,2,0,0
+4,0,1,0
+5,1,1,0
+6,2,1,0
+7,0,2,0
+8,2,2,0
+9,0,3,0
+10,2,3,0

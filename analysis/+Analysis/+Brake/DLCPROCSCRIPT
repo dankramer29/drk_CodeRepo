@@ -1,0 +1,10 @@
+%% the script to run the brake study
+
+load('C:\Users\kramdani\Dropbox\My PC (NSG-M-4P72P53)\Documents\Local Data\DLC_data\202110701_VM\20210701_VM01_008_rightCamDLC_resnet50_VM01TopJul4shuffle1_350000.csv');
+
+
+%% wrap the positional data in
+
+% current interest is finger tip x y
+posD_Raw=VM01008rightCamDLCresnet50VM01TopJul4shuffle1350000;
+posData(:,1:2)=posD_Raw(:, 2:3);

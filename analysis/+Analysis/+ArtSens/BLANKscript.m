@@ -1,4 +1,4 @@
-%to run real touch TEST
+%to run real touch TESTTest
 mapBM=GridMap('\\striatum\Data\neural\working\Real Touch\P008_realtouch\P08_Research_62218_RealTouch_map.csv');
 blcBM=BLc.Reader('\\striatum\Data\neural\working\Real Touch\P008_realtouch\P08_Research_62218_RealTouch-000.blc');
 dataBM=blcBM.read;

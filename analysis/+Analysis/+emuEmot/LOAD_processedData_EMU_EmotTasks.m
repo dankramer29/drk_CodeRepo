@@ -1,8 +1,9 @@
 %%Add matnwb file
-%addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+%addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession'));
 
 %%Load NWB
-testfile = nwbRead('MW3_Session_14_filter.nwb');
+testfile = nwbRead('MW3_Session_14_filter.nwb'); 
+%testfile = nwbRead(nwbFile);
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
@@ -42,7 +43,5 @@ mi_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').e
 % NLX time [microseconds] 
 ma_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').timestamps.load;
 
-wireID{:,1} = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
-columns = testfile.general_extracellular_ephys_electrodes.vectordata;
-wireID{:,2} = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load();  
+
 

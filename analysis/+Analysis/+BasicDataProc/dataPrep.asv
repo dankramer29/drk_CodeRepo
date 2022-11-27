@@ -339,8 +339,6 @@ if BandPassed || Spectrogram || DoBandFilterBroad
     end
     if DoBandFilterBroad
         dataFinalCB=dataTempClassicBandT;
-    else
-        dataFinalCB=[];
     end
     
     filtData.dataSpec.data=dataFinal;

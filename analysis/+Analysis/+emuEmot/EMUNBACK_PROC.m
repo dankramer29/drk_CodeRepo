@@ -2,7 +2,7 @@
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession'));
 
 %% setup details of the processing
-fs = 500; %sampling rate, original is 4000
+fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 chInterest = [1, 57, 77];
 % locationsInt = ['LAMY', 'RAMY', 'LAH', 'RAH', 'LPOL', 'RPOL']; % can
 % return to this, for now probably easier to pick by hand, this was a setup
@@ -53,7 +53,22 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 taskTimeSt = find(ma_timestampsDS >= beh_timestamps(1));
 taskTimeEnd = find(ma_timestampsDS <= beh_timestamps(end));
 
-dataFcut = dataF(taskTimeSt(1)-(500 * extraTime):taskTimeEnd(end)+(500 * extraTime), :);
+%check the time is long enough for the ends, fs * extraTime is the number of samples you want extra * the time in seconds 
+if taskTimeEnd(end,1)+(fs * extraTime) < 0
+    extraTimeSt = 0;
+else 
+    extraTimeSt = extraTime * fs;
+end
+if taskTimeEnd(end,1)+(fs * extraTime) > length(dataF)
+    extraTimeEnd = length(dataF) - taskTimeEnd(end,1);
+else 
+    extraTimeEnd = extraTime * fs;
+end
+
+
+dataFcut = dataF(taskTimeSt(1,1) - extraTimeSt:taskTimeEnd(end,1) + extraTimeEnd, :);
+
+%cut to end, but check
 
 
 

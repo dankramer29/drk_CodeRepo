@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = nwbLFPchProc(data, macroTimeStamps varargin)
+function [outputArg1,outputArg2] = nwbLFPchProc(data, varargin)
 %nwbLFPchProc Basic processing function for EMU 
 %   Inputs:
 %        channel - vector or matrix of channels
@@ -10,6 +10,9 @@ function [outputArg1,outputArg2] = nwbLFPchProc(data, macroTimeStamps varargin)
 [varargin, timeStamps] = util.argkeyval('timeStamps',varargin, []); %pull in the behavioral time stamps, which default is just 1 and the end of the recording
 [varargin, preTime] = util.argkeyval('preTime',varargin, 0.5); %time before image presentation
 [varargin, postTime] = util.argkeyval('preTime',varargin, 2); %time after image presentation
+[varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
+
+
 
 if isempty(timeStamps)
     timeStamps(1) = 1;
@@ -17,10 +20,7 @@ if isempty(timeStamps)
 end
 
 %TO DO, PROBABLY NEED TO ROUND THE PRETIME CONVERSIONS IN CASE
-%NEED TO MATCH THE TIME STAMPS, IS A LITTLE ANNOYING, BUT WILL NEED TO
-%MATCH BEH_TIMESTAMPS TO MA_TIMESTAMPS IN ORDER TO FIND THE CORRECT INDEX
-%INTO THE MACROWIRE DATA. PROBABLY BEST TO PREPROCESS THE TIMESTAMPS AND
-%THEN INPUT THAT INTO THIS FUNCTION
+
 
 
 
@@ -28,8 +28,13 @@ end
 
 [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(data, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
 
-%% separate the data
+%% separate the data and adjust timestamps
 filtD = filtData.dataSpec.dataZ;
+
+%adjust the timestamps
+timeStampsSeconds = timeStamps - timeStamps(1);
+timeStampsSeconds = timeStampSeconds/500;
+
 
 %break up into data epochs centered on image presentation
 %timestamp 2 = first image, and every other is new image

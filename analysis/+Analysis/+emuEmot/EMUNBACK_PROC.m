@@ -73,13 +73,11 @@ end
 
 dataFcut = dataF(taskTimeSt(1,1) - extraTimeSt:taskTimeEnd(end,1) + extraTimeEnd, :);
 
-%cut to end, but check
-
 
 
 %% process data with main proc function
 
-[lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, behavioralIndex, 'fs', fs);
+[lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, 'timeStamps', behavioralIndex, 'fs', fs);
 
 
 

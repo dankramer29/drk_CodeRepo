@@ -53,19 +53,17 @@ dataF = filtfilt(lpFilt,data');
 %downsamle the timestamps
 ma_timestampsDS=downsample(ma_timestamps, 8);
 
-[behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps,ma_timestampsDS);
-
-taskTimeSt = closestValue(1);
-taskTimeEnd = closestValue(end);
+taskTimeSt = find(ma_timestampsDS >= beh_timestamps(1));
+taskTimeEnd = find(ma_timestampsDS <= beh_timestamps(end));
 
 %check the time is long enough for the ends, fs * extraTime is the number of samples you want extra * the time in seconds 
-if taskTimeSt-(fs * extraTime) < 0
+if taskTimeEnd(end,1)+(fs * extraTime) < 0
     extraTimeSt = 0;
 else 
     extraTimeSt = extraTime * fs;
 end
-if taskTimeEnd+(fs * extraTime) > length(dataF)
-    extraTimeEnd = length(dataF) - taskTimeEnd;
+if taskTimeEnd(end,1)+(fs * extraTime) > length(dataF)
+    extraTimeEnd = length(dataF) - taskTimeEnd(end,1);
 else 
     extraTimeEnd = extraTime * fs;
 end
@@ -79,7 +77,7 @@ dataFcut = dataF(taskTimeSt(1,1) - extraTimeSt:taskTimeEnd(end,1) + extraTimeEnd
 
 %% process data with main proc function
 
-[lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, behavioralIndex, 'fs', fs);
+[lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, ma_timestampsDS, 'timeStamps', beh_timestamps, 'fs', fs);
 
 
 

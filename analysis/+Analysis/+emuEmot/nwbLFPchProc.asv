@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = nwbLFPchProc(data, macroTimeStamps varargin)
+function [outputArg1,outputArg2] = nwbLFPchProc(data)
 %nwbLFPchProc Basic processing function for EMU 
 %   Inputs:
 %        channel - vector or matrix of channels
@@ -7,20 +7,11 @@ function [outputArg1,outputArg2] = nwbLFPchProc(data, macroTimeStamps varargin)
 
 
 [varargin, fs] = util.argkeyval('fs',varargin, 500); %sampling rate, default is 500
-[varargin, timeStamps] = util.argkeyval('timeStamps',varargin, []); %pull in the behavioral time stamps, which default is just 1 and the end of the recording
+[varargin, timeStamps] = util.argkeyval('timeStamps',varargin, [1 end]); %pull in the behavioral time stamps, which default is just 1 and the end of the recording
 [varargin, preTime] = util.argkeyval('preTime',varargin, 0.5); %time before image presentation
 [varargin, postTime] = util.argkeyval('preTime',varargin, 2); %time after image presentation
 
-if isempty(timeStamps)
-    timeStamps(1) = 1;
-    timeStamps(2) = length(data);
-end
-
 %TO DO, PROBABLY NEED TO ROUND THE PRETIME CONVERSIONS IN CASE
-%NEED TO MATCH THE TIME STAMPS, IS A LITTLE ANNOYING, BUT WILL NEED TO
-%MATCH BEH_TIMESTAMPS TO MA_TIMESTAMPS IN ORDER TO FIND THE CORRECT INDEX
-%INTO THE MACROWIRE DATA. PROBABLY BEST TO PREPROCESS THE TIMESTAMPS AND
-%THEN INPUT THAT INTO THIS FUNCTION
 
 
 
@@ -35,9 +26,6 @@ filtD = filtData.dataSpec.dataZ;
 %timestamp 2 = first image, and every other is new image
 idx1 = 1;
 for ii = 2:2:length(timeStamps) - 3
-    if timeStamps(ii+1) + (fs*postTime) > length(filtD) %make sure data not too long
-        break
-    else
     %image presentation arrangements
     %image presentation (each cell wil be ID identity for image presentation)
     imageEpochID{PresentedIdentityIdx(idx1),1}(:,:,idx1) = filtD(:, timeStamps(ii) - (fs * preTime): timeStamps(ii) + (fs * postTime),:);
@@ -51,5 +39,4 @@ for ii = 2:2:length(timeStamps) - 3
     emotionEpochID{PresentedEmotionIdx(idx1),2}(:,:,idx1) = filtD(:, timeStamps(ii+1) - (fs * preTime): timeStamps(ii+1) + (fs * postTime),:);
 
     idx1 = idx1 + 1;
-    end
 end

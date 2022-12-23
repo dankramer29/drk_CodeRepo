@@ -44,15 +44,14 @@ timeStampsFiltData = filtData.dataSpec.tplot;
 
 %find the time stamps of all events for cutting the data up
 
-[behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(timeStampsSeconds, timeStampsFiltData);
+[behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(timeStampsSeconds, timeStampsFiltData');
 
 
 
 %break up into data epochs centered on image presentation
 %timestamp 2 = first image, and every other is new image
-%NOW FIX THIS TO USE THE BEHAVIORALINDEX
 idx1 = 1;
-for ii = 2:2:length(timeStampsFiltData) - 3
+for ii = 2:2:length(timeStamps) - 3
     if timeStamps(ii+1) + (fs*postTime) > length(filtD) %make sure data not too long
         break
     else

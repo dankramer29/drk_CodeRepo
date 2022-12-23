@@ -16,17 +16,7 @@ function [closestIndex, closestValue] = timeStampConversion(behavioralTimeStamps
 %       closestValue = the actual value at each index, which probably isn't
 %       needed
 
-[row col] = size(macromicroTimeStamps);
-if col > row
-    macromicroTimeStamps=macromicroTimeStamps';
-end
-
-[row col] = size(behavioralTimeStamps);
-if col > row
-    behavioralTimeStamps=behavioralTimeStamps';
-end
-
-
+if size(macromicroTimeStamps)
 A = repmat(macromicroTimeStamps,[1 length(behavioralTimeStamps)]);
 [minValue,closestIndex] = min(abs(A-behavioralTimeStamps'));
 closestValue = macromicroTimeStamps(closestIndex); 

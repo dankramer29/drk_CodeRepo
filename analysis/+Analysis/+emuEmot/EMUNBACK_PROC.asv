@@ -88,9 +88,9 @@ dataFcut = dataF(taskTimeSt(1,1) - extraTimeSt:taskTimeEnd(end,1) + extraTimeEnd
 
 if alreadyFilteredData
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, 'timeStamps', behavioralIndex, 'fs', fs, 'filtData', filtData);
+    [lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'filtData', filtData);
 else
-    [lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, 'timeStamps', behavioralIndex, 'fs', fs);
+    [lfpData] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs);
 end
 
 

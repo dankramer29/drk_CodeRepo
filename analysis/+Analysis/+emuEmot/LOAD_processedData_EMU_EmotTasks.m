@@ -1,9 +1,7 @@
 %%Add matnwb file
 %addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession'));
 
-%%Load NWB
-testfile = nwbRead('MW3_Session_14_filter.nwb'); 
-%testfile = nwbRead(nwbFile);
+
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
@@ -29,9 +27,17 @@ beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 % Low pass at 3000Hz
 
 %% Get processed/filtered neurophysiology
+%these two are for .filtered file
 macrowires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load;
 
 microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
+
+%this is for .raw file
+% macroData = testfile.acquisition.get('MacroWireSeries').data.load();
+% macroDataD = downsample(macroData', 8);
+% macroDataD = macroDataD';
+% macrowires = macroDataD;
+
 
 %% Get neurophysiology timestamps [to align with behavioral timestamps]
 

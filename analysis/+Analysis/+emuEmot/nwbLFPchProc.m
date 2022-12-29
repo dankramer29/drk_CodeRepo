@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, varargin)
+function [nback] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, varargin)
 %nwbLFPchProc Basic processing function for EMU 
 %   Inputs:
 %        channel - vector or matrix of channels
@@ -40,7 +40,7 @@ filtD = filtData.dataSpec.dataZ; %pulls z scored spectrogram data.
 %output from filtData.
 %Each timestamp is a row and each row is fs ms.Convert to seconds and
 %subtract one time stamps worth since row 1 = time 0 of the recording data.
-timeStampsSeconds = (timeStamps/fs)-1/fs; 
+timeStampsSeconds = (timeStamps/fs)-1/fs;
 
 %pull the time from the filt data
 timeStampsFiltData = filtData.dataSpec.tplot;
@@ -63,39 +63,60 @@ end
 %break up into data epochs centered on image presentation
 %timestamp 2 = first image, and every other is new image until the last one
 idx1 = 1;
-for ii = 2:2:length(behavioralIndex) - 3
+idxID = 1;
+idxEmot = 1;
+idxID1 = 0; idxEmot1 = 0;
+idxID2 = 0; idxEmot2 = 0;
+idxID3 = 0; idxEmot3 = 0;
+for ii = 2:2:length(behavioralIndex) - 2
     if behavioralIndex(ii) + postTimeC > length(filtD) %make sure data not too long
         break
     else
+        switch PresentedIdentityIdx(idx1)
+            case 1
+                idxID1 = idxID1 +1;
+                idxID = idxID1;
+            case 2
+                idxID2 = idxID2 +1;
+                idxID = idxID2;
+            case 3
+                idxID3 = idxID3 +1;
+                idxID = idxID3;
+        end
+        switch PresentedEmotionIdx(idx1)
+            case 1
+                idxEmot1 = idxEmot1 +1;
+                idxEmot = idxEmot1;
+            case 2
+                idxEmot2 = idxEmot2 +1;
+                idxEmot = idxEmot2;
+            case 3
+                idxEmot3 = idxEmot3 +1;
+                idxEmot = idxEmot3;
+        end
         for cc = 1:length(chNum)
-            %the 
+            %the
             %by image, second group is responese NEED TO CHECK THAT'S WHAT
             %THE SECOND EVENT IS
             % NEED TO REMOVE THE 0S OR FIGURE OUT HOW TO ONLY DO THE
             % INDICES FOR THE TRIAL.
-            nback.image.(chName{cc}).image{PresentedIdentityIdx(idx1)}(:,:,idx1) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-            nback.image.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idx1) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
-            
+
+
+            nback.byidentity.(chName{cc}).image{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
+            nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
+
             %by emotion
-            nback.emotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idx1) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-            nback.emotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idx1) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
-
-%             %image presentation (each cell wil be ID identity for image presentation
-%             imageEpochID{PresentedIdentityIdx(idx1),1}(:,:,:) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC),:);
-%             %response presentation (each cell wil be ID identity for response NEED TO FIND OUT IF THIS IS ACTUALLY RESPONSE)
-%             imageEpochID{PresentedIdentityIdx(idx1),2}(:,:,:) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC),:);
-% 
-%             %emotion presentation arrangements
-%             %emotion presentation (each cell wil be EMOTION identity for image presentation)
-%             emotionEpochID{PresentedEmotionIdx(idx1),1}(:,:,:) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC),:);
-%             %emotion presentation (each cell wil be EMOTION identity for response NEED TO FIND OUT IF THIS IS ACTUALLY RESPONSE)
-%             emotionEpochID{PresentedEmotionIdx(idx1),2}(:,:,:) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC),:);
-
+            nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
+            nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
         end
         idx1 = idx1 + 1;
     end
 end
 
-figure
+
+
+
+
+
 
 

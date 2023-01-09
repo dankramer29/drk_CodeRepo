@@ -153,9 +153,19 @@ end
 dataC = dataF(behavioralIndex(2):behavioralIndex(8));
     [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(dataC, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
 
-    %this does not work, gives complex outputs for some reason.
-    sss=spectrogram(dataC, [], [], [], 500);
-[sss, fff, ttt] = spectrogram(dataC, 500*.2, floor((500*.2)*.995), [1 200], 500);
+%this does not work, gives complex outputs for some reason.
+sss=spectrogram(dataC, [], [], [], 500);
+
+figure
+[sss, fff, ttt] = spectrogram(dataC, 500*.2, 5, [1 200], 500, 'yaxis');
+figure
+spectrogram(dataC, 'yaxis');
+
+[trum, ft] = pspectrum(dataC, 500);
+
+trumDB = 10*log10(trum);
+figure
+plot(ft, trumdb)
 
 %% set up plotting
 tt = filtData.dataSpec.tplot(1:size(identityTaskLFPT.byemotion.ch1.image{1}, 2));

@@ -40,6 +40,8 @@ macroData = testfile.acquisition.get('MacroWireSeries').data.load();
 macroDataD = downsample(macroData', 8); %raw dara is 4000 and want 500 so downsample by 8
 macroDataD = macroDataD';
 macrowires = macroDataD;
+
+
 end
 
 

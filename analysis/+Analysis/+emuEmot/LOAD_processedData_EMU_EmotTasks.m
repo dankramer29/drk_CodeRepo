@@ -30,9 +30,9 @@ beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 %these two are for .filtered file
 if rawData == 0
 macrowires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load;
+microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 end
 
-microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 
 %this is for .raw file
 if rawData == 1

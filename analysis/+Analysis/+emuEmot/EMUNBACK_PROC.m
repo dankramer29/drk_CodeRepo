@@ -1,29 +1,49 @@
-% %set to 0 if running this with a new data set for the first time, set to
+%% major script for running the processing of an individual patient
+%TO DO IS PLACE VARIABLES IN THE FILE NAMES TO EASILY SWITCH PATIENT
+%FEW THINGS STILL TO CHECK, CAUSE DOES STILL LOOK STREAKY. FIRST, JUST RUN
+%WITH REAL DATA WHEN JOHN GIVES IT TO YOU AND SEE WHAT IT LOOKS LIKE. THEN,
+%TRY THE OTHER LOWPASS FILTER FUNCTION. CHECK THAT IT'S GOING THE CORRECT
+%DIRECTION WHEN FILTERING (I THINK IT ERRORS THE OTHER WAY, BUT EASY ENOUGH
+%TO FLIP IT AND FIND OUT AND TRY THE OTHER FUNCTION). TRY THE OTHER
+%NORMALIZE FUNCTION EVEN THOUGH YOU TRIED THAT...ALSO TRY THE OTHER
+%SPECTROGRAM FUNCTION OR PSPECTRUM, WHATEVER MATLAB HAS AND FIGURE OUT THE
+%OUTPUTS SO YOU CAN NORMALIZE IT AND SEE WHAT IT LOOKS LIKE.
+
+% set to 0 if running this with a new data set for the first time, set to
 % 1 if you saved the filtered data after running
 % Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
 %Set up if you are saving and then loading the filtered data
 alreadyFilteredData = 0; 
+
+%% choose raw data or not
+rawData = 0; %turn to 0 if wanting to use the filtered data
 
 %%
 % EMUNBACK_PROC
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 %% setup details of the processing
-fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
-chInterest = [1, 57, 77];
+%MW3
+chInterest = [69, 77, 148];
+%MW13
+%chInterest = [17, 25, 97];
 % locationsInt = ['LAMY', 'RAMY', 'LAH', 'RAH', 'LPOL', 'RPOL']; % can
 % return to this, for now probably easier to pick by hand, this was a setup
 % to automatically pull the electrode numbers
+fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
+
 extraTime = 3; %amount in seconds, to add to the end of the recordings
 
 
 %% Event files
+
 %% Load NWB
 % Emotion
 
-rawData = 1; %turn to 0 if wanting to use the filtered data
 if rawData == 0
-        testfile = nwbRead('MW3_Session_13_filter.nwb');
+       % testfile = nwbRead('MW3_Session_13_filter.nwb');
+                testfile = nwbRead('MW13_Session_5_filter.nwb');
+
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
 end
@@ -35,11 +55,14 @@ end
 %MW3_Session12_filter.nwb (NBack Identity): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
 %(MW3_Session11_filter.nwb = MW3_Session12_filter.nwb but the filtering is
 %better)
+% MW13_Session_10_filter.nwb — NBack_IDENTITY_2022_5_29…
+% MW13_Session_11_filter.nwb — NBack_EMOTION_2022_5_29…
 %What this means is that beh_timestamps(2) = ImageTimes(1) = Image 1 and then beh_timestamps(4) = ImageTimes(2) = Image 2 
 %run the script to pull in the data from nwb if needed
 
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
+%load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
 nbackData.task = matchStr;
 
 
@@ -74,23 +97,24 @@ lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
 'PassbandFrequency',200,'PassbandRipple',0.2, ...
 'SampleRate',500);
 
-%high pass if raw data
-lpFiltHigh = designfilt('highpassiir','FilterOrder',8, ...
-'PassbandFrequency',1,'PassbandRipple',0.2, ...
-'SampleRate',500);
-
 %cut data to channels of interest
 data = double(macrowiresCAR(chInterest, :));
 
 %lowpass filter
 dataF = filtfilt(lpFilt,data');
 
+%high pass if raw data
+% lpFiltHigh = designfilt('highpassiir','FilterOrder',8, ...
+% 'PassbandFrequency',1,'PassbandRipple',0.2, ...
+% 'SampleRate',500);
 %highpass filter
-dataF = filtfilt(lpFiltHigh,dataF);
+%dataF = filtfilt(lpFiltHigh,dataF);
 
 %% find the behavioral timestamps
-%downsamle the timestamps
+%downsamle the timestamps (ma_timestamps comes from the nwb as well)
 ma_timestampsDS=downsample(ma_timestamps, 8);
+
+%% 
 
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
@@ -105,6 +129,7 @@ taskTimeEnd = closestValue(end);
 %% process data with main proc function (see above to set this)
 
 if alreadyFilteredData == 1
+    % need to change path but also change the name if done in the future
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData);
 elseif alreadyFilteredData ~= 1
@@ -119,7 +144,7 @@ end
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
         testfile = nwbRead('MW3_Session_11_filter.nwb');
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
 nbackData.task = matchStr;
 
 %%
@@ -164,87 +189,10 @@ end
 
 %% compare
 
-[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
+%[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
 
 
 
 
-%% this is all scratch pad stuff for now.
-
-dataC = dataF(behavioralIndex(2):behavioralIndex(4));
-    [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(dataC, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
-
-%this does not work, gives complex outputs for some reason.
-spectrogram(dataC, [], [], [], 500, "power", "yaxis");
-
-figure
-spectrogram(dataC*sqrt(2), 100, 95, [1:200], 500, "power", "yaxis");
-figure
-spectrogram(dataC, 'yaxis');
-
-[trum, ft] = pspectrum(dataC, 500);
-
-trumDB = 10*log10(trum);
-figure
-plot(ft, trumdb)
-
-%% set up plotting
-tt = filtData.dataSpec.tplot(1:size(identityTaskLFPT.byemotion.ch1.image{1}, 2));
-ff = filtData.dataSpec.f;
-
-S = identityTaskLFPT.byemotion.ch1.image{1}(:, :, 2);
-
-SS1 = identityTaskLFPT.byemotion.ch77.image{1};
-SS2 = identityTaskLFPT.byidentity.ch77.image{2};
-
-SS1m = mean(SS1, 3);
-SS2m = mean(SS2, 3);
-SSt = SS1m-SS2m;
-figure
-imagesc(tt, ff, SSt); axis xy;
-
-
-figure
-imagesc(tt, ff, S); axis xy;
-
-for ii = 1:9
-    S = SS(: , : , ii);
-    figure
-    imagesc(tt, ff, S); axis xy;
-end
-
-figure
-S = dataTemp(:, 1:1000, 1);
-tt = tplot(1:1000);
-imagesc(tt, ff, S); axis xy
-
-%%
-% for the test output in nwbLFPchProc NEXT THING TO CHECK IS DIFFERENT
-% CHANNELS? ALSO IS THE Z SCORING DOING TOO MUCH? PROBABLY AND PROBABLY CAN
-% Z SCORE FOR JUST THE CHUNKS, DOUBLE CHECK IN THE STUFF YOU JUST DID THAT
-% IT Z SCORED ONLY ACROSS EACH TRIAL INSTEAD OF ACROSS ALL OF THE DATA
-% WHERE ONE LARGE OUTPUT WOULD REALLY DOMINATE.
-
-%NO IDEA WHAT IS HAPPENING, THE PROCESSING IS REALLY JUST DOING CHRONUX.
-%AT THIS POINT, LOOK BACK THROUGH YOUR OWN FILTERING PROCESS AND THEN TRY
-%THE RAW DATA
-        [dataTempM, tplotTemp, ff]=mtspecgramc(dataM, params.win, params); %time by freq, need to ' to plot with imagesc
-
-
-tt = filtDataTemp.dataSpec.tplot;
-ff = filtDataTemp.dataSpec.tplot;
-Stest = filtDataTemp.dataSpec.dataZ;
-
-xx= nback.byidentity.ch77.image.specDzscore{1};
-StestM = nanmean(nback.byidentity.ch77.image.specDzscore{1}, 3);
-
-figure
-
-imagesc(tt, ff, StestM); axis xy
-
-for ii = 1:18
-    figure
-    imagesc(tt, ff, xx(:,:,ii)); axis xy
-end
 
 

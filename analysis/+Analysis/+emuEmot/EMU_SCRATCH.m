@@ -38,5 +38,10 @@ figure
 imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 
 
-%%
+%% noise rejection
+
+macroCARch = macrowiresCAR(chInterest, :);
+
+
+
 

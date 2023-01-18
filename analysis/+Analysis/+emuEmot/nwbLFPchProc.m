@@ -24,6 +24,98 @@ end
 
 %TO DO, PROBABLY NEED TO ROUND THE PRETIME CONVERSIONS IN CASE
 
+%% this will be breaking the data up by section then data prepping it
+%% set up names for the struct
+for ff=1:length(chNum)
+    ch = num2str(chNum(ff));
+    chName{ff} = ['ch' ch];
+end
+
+%% pre and post time conversion
+preTimeC = round(preTime * fs);
+postTimeC = round(postTime * fs);
+
+
+%break up into data epochs centered on image presentation
+%timestamp 2 = first image, and every other is new image until the last one
+idx1 = 1;
+idxID = 1;
+idxEmot = 1;
+idxID1 = 0; idxEmot1 = 0;
+idxID2 = 0; idxEmot2 = 0;
+idxID3 = 0; idxEmot3 = 0;
+for ii = 2:2:length(timeStamps) - 2
+    if timeStamps(ii) + postTime > length(data) %make sure data not too long
+        break
+    else
+        switch PresentedIdentityIdx(idx1)
+            case 1
+                idxID1 = idxID1 +1;
+                idxID = idxID1;
+            case 2
+                idxID2 = idxID2 +1;
+                idxID = idxID2;
+            case 3
+                idxID3 = idxID3 +1;
+                idxID = idxID3;
+        end
+        switch PresentedEmotionIdx(idx1)
+            case 1
+                idxEmot1 = idxEmot1 +1;
+                idxEmot = idxEmot1;
+            case 2
+                idxEmot2 = idxEmot2 +1;
+                idxEmot = idxEmot2;
+            case 3
+                idxEmot3 = idxEmot3 +1;
+                idxEmot = idxEmot3;
+        end
+        for cc = 1:length(chNum)
+            %the
+            %by image, second group is responese NEED TO CHECK THAT'S WHAT
+            %THE SECOND EVENT IS
+            % NEED TO REMOVE THE 0S OR FIGURE OUT HOW TO ONLY DO THE
+            % INDICES FOR THE TRIAL.
+            
+            %image presentation epoch
+            [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(timeStamps(ii) - (preTimeC): timeStamps(ii) + (postTimeC), cc), 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing stepsdata
+            %by identity
+            nback.byidentity.(chName{cc}).image.specDzscore{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.dataZ;
+            nback.byidentity.(chName{cc}).image.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.data;
+            %by emotion
+            nback.byidentity.(chName{cc}).image.specDzscore{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.dataZ;
+            nback.byidentity.(chName{cc}).image.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.data;
+
+            %response epoch
+            
+            [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(timeStamps(ii+1) - (preTimeC): timeStamps(ii+1) + (postTimeC), cc), 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing stepsdata
+            %by identity
+            nback.byidentity.(chName{cc}).response.specDzscore{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.dataZ;
+            nback.byidentity.(chName{cc}).response.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.data;
+            %by emotion
+            nback.byidentity.(chName{cc}).response.specDzscore{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.dataZ;
+            nback.byidentity.(chName{cc}).response.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.data;
+%             
+%             nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
+%              %by emotion
+%             nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii) - (preTime): timeStamps(ii) + (postTime), cc);
+%             nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
+% 
+%            
+%             nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
+% 
+%             %by emotion
+%             nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii) - (preTime): timeStamps(ii) + (postTime), cc);
+%             nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
+        end
+        idx1 = idx1 + 1;
+    end
+end
+
+%% Process the data
+
+
+
 
 
 

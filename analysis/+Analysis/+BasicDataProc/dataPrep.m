@@ -45,7 +45,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 [varargin, Freq_BandWidth] = util.argkeyval('Freq_BandWidth',varargin, 2);  %width of the bands you are filtering (DOESN'T SEEM TO WORK RIGHT NOW)
 [varargin, MinFreq] = util.argkeyval('MinFreq',varargin, 1);  % minimium frequency to run
-[varargin, MaxFreq] = util.argkeyval('MaxFreq',varargin, 200);  % maximum  frequency to run
+[varargin, MaxFreq] = util.argkeyval('MaxFreq',varargin, 150);  % maximum  frequency to run
 
 [varargin, bandfilter] = util.argkeyval('bandfilter',varargin, []);  % check if filters already made so you don't have to keep making them each run
 [varargin, filterClassBand] = util.argkeyval('dataClassBand',varargin, []);  % check if classic broad filters already made so you don't have to keep making them each run
@@ -141,9 +141,11 @@ end
 filtData.dataBasicFilter=dataM(ramp:end-ramp,:); 
 
 %design a lowpass filter for smoothing after power
+if BandPassed
 lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
          'PassbandFrequency',15,'PassbandRipple',0.2, ...
          'SampleRate',fs);
+end
 
 %% Run either spectrogram or band filters
 

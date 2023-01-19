@@ -165,5 +165,30 @@ imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 macroCARch = macrowiresCAR(chInterest, :);
 
 
+%% sig clusters
+%THINGS TO DO, WILL NEED TO RUN THE CLUSTER PERMUTATION AGAINST ALL SORTS
+%OF THINGS, AND WILL NEED TO THINK ABOUT WHAT GOES INTO IT BECAUSE WILL
+%CREATE 1 MILLION PLOTS AND SIG CLUSTERS. ALSO ADD AN FF AND TT INTO THE
+%COMPARE SO YOU CAN PLOT THEM FOR REAL. MAYBE RUN THROUGH CLUSTERS TO SEE
+%IF ANY ARE RELEVANT JUST TO MARK THOSE FIGURES.
+
+S1 = nback.ch69.id3.emotionMean;
+S1 = normalize(S1,2);
+S2 = nback.ch69.id2.emotionMean;
+S2 = normalize(S2,2);
+tt=size(S1,2);
+ff=size(S1,1);
+
+figure
+imagesc(tt, ff, nback.ch69.id3.sigclust)
+
+figure
+
+subplot(3,1,1)
+imagesc(tt,ff,S1); axis xy
+subplot(3,1,2)
+imagesc(tt,ff,S2); axis xy
+subplot(3,1,3)
+imagesc(tt,ff,S1-S2); axis xy
 
 

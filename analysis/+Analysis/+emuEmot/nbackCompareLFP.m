@@ -13,18 +13,18 @@ for ff=1:length(chInterest)
     chName{ff} = ['ch' ch];
 end
 
-for ff=1:length(numIDs)
-    numstr = num2str(numIDs(ff));
+for ff=1:numIDs
+    numstr = num2str(ff);
     idName{ff} = ['id' numstr];
 end
 
-for ff=1:length(numEmotions)
-    numstr = num2str(numEmotions(ff));
+for ff=1:numEmotions
+    numstr = num2str(ff);
     emotName{ff} = ['emotion' numstr];
 end
 
 %find the size of the data
-[rr, cc, dd] =size(identityTaskLFP.emotion.ch1.image{1});
+[rr, cc, dd] = size(identityTaskLFP.byemotion.(chName{1}).image.specD{1});
 
 
 %compare channel by channel
@@ -34,15 +34,17 @@ end
 for ii = 1:length(chInterest)
     idx1 = 1;
     idx2 = 1;
-    for jj = 1:numIDs
-        trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image{jj}, 3);
-        trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image{jj}, 3);
+    for jj = 1:numIDs %goes through each image
+        trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
+        trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
         if trialcountID ~= trialcountEmot
             warning('trialcount different between same presentations between tasks')
         end
 
-        dataIdentity = identityTaskLFP.byidentity.(chName{ii}).image{jj};
-        dataEmotion = emotionTaskLFP.byidentity.(chName{ii}).image{jj};
+        dataIdentity = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+        dataEmotion = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+        %create a matrix with all of the identities/emotions stacked so you
+        %can process them as one
         dataIdentityAll(:,:,idx1:idx1+trialcountID-1) = dataIdentity;
         dataEmotionAll(:,:,idx2:idx2+trialcountEmot-1) = dataEmotion;
 
@@ -54,7 +56,7 @@ for ii = 1:length(chInterest)
     end
     idx1 = 1;
     idx2 = 1;
-    for jj = 1:numEmotions
+    for jj = 1:numEmotions %goes through each emotion
         trialcountID = size(identityTaskLFP.byemotion.(chName{ii}).image{jj}, 3);
         trialcountEmot = size(emotionTaskLFP.byemotion.(chName{ii}).image{jj}, 3);
         if trialcountID ~= trialcountEmot

@@ -27,7 +27,7 @@ imagesc(tt, ff, S); axis xy;
 subplot(1,2,2)
 imagesc(t, f(1:615), sn(1:615,:)); axis xy;
 ax=gca;
-ax.XTick= [1:20:150])
+ax.YTick= [0:20:150];
 
 subplot(4,1,1)
 imagesc(t, f, s); axis xy;
@@ -165,5 +165,7 @@ imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 macroCARch = macrowiresCAR(chInterest, :);
 
 
+%% sig clusters
 
+S
 

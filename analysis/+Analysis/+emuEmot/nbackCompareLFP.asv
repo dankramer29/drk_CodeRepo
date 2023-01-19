@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
+function [nback,outputArg2] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
 %UNTITLED2 Summary of this function goes here
 %   lfp1/2 = expects output of nwbLFPchProc for the emotion relevant task
 %   and the identity relevant task
@@ -13,18 +13,18 @@ for ff=1:length(chInterest)
     chName{ff} = ['ch' ch];
 end
 
-for ff=1:length(numIDs)
-    numstr = num2str(numIDs(ff));
+for ff=1:numIDs
+    numstr = num2str(ff);
     idName{ff} = ['id' numstr];
 end
 
-for ff=1:length(numEmotions)
-    numstr = num2str(numEmotions(ff));
+for ff=1:numEmotions
+    numstr = num2str(ff);
     emotName{ff} = ['emotion' numstr];
 end
 
 %find the size of the data
-[rr, cc, dd] =size(identityTaskLFP.emotion.ch1.image{1});
+[rr, cc, dd] = size(identityTaskLFP.byemotion.(chName{1}).image.specD{1});
 
 
 %compare channel by channel
@@ -34,14 +34,19 @@ end
 for ii = 1:length(chInterest)
     idx1 = 1;
     idx2 = 1;
-    for jj = 1:numIDs
-        trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image{jj}, 3);
-        trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image{jj}, 3);
+    for jj = 1:numIDs %goes through each image
+        trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
+        trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
+        if trialcountID ~= trialcountEmot
+            warning('trialcount different between same presentations between tasks')
+        end
 
-        dataIdentity = identityTaskLFP.byidentity.(chName{ii}).image{jj};
-        dataEmotion = emotionTaskLFP.byidentity.(chName{ii}).image{jj};
-        dataIdentityAll(:,:,idx1:trialcountID) = dataIdentity;
-        dataEmotionAll(:,:,idx2:trialcountEmot) = dataEmotion;
+        dataIdentity = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+        dataEmotion = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+        %create a matrix with all of the identities/emotions stacked so you
+        %can process them as one
+        dataIdentityAll(:,:,idx1:idx1+trialcountID-1) = dataIdentity;
+        dataEmotionAll(:,:,idx2:idx2+trialcountEmot-1) = dataEmotion;
 
         [nback.(chName{ii}).(idName{jj}).identityMean, nback.(chName{ii}).(idName{jj}).emotionMean...
             nback.(chName{ii}).(idName{jj}).identitySD, nback.(chName{ii}).(idName{jj}).emotionSD...
@@ -51,16 +56,17 @@ for ii = 1:length(chInterest)
     end
     idx1 = 1;
     idx2 = 1;
-    for jj = 1:numEmotions
-        trialcountID = size(identityTaskLFP.byemotion.(chName{ii}).image{jj}, 3);
-        trialcountEmot = size(emotionTaskLFP.byemotion.(chName{ii}).image{jj}, 3);
+    for jj = 1:numEmotions %goes through each emotion
+        trialcountID = size(identityTaskLFP.byemotion.(chName{ii}).image.specD{jj}, 3);
+        trialcountEmot = size(emotionTaskLFP.byemotion.(chName{ii}).image.specD{jj}, 3);
         if trialcountID ~= trialcountEmot
-            warning('tria')
+            warning('trialcount different between same presentations between tasks')
+        end
 
-        dataIdentity = identityTaskLFP.byemotion.(chName{ii}).image{jj};
-        dataEmotion = emotionTaskLFP.byemotion.(chName{ii}).image{jj};
-        dataIdentityAll(:,:,idx1:trialcountID) = dataIdentity;
-        dataEmotionAll(:,:,idx2:trialcountEmot) = dataEmotion;
+        dataIdentity = identityTaskLFP.byemotion.(chName{ii}).image.specD{jj};
+        dataEmotion = emotionTaskLFP.byemotion.(chName{ii}).image.specD{jj};
+        dataIdentityAll(:,:,idx1:idx1+trialcountID-1) = dataIdentity;
+        dataEmotionAll(:,:,idx2:idx2+trialcountEmot-1) = dataEmotion;
 
         [nback.(chName{ii}).(idName{jj}).identityMean, nback.(chName{ii}).(idName{jj}).emotionMean...
             nback.(chName{ii}).(idName{jj}).identitySD, nback.(chName{ii}).(idName{jj}).emotionSD...

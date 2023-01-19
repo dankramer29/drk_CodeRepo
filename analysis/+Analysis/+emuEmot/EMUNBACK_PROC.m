@@ -41,8 +41,8 @@ extraTime = 3; %amount in seconds, to add to the end of the recordings
 % Emotion
 
 if rawData == 0
-       % testfile = nwbRead('MW3_Session_13_filter.nwb');
-                testfile = nwbRead('MW13_Session_5_filter.nwb');
+        testfile = nwbRead('MW3_Session_13_filter.nwb');
+           %     testfile = nwbRead('MW13_Session_5_filter.nwb');
 
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
@@ -61,8 +61,8 @@ end
 %run the script to pull in the data from nwb if needed
 
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-%load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
+%load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
 nbackData.task = matchStr;
 
 
@@ -179,17 +179,16 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 %behavioral time stamps. 
 [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
 
-dataC = dataF(behavioralIndex(2)-500:behavioralIndex(end-1)+100,:);
 if alreadyFilteredData == 1
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData);
 elseif alreadyFilteredData ~= 1
-    [identityTaskLFPT] = Analysis.emuEmot.nwbLFPchProc(dataC, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
 end
 
 %% compare
 
-%[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
+[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
 
 
 

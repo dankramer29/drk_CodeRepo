@@ -212,6 +212,13 @@ if filterAllData == 1
     end
 end
 
+if filterByTrial == 1
+    nback.time = filtData.dataSpec.tplot;
+    nback.freq = filtData.dataSpec.f;
+elseif filterAllData == 1
+    nbackFilterAllData.time = filtData.dataSpec.tplot;
+    nbackFilterAllData.freq = filtData.dataSpec.f;
+end
 
 end
 

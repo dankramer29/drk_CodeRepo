@@ -164,6 +164,9 @@ imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 
 macroCARch = macrowiresCAR(chInterest, :);
 
+%% shuffle baseline
+
+
 
 %% sig clusters
 %THINGS TO DO, WILL NEED TO RUN THE CLUSTER PERMUTATION AGAINST ALL SORTS

@@ -1,4 +1,4 @@
-function [nback] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, varargin)
+function [nback, nbackFilterAllData] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, varargin)
 %nwbLFPchProc Basic processing function for EMU 
 %   Inputs:
 %        channel - vector or matrix of channels
@@ -12,8 +12,8 @@ function [nback] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx,
 [varargin, postTime] = util.argkeyval('preTime',varargin, 2); %time after image presentation
 [varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %for speed, if you want to load in processed data instead of running it each time
-[varargin, filterByTrial] = util.argkeyval('filterByTrial',varargin, true); %if true, will create an output that breaks the trials up then filters them each time
-[varargin, filterAllData] = util.argkeyval('filterAllData',varargin, true); %if true, will create an output that breaks the trials up then filters them each time
+[varargin, filterByTrial] = util.argkeyval('filterByTrial',varargin, true); %if true, will process by breaking the trials up then filters them each time.
+[varargin, filterAllData] = util.argkeyval('filterAllData',varargin, false); %if true, will  process by filtering all the data then breaking it up.
 
 if isempty(chNum)
     chNum = 1:size(data, 1);
@@ -124,6 +124,7 @@ end
 
 %% filter the data
 %This is code to filter the whole session and break it up
+nbackFilterAllData = struct;
 if filterAllData == 1
     if isempty(filtData)
         [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(data, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
@@ -199,18 +200,22 @@ if filterAllData == 1
                 % INDICES FOR THE TRIAL.
 
 
-                nback.byidentity.(chName{cc}).image{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-                nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
+                nbackFilterAllData.byidentity.(chName{cc}).image{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
+                nbackFilterAllData.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
 
                 %by emotion
-                nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-                nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
+                nbackFilterAllData.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
+                nbackFilterAllData.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
             end
             idx1 = idx1 + 1;
         end
     end
 end
 
+if filterByTrial == 1
+nback.time = filtData.dataSpec.tplot;
+nback.freq = filtData.dataSpec.f;
+elseif 
 
 end
 

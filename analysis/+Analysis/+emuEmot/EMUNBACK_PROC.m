@@ -186,8 +186,16 @@ elseif alreadyFilteredData ~= 1
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
 end
 
-%% compare
+%% compare identity task/emotion task within a channel
+%create an "iti" baseline
 
+preStartData = dataF(1:behavioralIndex(2),:);
+timeForIti = length(preStartData)/fs;
+trialLength = identityTaskLFP.time(end);
+itiData = stats.shuffleDerivedBaseline(preStartData, 'shufflLength', 0.05, 'trialLength', trialLength);
+
+%This will run stats to compare the same identities or same emotions but
+%across the two different tasks
 [nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
 
 

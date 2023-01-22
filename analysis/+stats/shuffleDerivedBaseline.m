@@ -10,11 +10,12 @@ function [trialData] = shuffleDerivedBaseline(data,varargin)
 [varargin, shuffleLength]=util.argkeyval('shuffleLength', varargin, .05); %in s (default 50ms) how much time you want in each epoch
 [varargin, trials]=util.argkeyval('trials', varargin, 50); %number of fake trials you want
 [varargin, trialLength]=util.argkeyval('trialLength', varargin, 2); %length of epoch to compare in s
+[varargin, continuous]=util.argkeyval('continuous', varargin, false); %if true, will unravel the trials to be able to run spectrogram or whatever across the whole thing, then break up by trial
 
 
 util.argempty(varargin); % check all additional inputs have been processed
 
-if size(data,1) > size(data,2)
+if size(data,2) > size(data,1)
     data = data';
 end
 
@@ -25,10 +26,20 @@ trialLengthAdj = round(trialLength*fs); %adjust the trial length for the samplin
 for ii = 1:trials
     for jj = 1:shLAdj:trialLengthAdj
         st = randi(length(data)-shLAdj);
-        trialData(:,jj:jj+shLAdj-1,ii) = data(:,st:st+shLAdj-1);
+        trialData(jj:jj+shLAdj-1,:,ii) = data(st:st+shLAdj-1,:);
     end
 end
 
+%remove any extra for creating even trial lengths.
+if size(trialData,1) > trialLengthAdj    
+    trialData(trialLengthAdj+1:end,:,:) = [];
+end
 
+%NOT TESTED
+if continuous
+    for ii = 1:size(trialData,3)
+    trialDataCont = [trialDataCont trialData(:,:,ii)];
+    end
+end
 
 end

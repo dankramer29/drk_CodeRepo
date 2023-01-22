@@ -329,7 +329,7 @@ if BandPassed || Spectrogram || DoBandFilterBroad
             [a, b]=proc.basic.zScore(baseTemp, 'z-score', 2); %get the z score mean and std
             dataFinalZ(:,:,ii)=(baseTemp-a)./b;
             if pSpectrum
-                sPspectrumZ(:,:,ii) = normalize(sPspectrum(:,:,ii),2); %auto normalizes
+                sPspectrumZ = normalize(sPspectrum(:,:,ii),2); %auto normalizes
             end
 
         end
@@ -362,10 +362,7 @@ if BandPassed || Spectrogram || DoBandFilterBroad
     clear dataFinal
     filtData.dataSpec.dataZ=dataFinalZ;
     clear dataFinal
-    filtData.dataSpec.pSpectrum.data=sPspectrum;
-    clear sPspectrum
-    filtData.dataSpec.pSpectrum.data=sPspectrumZ;
-
+    filtData.dataSpec.pSpectrum.data
     
     if DoBandFilterBroad
         for ii=1:length(lblB)

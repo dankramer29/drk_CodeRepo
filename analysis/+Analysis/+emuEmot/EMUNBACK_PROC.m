@@ -34,6 +34,10 @@ fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 mi
 
 extraTime = 3; %amount in seconds, to add to the end of the recordings
 
+%time in seconds to add before and after the events
+preTime = 0.5; 
+postTime = 2; 
+
 
 %% Event files
 
@@ -131,9 +135,9 @@ taskTimeEnd = closestValue(end);
 if alreadyFilteredData == 1
     % need to change path but also change the name if done in the future
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData);
+    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
 elseif alreadyFilteredData ~= 1
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
+    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -181,22 +185,26 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 
 if alreadyFilteredData == 1
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
 elseif alreadyFilteredData ~= 1
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
 end
 
 %% compare identity task/emotion task within a channel
 %create an "iti" baseline
+% TO DO, PLOT THE ITIS TO SHOW THAT IT IS PRETTY NEUTRAL.
 
 preStartData = dataF(1:behavioralIndex(2),:);
 timeForIti = length(preStartData)/fs;
-trialLength = identityTaskLFP.time(end);
-itiData = stats.shuffleDerivedBaseline(preStartData, 'shufflLength', 0.05, 'trialLength', trialLength);
-
+trialLength = preTime + postTime;
+itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'trialLength', trialLength);
+[itiDataFilt] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
-[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
+%TO DO, THE SIG CLUSTERS IS MESSED UP AND DOING HUGE SWATHS AS POSITIVE,
+%MAY MAKE SENSE TO NORMALIZE FIRST? PROBABLY DOES ACTUALLY, TAKE THE MEAN,
+%THEN NORMALIZE, THEN TAKE THE CLUSTERS.
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt);
 
 
 

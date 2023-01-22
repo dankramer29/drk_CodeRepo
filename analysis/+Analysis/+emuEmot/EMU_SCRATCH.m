@@ -175,15 +175,16 @@ macroCARch = macrowiresCAR(chInterest, :);
 %COMPARE SO YOU CAN PLOT THEM FOR REAL. MAYBE RUN THROUGH CLUSTERS TO SEE
 %IF ANY ARE RELEVANT JUST TO MARK THOSE FIGURES.
 
-S1 = nback.ch69.id3.emotionMean;
+S1 = nbackCompare.ch77.id2.emotionTaskMean;
 S1 = normalize(S1,2);
-S2 = nback.ch69.id2.emotionMean;
+S2 = nbackCompare.ch77.id2.identityTaskMean;
 S2 = normalize(S2,2);
-tt=size(S1,2);
-ff=size(S1,1);
+tt=emotionTaskLFP.time;
+ff=emotionTaskLFP.freq;
+
 
 figure
-imagesc(tt, ff, nback.ch69.id3.sigclust)
+imagesc(tt, ff, nbackCompare.ch77.id2.identityTasksigclust)
 
 figure
 

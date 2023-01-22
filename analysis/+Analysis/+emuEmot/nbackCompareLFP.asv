@@ -6,11 +6,15 @@ function [nback,outputArg2] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,var
 [varargin, chInterest]=util.argkeyval('chInterest', varargin, 1); %pull in the channel names
 [varargin, numIDs]=util.argkeyval('numIDs', varargin, 3); %3 face IDs are shown
 [varargin, numEmotions]=util.argkeyval('numEmotions', varargin, 3); %3 emotions are shown
-[varargin, itiData]=util.argkeyval('numEmotions', varargin, []); %3 emotions are shown
+[varargin, itiDataFilt]=util.argkeyval('itiDataFilt', varargin, []); %include iti data
 [varargin, comparedToCondition]=util.argkeyval('comparedToCondition', varargin, false); %if you are going to compare condition to condition (i.e. emotion task to identity task)
 [varargin, comparedToITI]=util.argkeyval('comparedToITI', varargin, true); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI)
 
 if comparedToITI ==1
+    if isempty(itiDataFilt)
+        error('no iti data included')
+    end
+end
 
 
 %% set up names for the struct
@@ -138,6 +142,7 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
+        itiData = itiDataFilt.iti.(chName{ii}).specD;
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)
@@ -154,11 +159,11 @@ if comparedToITI == 1
             dataIdentityTaskAllIdentities(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all identities for identity task
             dataEmotionTaskAllIdentities(:,:,idx2:idx2+trialcountEmot-1) = dataEmotionTask; %has all identities for emotion task
 
-            [nback.(chName{ii}).(idName{jj}).identityTaskMean, ...
-                nback.(chName{ii}).(idName{jj}).identityTaskSD, ...
+            [nback.(chName{ii}).(idName{jj}).identityTaskMean, ~ ...
+                nback.(chName{ii}).(idName{jj}).identityTaskSD,~ ...
                 nback.(chName{ii}).(idName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiData, 'xshuffles', 50);
-            [nback.(chName{ii}).(idName{jj}).emotionTaskMean, ...
-                nback.(chName{ii}).(idName{jj}).emotionTaskSD, ...
+            [nback.(chName{ii}).(idName{jj}).emotionTaskMean, ~,...
+                nback.(chName{ii}).(idName{jj}).emotionTaskSD, ~, ...
                 nback.(chName{ii}).(idName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiData, 'xshuffles', 50);
 
             %record if any significant clusters exist

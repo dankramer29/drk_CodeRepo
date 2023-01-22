@@ -33,7 +33,7 @@ for ff=1:length(chNum)
 end
 
 %% this is breaking the data up by session, then filtering, see below for an alternative DO NOT NEED TO DO BOTH, JUST TROUBLESHOOTING
-if filterByTrial == 1
+if filterByTrial 
     %% pre and post time conversion
     preTimeC = round(preTime * fs);
     postTimeC = round(postTime * fs);
@@ -125,13 +125,13 @@ end
 %% filter the data
 %This is code to filter the whole session and break it up
 nbackFilterAllData = struct;
-if filterAllData == 1
+if filterAllData 
     if isempty(filtData)
         [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(data, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
     end
 
     %% separate the data and adjust timestamps
-    filtD = filtData.dataSpec.dataZ; %pulls z scored spectrogram data.
+    filtD = filtData.dataSpec.data; %pulls z scored spectrogram data.
 
     %Adjust the timestamps. Now timeStampsSeconds will be seconds from the
     %start of the recording which will be zero, and can be matched to the time
@@ -212,10 +212,10 @@ if filterAllData == 1
     end
 end
 
-if filterByTrial == 1
-    nback.time = filtData.dataSpec.tplot;
-    nback.freq = filtData.dataSpec.f;
-elseif filterAllData == 1
+if filterByTrial 
+    nback.time = filtDataTemp.dataSpec.tplot;
+    nback.freq = filtDataTemp.dataSpec.f;
+elseif filterAllData 
     nbackFilterAllData.time = filtData.dataSpec.tplot;
     nbackFilterAllData.freq = filtData.dataSpec.f;
 end

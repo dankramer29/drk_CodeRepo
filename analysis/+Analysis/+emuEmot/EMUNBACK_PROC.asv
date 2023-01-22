@@ -3,7 +3,11 @@
 %FEW THINGS STILL TO CHECK, CAUSE DOES STILL LOOK STREAKY. FIRST, JUST RUN
 %WITH REAL DATA WHEN JOHN GIVES IT TO YOU AND SEE WHAT IT LOOKS LIKE. THEN,
 %TRY THE OTHER LOWPASS FILTER FUNCTION. CHECK THAT IT'S GOING THE CORRECT
-%DIRECTION WHEN FILTERING (I
+%DIRECTION WHEN FILTERING (I THINK IT ERRORS THE OTHER WAY, BUT EASY ENOUGH
+%TO FLIP IT AND FIND OUT AND TRY THE OTHER FUNCTION). TRY THE OTHER
+%NORMALIZE FUNCTION EVEN THOUGH YOU TRIED THAT...ALSO TRY THE OTHER
+%SPECTROGRAM FUNCTION OR PSPECTRUM, WHATEVER MATLAB HAS AND FIGURE OUT THE
+%OUTPUTS SO YOU CAN NORMALIZE IT AND SEE WHAT IT LOOKS LIKE.
 
 % set to 0 if running this with a new data set for the first time, set to
 % 1 if you saved the filtered data after running
@@ -37,8 +41,8 @@ extraTime = 3; %amount in seconds, to add to the end of the recordings
 % Emotion
 
 if rawData == 0
-       % testfile = nwbRead('MW3_Session_13_filter.nwb');
-                testfile = nwbRead('MW13_Session_5_filter.nwb');
+        testfile = nwbRead('MW3_Session_13_filter.nwb');
+           %     testfile = nwbRead('MW13_Session_5_filter.nwb');
 
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
@@ -57,8 +61,8 @@ end
 %run the script to pull in the data from nwb if needed
 
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-%load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
+%load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
 nbackData.task = matchStr;
 
 
@@ -175,17 +179,29 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 %behavioral time stamps. 
 [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
 
-dataC = dataF(behavioralIndex(2)-500:behavioralIndex(end-1)+100,:);
 if alreadyFilteredData == 1
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData);
 elseif alreadyFilteredData ~= 1
-    [identityTaskLFPT] = Analysis.emuEmot.nwbLFPchProc(dataC, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest);
 end
 
-%% compare
+%% compare identity task/emotion task within a channel
+%create an "iti" baseline
+% WHAT I NEED TO DO IS ARRANGE THE ITI LIKE THE NBACK AND THEN SEND IT
+% THROUGH MY NWBPROC PROBABLY, OR POSSIBLY THERE IS AN EASIER WAY TO DO IT
 
-%[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest);
+preStartData = dataF(1:behavioralIndex(2),:);
+timeForIti = length(preStartData)/fs;
+trialLength = identityTaskLFP.time(end);
+itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'trialLength', trialLength);
+for ii = 1:size(itiData,3)
+[filtItiData] =   Analysis.BasicDataProc.dataPrep(itiData(:,:,ii), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150); %calls this function for my basic processing stepsdata
+itiSpect
+end
+%This will run stats to compare the same identities or same emotions but
+%across the two different tasks
+[nbackCompare] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiData', itiData);
 
 
 

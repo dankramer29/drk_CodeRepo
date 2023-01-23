@@ -9,6 +9,12 @@
 %SPECTROGRAM FUNCTION OR PSPECTRUM, WHATEVER MATLAB HAS AND FIGURE OUT THE
 %OUTPUTS SO YOU CAN NORMALIZE IT AND SEE WHAT IT LOOKS LIKE.
 
+% Structure: image 1 on, then off with fixation
+% cross on, then image 2 on and response about same/different at any time
+% after that, but then image off, fixation on, then image 3 and decision
+% about if 2 and 3 were the same. TTLs are image on (TTL 2) then fixation
+% (TTL 3) and back and forth like that.
+
 % set to 0 if running this with a new data set for the first time, set to
 % 1 if you saved the filtered data after running
 % Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
@@ -40,33 +46,28 @@ postTime = 2;
 
 
 %% Event files
+%MW3_Session14_filter.nwb (NBack Emotion): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
+%MW3_Session12_filter.nwb (NBack Identity): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
+%(MW3_Session11_filter.nwb = MW3_Session12_filter.nwb but the filtering is
+%better)
+% MW13_Session_9_filter.nwb — NBack_IDENTITY_2022_5_29…
+% MW13_Session_10_filter.nwb — NBack_EMOTION_2022_5_29…
+%What this means is that beh_timestamps(2) = ImageTimes(1) = Image 1 and then beh_timestamps(4) = ImageTimes(2) = Image 2 
+%run the script to pull in the data from nwb if needed
 
 %% Load NWB
 % Emotion
 
 if rawData == 0
-        testfile = nwbRead('MW3_Session_13_filter.nwb');
-           %     testfile = nwbRead('MW13_Session_5_filter.nwb');
-
+       % testfile = nwbRead('MW3_Session_13_filter.nwb');
+                testfile = nwbRead('MW13_Session_10_filter.nwb');
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
 end
 
-
-
-
-%MW3_Session14_filter.nwb (NBack Emotion): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
-%MW3_Session12_filter.nwb (NBack Identity): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
-%(MW3_Session11_filter.nwb = MW3_Session12_filter.nwb but the filtering is
-%better)
-% MW13_Session_10_filter.nwb — NBack_IDENTITY_2022_5_29…
-% MW13_Session_11_filter.nwb — NBack_EMOTION_2022_5_29…
-%What this means is that beh_timestamps(2) = ImageTimes(1) = Image 1 and then beh_timestamps(4) = ImageTimes(2) = Image 2 
-%run the script to pull in the data from nwb if needed
-
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
-%load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
+%load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
 nbackData.task = matchStr;
 
 
@@ -146,9 +147,13 @@ end
 %%
 %Identity run
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
-        testfile = nwbRead('MW3_Session_11_filter.nwb');
+     %   testfile = nwbRead('MW3_Session_11_filter.nwb');
+            testfile = nwbRead('MW13_Session_9_filter.nwb');
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
+%mw3
+%load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
+%mw13
+load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat')
 nbackData.task = matchStr;
 
 %%
@@ -203,8 +208,12 @@ itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'tri
 %across the two different tasks
 %TO DO, THE SIG CLUSTERS IS MESSED UP AND DOING HUGE SWATHS AS POSITIVE,
 %MAY MAKE SENSE TO NORMALIZE FIRST? PROBABLY DOES ACTUALLY, TAKE THE MEAN,
-%THEN NORMALIZE, THEN TAKE THE CLUSTERS.
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt);
+%THEN NORMALIZE, THEN TAKE THE CLUSTERS. TRYING TO COMPARE THESE, BUT
+%SOMETHING IS WRONG WITH THE SPECS, MAYBE WITH THE Z SCORING? FIRST MAKE
+%SURE THE NWB FILES ACTUALLY CHANGED, THEN CHECK THE MEANS AS THEY COME
+%OUT (WHICH ARE CURRENTLY IN NBACKCOMPARE IN THE WORKSPACE, THEN CONSIDER
+%Z SCORING IN 3DCLUSTER BEFORE THE CLUSTERING.
+[nbackCompareZ, sigComparisonZ] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt);
 
 
 

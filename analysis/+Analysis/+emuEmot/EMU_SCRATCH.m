@@ -175,16 +175,71 @@ macroCARch = macrowiresCAR(chInterest, :);
 %COMPARE SO YOU CAN PLOT THEM FOR REAL. MAYBE RUN THROUGH CLUSTERS TO SEE
 %IF ANY ARE RELEVANT JUST TO MARK THOSE FIGURES.
 
-S1 = nbackCompare.ch77.id2.emotionTaskMean;
+S1 = nback.ch69.id1.emotionTaskMean;
 S1 = normalize(S1,2);
-S2 = nbackCompare.ch77.id2.identityTaskMean;
+S2 = nback.ch69.id1.identityTaskMean;
 S2 = normalize(S2,2);
 tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
 
 
 figure
-imagesc(tt, ff, nbackCompare.ch77.id2.identityTasksigclust)
+imagesc(tt, ff, nback.ch69.id1.identityTasksigclust)
+
+figure
+
+subplot(3,1,1)
+imagesc(tt,ff,S1); axis xy
+subplot(3,1,2)
+imagesc(tt,ff,S2); axis xy
+subplot(3,1,3)
+imagesc(tt,ff,S1-S2); axis xy
+
+%% 
+
+for ff=1:length(chInterest)
+    ch = num2str(chInterest(ff));
+    chName{ff} = ['ch' ch];
+end
+
+for ff=1:3
+    numstr = num2str(ff);
+    idName{ff} = ['id' numstr];
+end
+
+ii=1;
+jj=1;
+
+S1 = nbackCompare.(chName{ii}).(idName{jj}).emotionTaskMean;
+S1 = normalize(S1,2);
+S2 = nbackCompare.(chName{ii}).(idName{jj}).identityTaskMean;
+S2 = normalize(S2,2);
+tt=emotionTaskLFP.time;
+ff=emotionTaskLFP.freq;
+
+
+figure
+imagesc(tt, ff, nbackCompare.(chName{ii}).(idName{jj}).identityTasksigclust)
+
+figure
+
+subplot(3,1,1)
+imagesc(tt,ff,S1); axis xy
+subplot(3,1,2)
+imagesc(tt,ff,S2); axis xy
+subplot(3,1,3)
+imagesc(tt,ff,S1-S2); axis xy
+
+S1 = nbackCompareZ.(chName{ii}).(idName{jj}).emotionTaskMean;
+
+S2 = nbackCompareZ.(chName{ii}).(idName{jj}).identityTaskMean;
+
+tt=emotionTaskLFP.time;
+ff=emotionTaskLFP.freq;
+
+
+figure
+imagesc(tt, ff, nbackCompareZ.(chName{ii}).(idName{jj}).identityTasksigclust)
 
 figure
 

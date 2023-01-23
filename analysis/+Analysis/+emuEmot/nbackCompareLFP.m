@@ -152,8 +152,8 @@ if comparedToITI == 1
                 warning('trialcount different between same presentations between tasks')
             end
 
-            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
-            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
+            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
             %create a matrix with all of the identities/emotions stacked so you
             %can process them as one
             dataIdentityTaskAllIdentities(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all identities for identity task
@@ -215,8 +215,8 @@ if comparedToITI == 1
                 warning('trialcount different between same presentations between tasks')
             end
 
-            dataIdentityTask = identityTaskLFP.byemotion.(chName{ii}).image.specD{jj};
-            dataEmotionTask = emotionTaskLFP.byemotion.(chName{ii}).image.specD{jj};
+            dataIdentityTask = identityTaskLFP.byemotion.(chName{ii}).image.specDzscore{jj};
+            dataEmotionTask = emotionTaskLFP.byemotion.(chName{ii}).image.specDzscore{jj};
             %create a matrix with all of the identities/emotions stacked so you
             %can process them as one
             dataIdentityTaskAllEmotions(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all emotions together for identity task

@@ -199,20 +199,16 @@ end
 %create an "iti" baseline
 % TO DO, PLOT THE ITIS TO SHOW THAT IT IS PRETTY NEUTRAL.
 
-preStartData = dataF(1:behavioralIndex(2),:);
-timeForIti = length(preStartData)/fs;
+preStartData = dataF;
 trialLength = preTime + postTime;
 itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'trialLength', trialLength);
-[itiDataFilt] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
+[itiDataFiltT] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
-%TO DO, THE SIG CLUSTERS IS MESSED UP AND DOING HUGE SWATHS AS POSITIVE,
-%MAY MAKE SENSE TO NORMALIZE FIRST? PROBABLY DOES ACTUALLY, TAKE THE MEAN,
-%THEN NORMALIZE, THEN TAKE THE CLUSTERS. TRYING TO COMPARE THESE, BUT
-%SOMETHING IS WRONG WITH THE SPECS, MAYBE WITH THE Z SCORING? FIRST MAKE
-%SURE THE NWB FILES ACTUALLY CHANGED, THEN CHECK THE MEANS AS THEY COME
-%OUT (WHICH ARE CURRENTLY IN NBACKCOMPARE IN THE WORKSPACE, THEN CONSIDER
-%Z SCORING IN 3DCLUSTER BEFORE THE CLUSTERING.
+%LOOKS LIKE THE STITCHED DATA IS SHOWING BIG SWATHS OF CHANGES AND NEEDS TO
+%BE PULLED FROM MORE RANDOM STUFf (ALTHOUGH MAYBE NOT, THE ZSCORE RANGE IS
+%PRETTY SMALL ACTUALLY. ALSO REMEMBER TO CHANGE THE ITI TO ZSCORE FOR
+%INPUT. THE FAKE DATA IS SUPRISINGLY STRONG
 [nbackCompareZ, sigComparisonZ] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt);
 
 

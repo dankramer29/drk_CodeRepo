@@ -135,7 +135,7 @@ end
 % lab=labelmatrix(clustR);
 % lab=lab';
 % rlab=label2rgb(lab,@spring,'c','shuffle');
-bonc=0.05/(461*175);
+bonc=0.05/(size(mnd1,1)*size(mnd1,2));
 rlab=r_pvalue<bonc;
 rlab=rlab';
 %%

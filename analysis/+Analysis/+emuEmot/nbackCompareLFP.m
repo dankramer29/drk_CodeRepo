@@ -56,8 +56,8 @@ if comparedToCondition == 1
                 warning('trialcount different between same presentations between tasks')
             end
 
-            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
-            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
+            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
             %create a matrix with all of the identities/emotions stacked so you
             %can process them as one
             dataIdentityTaskAllIdentities(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all identities for identity task
@@ -142,7 +142,7 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
-        itiData = itiDataFilt.iti.(chName{ii}).specD;
+        itiData = itiDataFilt.iti.(chName{ii}).specDzscore;
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)

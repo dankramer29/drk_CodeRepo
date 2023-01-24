@@ -176,8 +176,17 @@ if Spectrogram
 
         if pSpectrum %can also do it with pspectrum to compare, f does 1024 at nyquist, so just cut it off.
             [sPspectrum, f, t] = pspectrum(dataM, fs, "spectrogram", TimeResolution=  params.win(1), OverlapPercent = params.OverlapPercentage); %will need to do normalize
-            filtData.dataSpec.pSpectrum.tplot=t;
-            filtData.dataSpec.pSpectrum.f=f;        
+            tplotTempT=t-mirroredEnd;
+            zr=find(tplotTempT>0 & tplotTempT<tplotTempT(end)-mirroredEnd); %find the row for time=0
+            tplotpSpec=tplotTempT(zr(1):zr(end)); %cut off the mirrored end
+            dataTempPS=sPspectrum(:, zr(1):zr(end), :); %cut off the mirrored end
+            maxF=find(f >= MaxFreq);
+            dataTempPSmaxF=dataTempPS(1:maxF(1),:,:); 
+
+            filtData.dataSpec.pSpectrum.tplot=tplotpSpec;
+            filtData.dataSpec.pSpectrum.f=f(1:maxF(1));        
+            filtData.dataSpec.pSpectrum.data=dataTempPSmaxF;        
+
         end
         
 elseif BandPassed

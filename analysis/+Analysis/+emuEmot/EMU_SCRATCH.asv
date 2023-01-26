@@ -246,11 +246,12 @@ imagesc(thresh_binary); axis xy; colorbar;
 
 for ii =1:10
     figure
-    xx=itiDataFilt.iti.ch69.specDzscore(:,:,ii);
+    xx=itiDataFilt.iti.ch77.specDzscore(:,:,ii);
     imagesc(tt,ff, xx); axis xy; colorbar
 end
 
-   cl
+   
+xx=mean(itiDataFilt.iti.ch77.specDzscore(:,:,ii),3);
 
 %% 
 
@@ -266,6 +267,18 @@ end
 
 tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
+xx= identityTaskLFP.byidentity.ch69.image.specDzscore{1};
+S1 = mean(xx,3);
+%S1n = normalize(S1,2);
+figure
+imagesc(tt,ff,S1); axis xy; colorbar
+
+figure
+S1d = 10*log10(dataTemp);
+S1n = normalize(S1d, 2);
+figure
+imagesc(tplot, ff, dataFinalZ); axis xy; colorbar;
+
 
 ii=1;
 jj=1;
@@ -293,13 +306,30 @@ for ii = 1:3
     end
 end
 
-ch = 2;
-for tr = 18:28
-S1 = nbackCompare.(chNameStr{ch}).allIdentities.identityTaskData(:,:,tr);
-S1 = normalize(S1,2);
+ch = 1;
+aa=1;
+bb=18;
+for tr = aa:bb
+S1 = identityTaskLFP.byidentity.ch69.image.specDzscore{1}(:,:,tr);
+%S1 = normalize(S1,2);
 figure
 imagesc(tt,ff,S1); axis xy; colorbar
 end
+%  NO IDEA WHAT IS HAPPENING WITH THIS, SEEMS LIKE WHEN I TAKE THE MEAN IT
+%  GOES DOWN TO 0.8
+Sm = mean(identityTaskLFP.byidentity.ch69.image.specD{1}, 3);
+Sm = mean(nbackCompare.(chNameStr{ch}).allIdentities.identityTaskData(:,:,aa:bb),3);
+Smn= normalize(Sm, 2);
+figure
+imagesc(tt,ff,Sm); axis xy; colorbar;colormap(inferno(100));
+xx=nbackCompareZ.ch69.id1.identityTaskMean;
+figure
+imagesc(tt,ff,xx); axis xy; colorbar;
+
+
+S1= nbackCompareZ.ch77.allEmotions.emotionTasksigclust;
+figure
+        imagesc(tt,ff,S1); axis xy; colorbar
 
 S1 = nbackCompare.(chNameStr{ii}).(idName{jj}).emotionTaskMean;
 

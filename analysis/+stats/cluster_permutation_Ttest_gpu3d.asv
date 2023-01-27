@@ -1,6 +1,7 @@
 function [ mnd1, mnd2, sd1, sd2, sigclust, rlab ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
 %shuffle_stats shuffles the data between two data sets takes the mean and
 %std to make a distribution of the data to compare the true values to using
+%REMEMBER TO RUN THE STEP RAW AND THEN NORMALIZE
 %a cluster approach
 %   Takes two vectors of data and shuffles the data points, calculates the
 %   means of the two new, shuffled groups, and takes the difference between

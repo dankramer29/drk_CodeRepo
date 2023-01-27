@@ -216,6 +216,14 @@ imagesc(tt,ff,S1-S2); axis xy
 
 tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
+tt=filtDataTemp.dataSpec.tplot;
+ff=filtDataTemp.dataSpec.f;
+xx=filtDataTemp.dataSpec.dataZ;
+
+xx= mean(itiFiltered.iti.(chName{cc}).specDzscore(:,:,:),3);
+
+figure
+imagesc(tt,ff,xx); axis xy; colorbar;
 
 figure
 subplot (3,1,1)
@@ -235,6 +243,8 @@ imagesc(mnd2); axis xy;colorbar;
 subplot (3, 1, 3)
 imagesc(sigclust); axis xy; colorbar;
 
+
+
 figure
 xx = mean(dataIdentityTask,3);
 imagesc(tt,ff,xx), axis xy; colorbar
@@ -251,7 +261,10 @@ for ii =1:10
 end
 
    
-xx=mean(itiDataFilt.iti.ch77.specDzscore(:,:,ii),3);
+xx=mean(itiDataFilt.iti.ch69.specDzscore,3);
+xxm=normalize(xx,2);
+figure
+ imagesc(tt,ff, xx); axis xy; colorbar
 
 %% 
 
@@ -267,11 +280,11 @@ end
 
 tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
-xx= identityTaskLFP.byidentity.ch69.image.specDzscore{1};
+xx= identityTaskLFP.byidentity.ch69.image.specD{1};
 S1 = mean(xx,3);
-%S1n = normalize(S1,2);
+S1n = normalize(S1,2);
 figure
-imagesc(tt,ff,S1); axis xy; colorbar
+imagesc(tt,ff,S1n); axis xy; colorbar
 
 figure
 S1d = 10*log10(dataTemp);
@@ -315,8 +328,8 @@ S1 = identityTaskLFP.byidentity.ch69.image.specDzscore{1}(:,:,tr);
 figure
 imagesc(tt,ff,S1); axis xy; colorbar
 end
-%  NO IDEA WHAT IS HAPPENING WITH THIS, SEEMS LIKE WHEN I TAKE THE MEAN IT
-%  GOES DOWN TO 0.8 BUT WHEN I NORMALIZE THE SPECD ONLY, IT IS 3.
+% DOUBLE CHECKED THIS, THE DIFFERENCE HERE IS THAT IF YOU NORMALIZE THEN
+% MEAN IT, THE RANGE IS MUCH LOWER...
 Sm = mean(identityTaskLFP.byidentity.ch69.image.specD{1}, 3); %THIS IS SD 3
 Smn= normalize(Sm, 2);
 figure
@@ -326,11 +339,21 @@ Sm = mean(identityTaskLFP.byidentity.ch69.image.specDzscore{1}, 3); %THIS IS 0.8
 figure
 imagesc(tt,ff,Sm); axis xy; colorbar;colormap(inferno(100));
 
+tplot = filtDataTemp.dataSpec.tplot;
+ff = filtDataTemp.dataSpec.f;
+Sm = normalize(filtDataTemp.dataSpec.data,2);
+figure
+imagesc(tplot, ff, Sm); axis xy; colorbar;
+figure
+imagesc(tplot, ff, filtDataTemp.dataSpec.dataZ); axis xy; colorbar;
+
+
 Sm = mean(nbackCompare.(chNameStr{ch}).allIdentities.identityTaskData(:,:,aa:bb),3);
 
 figure
 imagesc(tt,ff,Smn); axis xy; colorbar;colormap(inferno(100));
-xx=nbackCompareZ.ch69.id1.identityTaskMean;
+xx=nbackCompare.ch69.id1.identityTaskMean;
+xx=normalize(xx,2);
 figure
 imagesc(tt,ff,xx); axis xy; colorbar;
 

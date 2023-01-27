@@ -7,8 +7,8 @@ function [nback,significantComparisons] = nbackCompareLFP(identityTaskLFP,emotio
 [varargin, numIDs]=util.argkeyval('numIDs', varargin, 3); %3 face IDs are shown
 [varargin, numEmotions]=util.argkeyval('numEmotions', varargin, 3); %3 emotions are shown
 [varargin, itiDataFilt]=util.argkeyval('itiDataFilt', varargin, []); %include iti data
-[varargin, comparedToCondition]=util.argkeyval('comparedToCondition', varargin, false); %if you are going to compare condition to condition (i.e. emotion task to identity task)
-[varargin, comparedToITI]=util.argkeyval('comparedToITI', varargin, true); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI)
+[varargin, comparedToCondition]=util.argkeyval('comparedToCondition', varargin, true); %if you are going to compare condition to condition (i.e. emotion task to identity task)
+[varargin, comparedToITI]=util.argkeyval('comparedToITI', varargin, false); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI)
 
 if comparedToITI ==1
     if isempty(itiDataFilt)
@@ -35,6 +35,8 @@ end
 
 %find the size of the data
 [rr, cc, dd] = size(identityTaskLFP.byemotion.(chName{1}).image.specD{1});
+
+nback = struct;
 
 %% compares condition vs condition
 if comparedToCondition == 1
@@ -142,7 +144,7 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
-        itiData = itiDataFilt.iti.(chName{ii}).specD;
+        itiData = itiDataFilt.iti.(chName{ii}).specDzscore;
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)
@@ -152,8 +154,8 @@ if comparedToITI == 1
                 warning('trialcount different between same presentations between tasks')
             end
 
-            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
-            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
+            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
             %create a matrix with all of the identities/emotions stacked so you
             %can process them as one
             dataIdentityTaskAllIdentities(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all identities for identity task

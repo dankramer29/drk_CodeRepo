@@ -27,11 +27,10 @@ for ii = 1:trials
     for jj = 1:shLAdj:trialLengthAdj
         st = randi(length(data)-shLAdj);
         shift = randi(20);
-        shLAdjRand = shLAdj + shift;
-        trialData(jj:jj+shLAdjRand-1,:,ii) = data(st:st+shLAdjRand-1,:);
+        shlAdj = s
+        trialData(jj:jj+shLAdj-1,:,ii) = data(st:st+shLAdj-1,:);
     end
 end
-
 
 %remove any extra for creating even trial lengths.
 if size(trialData,1) > trialLengthAdj    

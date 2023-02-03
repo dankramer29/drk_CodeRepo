@@ -192,26 +192,6 @@ macroCARch = macrowiresCAR(chInterest, :);
 %COMPARE SO YOU CAN PLOT THEM FOR REAL. MAYBE RUN THROUGH CLUSTERS TO SEE
 %IF ANY ARE RELEVANT JUST TO MARK THOSE FIGURES.
 
-S1 = nback.ch69.id1.emotionTaskMean;
-S1 = normalize(S1,2);
-S2 = nback.ch69.id1.identityTaskMean;
-S2 = normalize(S2,2);
-tt=emotionTaskLFP.time;
-ff=emotionTaskLFP.freq;
-
-
-figure
-imagesc(tt, ff, nback.ch69.id1.identityTasksigclust)
-
-figure
-
-subplot(3,1,1)
-imagesc(tt,ff,S1); axis xy
-subplot(3,1,2)
-imagesc(tt,ff,S2); axis xy
-subplot(3,1,3)
-imagesc(tt,ff,S1-S2); axis xy
-
 %% troubleshooting sig testing
 
 tt=emotionTaskLFP.time;
@@ -253,18 +233,36 @@ imagesc(mean1); axis xy; colorbar;
 figure
 imagesc(thresh_binary); axis xy; colorbar;
 
+tt=emotionTaskLFP.time;
+ff=emotionTaskLFP.freq;
 
-for ii =1:10
+
+for ii =1:5
     figure
-    xx=itiDataFilt.iti.ch77.specDzscore(:,:,ii);
+    xx=identityTaskLFP.byidentity.ch148.image.specDzscore{1}(:,:,ii);
     imagesc(tt,ff, xx); axis xy; colorbar
 end
 
    
-xx=mean(itiDataFilt.iti.ch69.specDzscore,3);
+xx=mean(identityTaskLFP.byidentity.ch148.image.specDzscore{1},3);
 xxm=normalize(xx,2);
 figure
  imagesc(tt,ff, xx); axis xy; colorbar
+
+
+ for ii =1:5
+    figure
+    xx=itiDataFilt.iti.ch148.specDzscore(:,:,ii);
+    imagesc(tt,ff, xx); axis xy; colorbar
+end
+
+   
+xx=mean(itiDataFilt.iti.ch148.specDzscore,3);
+xxm=normalize(xx,2);
+figure
+ imagesc(tt,ff, xx); axis xy; colorbar
+
+
 
 %% 
 

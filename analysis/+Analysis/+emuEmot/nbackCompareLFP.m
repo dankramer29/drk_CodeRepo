@@ -146,21 +146,21 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
-        itiData = itiDataFilt.iti.(chName{ii}).specD;
+        itiData = itiDataFilt.iti.(chName{ii}).specDzscore;
        % itiDataT = repmat(nanmean(itiData,2),size(itiData,2),1); %WORKING
        % ON THIS AND IT'S NOT WORKING, WOULD NEED TO TRY RUNNING IT AGAINST
        % A TOTALLY UNIFORM ITI, BUT OVERALL THIS IS NOT WORKING WELL.
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)
-            trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
-            trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj}, 3);
+            trialcountID = size(identityTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj}, 3);
+            trialcountEmot = size(emotionTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj}, 3);
             if trialcountID ~= trialcountEmot
                 warning('trialcount different between same presentations between tasks')
             end
 
-            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specD{jj};
-            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specD{jj};
+            dataIdentityTask = identityTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
+            dataEmotionTask = emotionTaskLFP.byidentity.(chName{ii}).image.specDzscore{jj};
             %create a matrix with all of the identities/emotions stacked so you
             %can process them as one
             dataIdentityTaskAllIdentities(:,:,idx1:idx1+trialcountID-1) = dataIdentityTask; %has all identities for identity task

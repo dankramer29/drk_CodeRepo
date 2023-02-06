@@ -33,18 +33,55 @@ colorbar
 %this works, take it and noramlize it and it looks pretty close to my
 %output, just more muted maybe
 
+ zz=trialDataTemp(:,1,ii);
+ zzz=trialData(:,1,ii);
+% figure
+% plot(zz)
+% hold on
+% plot(zzz)
 
-[s, f, t] = pspectrum(dataC, 500, "spectrogram", TimeResolution= .200, OverlapPercent=95);
 
-
+jj=3;
+[s, f, t] = pspectrum(zz, 500, "spectrogram", TimeResolution= .200, OverlapPercent=95);
 sn=normalize(s,2);
 
-subplot(1,2,1)
-imagesc(tt, ff, S); axis xy;
-subplot(1,2,2)
-imagesc(t, f(1:615), sn(1:615,:)); axis xy;
+ [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(zz, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
+%% set up basic plotting
+tt = filtData.dataSpec.tplot;
+ff = filtData.dataSpec.f;
+
+S = filtData.dataSpec.dataZ;
+tplot = linspace(0,tt(end),length(zz));
+figure
+subplot(3,1,1)
+imagesc(tt, ff, S); axis xy; colorbar;
+subplot(3,1,2)
+imagesc(t, f(1:615), sn(1:615,:)); axis xy; colorbar;
 ax=gca;
 ax.YTick= [0:20:150];
+subplot(3,1,3)
+plot(tplot,zz)
+hold on
+plot(tplot,zzz)
+
+
+
+tt=itiDataFiltT.time;
+ff=itiDataFiltT.freq;
+
+for ii = 1:10
+     S= itiDataFiltT.iti.ch69.specDzscore(:,:,ii);
+     figure
+imagesc(tt, ff, S); axis xy; colorbar;
+end
+
+ S = mean(itiDataFiltT.iti.ch69.specDzscore(:,:,:),3);
+ 
+
+
+
+
+
 
 subplot(4,1,1)
 imagesc(t, f, s); axis xy;

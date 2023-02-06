@@ -22,14 +22,22 @@ end
 shLAdj = round(shuffleLength*fs); %adjust the shuffle length for the sampling frequency
 trialLengthAdj = round(trialLength*fs); %adjust the trial length for the sampling frequency
 
+shiftAdjust = 20;
+trialData = zeros(trialLengthAdj+shiftAdjust,size(data,2),trials);
+trialDataTemp = zeros(trialLengthAdj+shiftAdjust,size(data,2),trials);
+
 %% if you want to stitch small patches together
 for ii = 1:trials
-    for jj = 1:shLAdj:trialLengthAdj
-        st = randi(length(data)-shLAdj);
-        shift = randi(20);
+    for jj = 1:shLAdj:trialLengthAdj-shLAdj
+        st = randi(length(data)-shLAdj-shiftAdjust);
+        shift = randi(shiftAdjust);
         shLAdjRand = shLAdj + shift;
-        trialData(jj:jj+shLAdjRand-1,:,ii) = data(st:st+shLAdjRand-1,:);
+        trialDataTemp(jj:jj+shLAdjRand-1,:,ii) = data(st:st+shLAdjRand-1,:);
     end
+    %smooth the data
+    %trialData(:,:,ii) = smoothdata(trialDataTemp(:,:,ii),'sgolay',50);
+        trialData(:,:,ii) = trialDataTemp(:,:,ii);
+
 end
 
 
@@ -37,6 +45,9 @@ end
 if size(trialData,1) > trialLengthAdj    
     trialData(trialLengthAdj+1:end,:,:) = [];
 end
+
+
+
 
 %NOT TESTED
 if continuous

@@ -199,9 +199,9 @@ end
 %create an "iti" baseline
 % TO DO, PLOT THE ITIS TO SHOW THAT IT IS PRETTY NEUTRAL.
 
-preStartData = dataF;
+preStartData = dataF(behavioralIndex(2):behavioralIndex(end-1),:);
 trialLength = preTime + postTime;
-itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'trialLength', trialLength);
+itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength);
 [itiDataFiltT] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks

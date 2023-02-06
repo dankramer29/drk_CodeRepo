@@ -73,7 +73,7 @@ for ii=1:xshuffles
     tsr_p=2*tcdf(-abs(tstat_res(:,:,ii)), (L1+L2-2)); %get the p values for adjustment, taking abs because it won't matter here whether + or -
    
     %% find the max t stat mass (meaning the sum of the t stats in the max area using image recognition using bwconncomp)
-    thresh_binary=tsr_p<0.01; %0.05 since absolute values
+    thresh_binary=tsr_p<0.01; %this is where it counts how many shuffled chunks are large enough to meet criteria
     
     if nnz(thresh_binary)==0
         no_sig=no_sig+1; %count how many times no significant t stats show up
@@ -138,7 +138,6 @@ end
 % rlab=label2rgb(lab,@spring,'c','shuffle');
 bonc=0.05/(size(mnd1,1)*size(mnd1,2));
 rlab=r_pvalue<bonc;
-rlab=rlab';
 %%
 if plt
     histogram(tstat_res, xshuffles)

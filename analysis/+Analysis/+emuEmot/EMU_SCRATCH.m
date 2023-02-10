@@ -33,8 +33,9 @@ colorbar
 %this works, take it and noramlize it and it looks pretty close to my
 %output, just more muted maybe
 
- zz=trialDataTemp(:,1,ii);
- zzz=trialData(:,1,ii);
+ zz=trialDataTemp(shLAdj:shLAdj+trialLengthAdj,1,ii);
+ zzz=trialDataGolay(:,1,ii);
+ zzzz=trialDataGaus(:,1,ii);
 % figure
 % plot(zz)
 % hold on
@@ -42,10 +43,10 @@ colorbar
 
 
 jj=3;
-[s, f, t] = pspectrum(zz, 500, "spectrogram", TimeResolution= .200, OverlapPercent=95);
+[s, f, t] = pspectrum(zzzz, 500, "spectrogram", TimeResolution= .200, OverlapPercent=95);
 sn=normalize(s,2);
 
- [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(zz, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
+ [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(zzzz, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
 %% set up basic plotting
 tt = filtData.dataSpec.tplot;
 ff = filtData.dataSpec.f;
@@ -63,6 +64,7 @@ subplot(3,1,3)
 plot(tplot,zz)
 hold on
 plot(tplot,zzz)
+plot(tplot,zzzz)
 
 
 

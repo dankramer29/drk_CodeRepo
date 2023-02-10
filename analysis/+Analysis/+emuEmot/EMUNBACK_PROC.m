@@ -199,7 +199,7 @@ end
 %create an "iti" baseline
 % TO DO, PLOT THE ITIS TO SHOW THAT IT IS PRETTY NEUTRAL.
 
-preStartData = dataF(behavioralIndex(2):behavioralIndex(end-1),:);
+preStartData = dataF;
 trialLength = preTime + postTime;
 itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength);
 [itiDataFiltT] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
@@ -213,10 +213,10 @@ itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'tria
 %ACTIVITY. ALSO FOR SOME REASON THE OUTPUT NBACKCOMPARE IS NOT ASSIGNING
 %IF I DO CONDITION COMPARISON. ALSO NOT SURE WHAT TO DO ABOUT THE ZSCORE
 %BUT MAYBE IT DOESNT MATTER?
-[nbackCompareT, sigComparisonT] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltT);
+[nbackCompare, nbackCompare.sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltT);
 
 
-
+[outputArg1,outputArg2] = plt.nbackPlotSpectrogram(nbackCompareT,'timePlot', identityTaskLFP.time, 'frequencyRange', identityTaskLFP.freq);
 
 
 

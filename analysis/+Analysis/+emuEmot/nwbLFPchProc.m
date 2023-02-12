@@ -99,18 +99,6 @@ if filterByTrial
                 %by emotion
                 nback.byemotion.(chName{cc}).response.specDzscore{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.dataZ;
                 nback.byemotion.(chName{cc}).response.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtDataTemp.dataSpec.data;
-                %
-                %             nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
-                %              %by emotion
-                %             nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii) - (preTime): timeStamps(ii) + (postTime), cc);
-                %             nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
-                %
-                %
-                %             nback.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
-                %
-                %             %by emotion
-                %             nback.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii) - (preTime): timeStamps(ii) + (postTime), cc);
-                %             nback.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = data(:, timeStamps(ii+1) - (preTime): timeStamps(ii+1) + (postTime), cc);
             end
             idx1 = idx1 + 1;
         end
@@ -213,10 +201,12 @@ if filterAllData
 end
 
 if filterByTrial 
-    nback.time = filtDataTemp.dataSpec.tplot;
+    timePlot = filtDataTemp.dataSpec.tplot-preTime;
+    nback.time = timePlot;
     nback.freq = filtDataTemp.dataSpec.f;
 elseif filterAllData 
-    nbackFilterAllData.time = filtData.dataSpec.tplot;
+    timePlot = filtDataTemp.dataSpec.tplot-preTime;
+    nbackFilterAllData.time = timePlot;
     nbackFilterAllData.freq = filtData.dataSpec.f;
 end
 

@@ -7,30 +7,34 @@ function save_plots( figs, varargin )
 %         varargin=     
 %                     'subj_name', task  Input this if you want it to save it to the file that your data is in
 
+%TO DO FIX IF THE INPUTS AREN'T ENTERED, RIGHT NOW THEY ARE NEEDED REALLY
 %%
 %find if task and folder was entered
-[varargin, subj_name, ~, found]=util.argkeyval('folder_obj', varargin, []);
+[varargin, sessionName, ~, found]=util.argkeyval('sessionName', varargin, []);
 %Save the figures. Currently as jpg because the fig files are huge.
 %make it be a cell array
-[varargin, name, ~, found]=util.argkeyval('name', varargin, []);
+[varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
+[varargin, versionNum, ~, found]=util.argkeyval('versionNum', varargin, '_'); %if you want to do multiple versions of the same file
 
-if ~isempty(subj_name)
-    folder_create=strcat('C:\Users\Daniel\Documents\DATA\', subj_name.subject);
-    folder_name=strcat(folder_create, '\', subj_name.taskString, '\');  
+
+if ~isempty(subjName)
+    folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
+    folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
     %make the directory filder
-    mkdir (folder_create,   subj_name.idString)
+    mkdir (folder_name)
     for ii=1:length(figs)
         h=figure(figs(ii));
+        saveas(h, get(h,'Name'), 'jpg')
         saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
     end
-    
-elseif isempty(subj_name)
-    if ~isempty(name)
-        %NEED TO FIX THIS
+%THIS NEEDS FIXING BELOW TO MATCH WITH ABOVE    
+elseif isempty(sessionName)
+    if ~isempty(subjName)
+        name = strcat(subjName, date);
         folder_create=strcat('C:\Users\Daniel\Documents\DATA\', name);
-        folder_name=strcat(folder_create, '\', subj_name.taskString, '\');
+        folder_name=strcat(folder_create, '\', sessionName, '\', subjName);
         %make the directory filder
-        mkdir (folder_create,   subj_name.idString)
+        mkdir (folder_create,   subjName)
         for ii=1:length(figs)
             h=figure(figs(ii));
             saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');

@@ -147,6 +147,9 @@ if comparedToITI == 1
         idx1 = 1;
         idx2 = 1;
         itiData = itiDataFilt.iti.(chName{ii}).specDzscore;
+  
+        itiDataTemp =  mean(itiData,2);
+        itiDataTempRep = repmat(itiDataTemp,1, size(itiData,2),1);
        % itiDataT = repmat(nanmean(itiData,2),size(itiData,2),1); %WORKING
        % ON THIS AND IT'S NOT WORKING, WOULD NEED TO TRY RUNNING IT AGAINST
        % A TOTALLY UNIFORM ITI, BUT OVERALL THIS IS NOT WORKING WELL.
@@ -168,7 +171,7 @@ if comparedToITI == 1
 
             [nback.(chName{ii}).(idName{jj}).identityTaskMean, ~, ...
                 nback.(chName{ii}).(idName{jj}).identityTaskSD, ~, ...
-                nback.(chName{ii}).(idName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiData, 'xshuffles', 50);
+                nback.(chName{ii}).(idName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiData, 'xshuffles', 100);
             [nback.(chName{ii}).(idName{jj}).emotionTaskMean, ~,...
                 nback.(chName{ii}).(idName{jj}).emotionTaskSD, ~, ...
                 nback.(chName{ii}).(idName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiData, 'xshuffles', 50);
@@ -238,14 +241,14 @@ if comparedToITI == 1
 
             %record if any significant clusters exist
             if sum(sum(nback.(chName{ii}).(emotName{jj}).identityTasksigclust))>0
-                significantComparisons{idxcomp,1} = emotName{ii};
+                significantComparisons{idxcomp,1} = chName{ii};
                 significantComparisons{idxcomp,2} = emotName{jj};
                 significantComparisons{idxcomp,3} = 'identityTask';
                 idxcomp = idxcomp + 1;
             end
 
             if sum(sum(nback.(chName{ii}).(emotName{jj}).emotionTasksigclust))>0
-                significantComparisons{idxcomp,1} = emotName{ii};
+                significantComparisons{idxcomp,1} = chName{ii};
                 significantComparisons{idxcomp,2} = emotName{jj};
                 significantComparisons{idxcomp,3} = 'emotionTask';
                 idxcomp = idxcomp + 1;

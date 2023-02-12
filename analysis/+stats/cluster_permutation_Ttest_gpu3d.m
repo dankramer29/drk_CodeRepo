@@ -124,7 +124,7 @@ idxc=1;
 for ii=1:length(cl_keep)
     mat=false(size(thresh_binaryR));
     mat(clustR.PixelIdxList{cl_keep(ii)})=true;    
-    tstat_sums(ii)=sum(abs(tstat_temp(mat)));
+    tstat_sums(ii)=sum(abs(tstat_R(mat)));
     
     if tstat_sums(ii)>thresh %save the ones that are over the thresh
     sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;

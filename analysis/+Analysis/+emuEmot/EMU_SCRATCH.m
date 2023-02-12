@@ -115,7 +115,7 @@ plot(ft, trumDB)
 tt = filtData.dataSpec.tplot(1:size(emotionTaskLFP.byemotion.ch69.image.specDzscore{1}, 2));
 ff = filtData.dataSpec.f;
 
-S = emotionTaskLFP.byemotion.ch69.image.specDzscore{1}(:, :, 2);
+S = emotionTaskLFP.byemotion.ch97.image.specDzscore{2}(:, :, :);
 
 SS1 = emotionTaskLFP.byemotion.ch69.image.specDzscore{1};
 SS2 = emotionTaskLFP.byidentity.ch69.image.specDzscore{2};
@@ -220,7 +220,9 @@ imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 
 macroCARch = macrowiresCAR(chInterest, :);
 
-%% shuffle baseline
+%%
+
+
 
 
 
@@ -233,13 +235,24 @@ macroCARch = macrowiresCAR(chInterest, :);
 
 %% troubleshooting sig testing
 
+mnd2t=nanmean(mnd2,2);
+mnd2c=repmat(mnd2t,1,size(mnd1,2));
+
 tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
+xx= mean(itiData,3);
+id = mean(dataIdentityTask,3);
+em = mean(dataEmotionTask,3);
+
+figure
+imagesc(tt,ff,em); axis xy; colorbar;
+
 tt=filtDataTemp.dataSpec.tplot;
 ff=filtDataTemp.dataSpec.f;
 xx=filtDataTemp.dataSpec.dataZ;
+cc=9;
 
-xx= mean(itiFiltered.iti.(chName{cc}).specDzscore(:,:,:),3);
+xx= mean(itiDataFiltT.iti.ch97.specDzscore(:,:,:),3);
 
 figure
 imagesc(tt,ff,xx); axis xy; colorbar;
@@ -251,7 +264,7 @@ colorbar
 subplot (3, 1,2)
 imagesc(mean2); axis xy;colorbar;
 subplot (3, 1, 3)
-imagesc(thresh_binary); axis xy; colorbar;
+imagesc(tsr_p); axis xy; colorbar;
 
 figure
 subplot (3,1,1)
@@ -260,7 +273,7 @@ colorbar
 subplot (3, 1,2)
 imagesc(mnd2); axis xy;colorbar;
 subplot (3, 1, 3)
-imagesc(sigclust); axis xy; colorbar;
+imagesc(r_pvalue); axis xy; colorbar;
 
 
 

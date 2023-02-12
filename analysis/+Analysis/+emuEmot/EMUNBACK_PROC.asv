@@ -19,6 +19,14 @@
 % 1 if you saved the filtered data after running
 % Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
 %Set up if you are saving and then loading the filtered data
+sessionName = '5_29_2022session';
+subjName = 'MW13';
+taskName = 'Emotion';
+matName = 'NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat';
+
+folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matName);
+
+
 alreadyFilteredData = 0; 
 
 %% choose raw data or not
@@ -30,12 +38,13 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 %% setup details of the processing
 %MW3
-chInterest = [69, 77, 148];
+%chInterest = [69, 77, 148];
 %MW13
-%chInterest = [17, 25, 97];
-% locationsInt = ['LAMY', 'RAMY', 'LAH', 'RAH', 'LPOL', 'RPOL']; % can
-% return to this, for now probably easier to pick by hand, this was a setup
-% to automatically pull the electrode numbers
+chInterest = [23, 24, 31, 32, 33, 34, 83, 84, 97, 98];
+%REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT
+%OR DIXI) THEN 1 IS DISTAL 
+
+
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 
 extraTime = 3; %amount in seconds, to add to the end of the recordings
@@ -66,8 +75,9 @@ elseif rawData == 1
 end
 
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
+
 %load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat')
+load(folderName)
 nbackData.task = matchStr;
 
 
@@ -77,12 +87,14 @@ nbackData.task = matchStr;
 %pull wire numbers and wire ids
 wireID{:,1} = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
 wireID{:,2} = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
+wireID{:,3} = testfile.general_extracellular_ephys_electrodes.vectordata.get('channID').data.load(); 
 
 %setup for accessing channels
 %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
 %contact and 
 for ii = 1:length(wireID{2})
     chName{ii,1} = wireID{2}(ii,:);
+    chName{ii,2} = wireID{3}(ii,:);
 end
 
 
@@ -121,6 +133,20 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 
 %% 
 
+% set up the behavioral timestamps to ensure they are the presentation of
+% the image
+idx1 = 1; idx2 = 1;
+for ii=2:length(beh_timestamps)
+    timeStampDiff(idx1) = beh_timestamps(ii)-beh_timestamps(ii-1);    
+    if timeStampDiff(idx1) == 500000 %50000/500 = 1000ms
+        imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (this is possibly not true!)
+        idx2 = idx2 + 1;
+    end
+    idx1 = idx1 +1;
+end
+
+
+
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
@@ -146,14 +172,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %Identity run
-addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+taskName = 'Identity';
+matName = 'NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat';
+
+folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matName);
+
      %   testfile = nwbRead('MW3_Session_11_filter.nwb');
             testfile = nwbRead('MW13_Session_9_filter.nwb');
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 %mw3
 %load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
 %mw13
-load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat')
+load(folderName)
 nbackData.task = matchStr;
 
 %%
@@ -176,8 +206,8 @@ data = double(macrowiresCAR(chInterest, :));
 
 %lowpass filter
 dataF = filtfilt(lpFiltlow,data');
-%highpass filter
-dataF = filtfilt(lpFilthigh,data');
+%highpass filter if raw
+%dataF = filtfilt(lpFilthigh,dataF');
 
 %% find the behavioral timestamps
 %downsamle the timestamps
@@ -201,7 +231,9 @@ end
 
 preStartData = dataF;
 trialLength = preTime + postTime;
-itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'trialLength', trialLength);
+itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength, 'trials', 18*10);
+%squeeze the trials into the same number of trials
+for 1:
 [itiDataFiltT] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
@@ -211,11 +243,21 @@ itiData = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.05, 'tri
 %INPUT. THE FAKE DATA IS SUPRISINGLY STRONG. TO FIX THIS, I THINK I NEED TO
 %STITCH THE ITI DATA IN A DIFFERENT WAY OR EVEN JUST TAKE THE MEAN
 %ACTIVITY. ALSO FOR SOME REASON THE OUTPUT NBACKCOMPARE IS NOT ASSIGNING
-%IF I DO CONDITION COMPARISON
-[nbackCompareT, sigComparisonT] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltT);
+%IF I DO CONDITION COMPARISON. ALSO NOT SURE WHAT TO DO ABOUT THE ZSCORE
+%BUT MAYBE IT DOESNT MATTER?
+
+%  ALL EMOTIONS AND ALL IDENTITIES ARE THE SAME, JUST ENDS UP BEING ALL PRESENTATIONS FOR
+%  EACH TASK
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltT);
+
+tt = identityTaskLFP.time;
+ff = identityTaskLFP.freq;
+
+plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 3); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
 
 
-
-
-
+savePlot = 1;
+if savePlot
+    plt.save_plots([1:40], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
+end
 

@@ -35,26 +35,44 @@ if ~isempty(frequencyRange)
 else
     ff = 1:size(nbackCompare.(chNum{1}).(conditionName{1}).(resultName{1}),1);
 end
-
+idx1 = 1;
+idx2 = 1;
 for ii = 1:length(chNum)
     clear Sdiff
     %% identities
-    for jj = 1:4 %first do all identities
-        S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{1});%identity task mean
-        S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{4});%emotion task mean
-        if jj == 4
+    for jj = 1:8 %first do all identities
+        if jj == 4 || jj == 8
             S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{3});%identity task allIDs mean
+            mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
+            mn(idx2) = min(min(S1)); idx2 = idx2+1;
             S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{6});%emotion task allIDs mean
+            mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
+            mn(idx2) = min(min(S2)); idx2 = idx2+1;
+        else
+            S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{1});%identity task mean
+            mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
+            mn(idx2) = min(min(S1)); idx2 = idx2+1;
+            S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{4});%emotion task mean
+            mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
+            mn(idx2) = min(min(S2)); idx2 = idx2+1;
         end
         switch comparison
             case 1
                 Sdiff{jj} = S1-S2; %identity - emotion
             case 2
-                Sdiff{jj} = S1; %identity
+                Sdiff{jj} = S1; %identity task
             case 3
-                Sdiff{jj} = S2; % emotion
+                Sdiff{jj} = S2; % emotion task
         end
     end
+    %this adjusts the colormaps and prevents outliers from screwing it up.   
+    mxStd=std(mx); mnStd=-std(mn);
+    mxMean=mean(mx); mnMean=mean(mn);
+    %mx(mx>=mxMean+mxStd*1)=[]; mn(mn<=mnMean+mnStd*1)=[]; %removes maxes that are over xsd
+        mx(mx>=mxMean)=[]; mn(mn<=mnMean)=[]; %removes maxes that are over the mean to better visualize changes.
+
+    mxT=max(mx); mnT=min(mn);
+
 
     %plot the identities for both tasks
     
@@ -71,19 +89,18 @@ for ii = 1:length(chNum)
     title('Face 1')
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
-    colorbar;
+    colorbar; caxis([mnT mxT]);
     colormap(inferno(100));
     if nnz(nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{3});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
-        title('Identity task significance mask')
-        colorbar;
+        title('Identity task significance mask')        
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{1}).(resultName{6});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -101,9 +118,10 @@ for ii = 1:length(chNum)
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
-    colormap(inferno(100));
+    colormap(inferno(100)); 
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{3});
         subplot(6,4, 11)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -112,7 +130,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{2}).(resultName{6});
         subplot(6,4, 12)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -131,8 +149,9 @@ for ii = 1:length(chNum)
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{3});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -141,7 +160,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{3}).(resultName{6});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -160,8 +179,9 @@ for ii = 1:length(chNum)
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{5}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{5}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{5});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -170,7 +190,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{8}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{8}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{4}).(resultNameAll{8});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -179,30 +199,8 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     %% now the emotions
-    clear Sdiff
     idx = 1;
-     %% identities
-     for jj = 5:8 %first do all identities
-         S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{1});%identity task mean
-         S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{4});%emotion task mean
-         if jj == 8
-             S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{3});%identity task allIDs mean
-             S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{6});%emotion task allIDs mean
-         end
-         switch comparison
-             case 1
-                 Sdiff{idx} = S1-S2; %identity - emotion
-                 idx = idx + 1;
-             case 2
-                 Sdiff{idx} = S1; %identity
-                 idx = idx + 1;
-
-             case 3
-                 Sdiff{idx} = S2; % emotion
-                 idx = idx + 1;
-
-         end
-     end
+    
 
     %plot the identities for both tasks
     figtitle=[comparisonTitle, 'for Emotion Identities for ', (chName{ii,1}), ' ', (chNum{ii}), ' Heatmap '];
@@ -213,15 +211,16 @@ for ii = 1:length(chNum)
     %Emotion 1
     subplot(6,4, [1 2 5 6])
 
-    im=imagesc(tt,ff, Sdiff{1}); axis xy;
+    im=imagesc(tt,ff, Sdiff{5}); axis xy;
     ax=gca;
     title('Emotion 1')
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{3});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -229,7 +228,7 @@ for ii = 1:length(chNum)
         colorbar;
         colormap(inferno(100));
     elseif nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{4}).(resultName{6});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -241,15 +240,16 @@ for ii = 1:length(chNum)
     %Emotion 2
     subplot(6,4, [3 4 7 8])
 
-    im=imagesc(tt,ff, Sdiff{2}); axis xy;
+    im=imagesc(tt,ff, Sdiff{6}); axis xy;
     ax=gca;
     title('Emotion 2')
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{3});
         subplot(6,4, 11)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -258,7 +258,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{5}).(resultName{6});
         subplot(6,4, 12)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -270,15 +270,16 @@ for ii = 1:length(chNum)
     %Emotion 3
     subplot(6,4, [13 14 17 18])
 
-    im=imagesc(tt,ff, Sdiff{3}); axis xy;
+    im=imagesc(tt,ff, Sdiff{7}); axis xy;
     ax=gca;
     title('Emotion 3')
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{3}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{3}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{3});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -287,7 +288,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{6}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{6}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{6}).(resultName{6});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -299,15 +300,16 @@ for ii = 1:length(chNum)
     %ALL Emotions
     subplot(6,4, [15 16 19 20])
 
-    im=imagesc(tt,ff, Sdiff{4}); axis xy;
+    im=imagesc(tt,ff, Sdiff{8}); axis xy;
     ax=gca;
     title('All Emotions')
     xlabel('Time (s)','Fontsize',13);
     ylabel('Frequency (Hz)','Fontsize',13);
     colorbar;
     colormap(inferno(100));
+    caxis([mnT mxT]);
     if nnz(nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{5}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{5}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{5});
         subplot(6,4, 9)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;
@@ -316,7 +318,7 @@ for ii = 1:length(chNum)
         colormap(inferno(100));
     end
     if nnz(nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{8}))
-        sigCluster = nnz(nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{8}));
+        sigCluster = nbackCompare.(chNum{ii}).(conditionName{8}).(resultNameAll{8});
         subplot(6,4, 10)
         im=imagesc(tt,ff, sigCluster); axis xy;
         ax=gca;

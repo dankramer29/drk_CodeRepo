@@ -252,28 +252,51 @@ ff=filtDataTemp.dataSpec.f;
 xx=filtDataTemp.dataSpec.dataZ;
 cc=9;
 
-xx= mean(itiDataFiltT.iti.ch97.specDzscore(:,:,:),3);
+xx= mean(itiData,3);
+
+idx = 1;
+for ii =1:10:190
+    xmean(:,:,idx) = mean(itiData(:,:,ii:ii+10),3);
+    idx = idx+1;
+end
+
+yy=(xmean(:,:,1));
+[mxt, ccmxt]=max(xmean,[],3);
+[mnt, ccmnt]=min(xmean,[],3);
 
 figure
-imagesc(tt,ff,xx); axis xy; colorbar;
+subplot(2,1,1)
+imagesc(tt,ff,normalize(yy, 2)); axis xy; colorbar;
+subplot(2,1,2)
+imagesc(tt,ff,yy); axis xy; colorbar;
+
 
 figure
 subplot (3,1,1)
-imagesc(mean1); axis xy;
+imagesc(normalize(mean1,2)); axis xy;
 colorbar
 subplot (3, 1,2)
-imagesc(mean2); axis xy;colorbar;
+imagesc(normalize(mean2,2)); axis xy;colorbar;
 subplot (3, 1, 3)
-imagesc(tsr_p); axis xy; colorbar;
+imagesc(thresh_binary); axis xy; colorbar;
 
 figure
 subplot (3,1,1)
-imagesc(mnd1); axis xy;
+imagesc(normalize(mnd1,2)); axis xy; colorbar
+colorbar
+subplot (3, 1,2)
+imagesc(normalize(mnd2,2)); axis xy;colorbar;
+subplot (3, 1, 3)
+imagesc(tstat_R); axis xy; colorbar; colormap(inferno)
+
+figure
+subplot (3,1,1)
+imagesc(mnd1); axis xy; colorbar
 colorbar
 subplot (3, 1,2)
 imagesc(mnd2); axis xy;colorbar;
 subplot (3, 1, 3)
-imagesc(r_pvalue); axis xy; colorbar;
+imagesc(r_pvalue); axis xy; colorbar; colormap(inferno)
 
 
 

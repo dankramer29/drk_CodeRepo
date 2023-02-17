@@ -27,24 +27,24 @@ if ~isempty(subjName)
         saveas(h, get(h,'Name'), 'jpg')
         saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
     end
-%THIS NEEDS FIXING BELOW TO MATCH WITH ABOVE    
-elseif isempty(sessionName)
-    if ~isempty(subjName)
-        name = strcat(subjName, date);
-        folder_create=strcat('C:\Users\Daniel\Documents\DATA\', name);
-        folder_name=strcat(folder_create, '\', sessionName, '\', subjName);
-        %make the directory filder
-        mkdir (folder_create,   subjName)
-        for ii=1:length(figs)
-            h=figure(figs(ii));
-            saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
-        end
-    else
-        for ii=1:length(figs)
-            h=figure(figs(ii));
-            saveas(h, get(h,'Name'), 'jpg');
-        end
-    end
+% %THIS NEEDS FIXING BELOW TO MATCH WITH ABOVE    
+% elseif isempty(sessionName)
+%     if ~isempty(subjName)
+%         name = strcat(subjName, date);
+%         folder_create=strcat('C:\Users\Daniel\Documents\DATA\', name);
+%         folder_name=strcat(folder_create, '\', sessionName, '\', subjName);
+%         %make the directory filder
+%         mkdir (folder_create,   subjName)
+%         for ii=1:length(figs)
+%             h=figure(figs(ii));
+%             saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
+%         end
+%     else
+%         for ii=1:length(figs)
+%             h=figure(figs(ii));
+%             saveas(h, get(h,'Name'), 'jpg');
+%         end
+%     end
 end
 
 

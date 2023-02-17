@@ -231,15 +231,68 @@ end
 
 preStartData = dataF;
 trialLength = preTime + postTime;
-itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength, 'trials', 18*11);
-%squeeze the trials into the same number of trials
-idx3 = 1;
-for ii = 1:10:180
-    itiData(:, :, idx3) = mean(itiDataTemp(:,:,ii:ii+10),3);
-    idx3 = idx3 + 1;
+itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength, 'trials', 200);
+%THIS APPEARS NOT TO WORK, IT REALLY MUTES THE ITI DATA AND ENDS UP WITH IT
+%MAKING THE ENTIRE TRIAL LOOK POSITIVE.
+% idx3 = 1;
+% for ii = 1:10:480
+%     itiDataCompare(:, :, idx3) = mean(itiDataTemp(:,:,ii:ii+10),3);
+%     idx3 = idx3 + 1;
+% end
+% itiData = itiDataTemp;
+
+[itiDataCompareFilt] = Analysis.emuEmot.nwbLFPchProcITI(itiDataTemp, 'chNum', chInterest);
+
+for ff=1:length(chInterest)
+    ch = num2str(chInterest(ff));
+    channelName{ff} = ['ch' ch];
 end
 
-[itiDataFiltT] = Analysis.emuEmot.nwbLFPchProcITI(itiData, 'chNum', chInterest);
+%this is for creating a central threshold, but I'M NOT SURE IT REALLY WORKS
+%BECAUSE I CAN'T FIGURE OUT WHAT TO COMPARE THE REGULAR DATA TO
+for ii =1:length(chInterest)
+    itiDataTest = itiDataFilt.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
+    [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
+end
+
+%%
+%this attempt removes spurious trials that have some high noise for some
+%reason THIS DOES NOT WORK, THERE MIGHT BE A WAY TO GET THE ACTUAL STD, BUT
+%RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
+clear abEpochP abEpochN
+idx1=1;
+idx2=1;
+for ii =1:length(chInterest)
+    itiDataTest = itiDataFilt.iti.(channelName{ii}).specD;
+    itiDataTest = normalize(itiDataTest,2);
+    stD1 = std(itiDataTest,[],2);
+    stD2 = std(stD1, [], 3);
+    mn1 = mean(itiDataTest, 2);
+    mn2 = mean(mn1,3);
+    for jj = 1:size(itiDataTest,3)
+        zz=itiDataTest(:,:,jj) >stD2*3.5;
+        if nnz(zz)
+            abEpochP(idx1,1) = jj;
+            abEpochP(idx1,2) = chInterest(ii); 
+            idx1=idx1+1;
+        end
+        zz=itiDataTest(:,:,jj) < std2*-3.5;
+        if nnz(zz)
+            abEpochN(idx2,1) = jj;
+            abEpochN(idx2,2) = chInterest(ii);
+            idx2=idx2+1;
+        end
+    end
+end
+%%        
+        %NEEED TO THEN TAKE THE MEAN OF THAT ONE
+        %AND THEN ADD THE SDS AND SEE IF IT'S BIGGER THAN THAT AND THEN
+       % REMOVE IT, BY REPLACING IT WITH THE MEAN
+
+
+
+
+
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
 %LOOKS LIKE THE STITCHED DATA IS SHOWING BIG SWATHS OF CHANGES AND NEEDS TO
@@ -251,19 +304,24 @@ end
 %IF I DO CONDITION COMPARISON. ALSO NOT SURE WHAT TO DO ABOUT THE ZSCORE
 %BUT MAYBE IT DOESNT MATTER?
 
+%TOMORROW, TRY NO ZSCORE AND TRY THE MAIN "GOOD ONE" AND SEE WHY IT'S NOT
+%BEING CALLED SIGNIFICANT. PROBABLY TRY IT AGAINST AN AVERAGED ITI, IT
+%SEEMS TO BE 0 ESSENTIALLY, BUT YOU'RE COMPARING IT TO A HISTOGRAM THAT
+%WASN'T DERIVED THAT WAY.
+
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 % NO IDEA WHY THE CLUSTERS ARE SO SMALL FOR THE REAL BUT NOT FOR THE ITI
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltT);
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt, 'xshuffles', 100);
 
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
 
-plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 3); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
+plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 2); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
 
 
 savePlot = 1;
 if savePlot
-    plt.save_plots([1:40], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
+    plt.save_plots([1:20], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
 

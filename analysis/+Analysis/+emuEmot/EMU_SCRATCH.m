@@ -235,6 +235,41 @@ macroCARch = macrowiresCAR(chInterest, :);
 
 %% troubleshooting sig testing
 
+%this attempt removes spurious trials that have some high noise for some
+%reason THIS DOES NOT WORK, THERE MIGHT BE A WAY TO GET THE ACTUAL STD, BUT
+%RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
+
+%%
+clear abEpochP abEpochN
+idx1=1;
+idx2=1;
+for ii =1:length(chInterest)
+    itiDataTest = itiDataFilt.iti.(channelName{ii}).specD;
+    itiDataTest = normalize(itiDataTest,2);
+    stD1 = std(itiDataTest,[],2);
+    stD2 = std(stD1, [], 3);
+    mn1 = mean(itiDataTest, 2);
+    mn2 = mean(mn1,3);
+    for jj = 1:size(itiDataTest,3)
+        zz=itiDataTest(:,:,jj) >stD2*3.5;
+        if nnz(zz)
+            abEpochP(idx1,1) = jj;
+            abEpochP(idx1,2) = chInterest(ii); 
+            idx1=idx1+1;
+        end
+        zz=itiDataTest(:,:,jj) < std2*-3.5;
+        if nnz(zz)
+            abEpochN(idx2,1) = jj;
+            abEpochN(idx2,2) = chInterest(ii);
+            idx2=idx2+1;
+        end
+    end
+end
+
+
+
+%%
+
 mnd2t=nanmean(mnd2,2);
 mnd2c=repmat(mnd2t,1,size(mnd1,2));
 
@@ -283,11 +318,14 @@ imagesc(thresh_binary); axis xy; colorbar;
 figure
 subplot (3,1,1)
 imagesc(normalize(mnd1,2)); axis xy; colorbar
+title('Mean of Trial data')
 colorbar
 subplot (3, 1,2)
 imagesc(normalize(mnd2,2)); axis xy;colorbar;
+title('Mean of shuffle data 200 epochs')
 subplot (3, 1, 3)
-imagesc(tstat_R); axis xy; colorbar; colormap(inferno)
+imagesc(mat); axis xy; colorbar; colormap(inferno)
+title('tstats from a ttest')
 
 figure
 subplot (3,1,1)
@@ -312,6 +350,7 @@ tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
 
 
+%%
 for ii =1:5
     figure
     xx=identityTaskLFP.byidentity.ch148.image.specDzscore{1}(:,:,ii);

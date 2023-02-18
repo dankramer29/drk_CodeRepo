@@ -72,8 +72,8 @@ for ii = 1:length(chNum)
     %this adjusts the colormaps and prevents outliers from screwing it up.   
     mxStd=std(mx); mnStd=-std(mn);
     mxMean=mean(mx); mnMean=mean(mn);
-    mx(mx>=mxMean+mxStd*3)=[]; mn(mn<=mnMean+mnStd*3)=[]; %removes maxes that are over xsd
-        %mx(mx>=mxMean)=[]; mn(mn<=mnMean)=[]; %removes maxes that are over the mean to better visualize changes.
+    mx(mx>=mxMean+mxStd*1)=[]; mn(mn<=mnMean+mnStd*1)=[]; %removes maxes that are over xsd
+        mx(mx>=mxMean)=[]; mn(mn<=mnMean)=[]; %removes maxes that are over the mean to better visualize changes.
 
     mxT=max(mx); mnT=min(mn);
 

@@ -118,7 +118,7 @@ lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
 data = double(macrowiresCAR(chInterest, :));
 
 %lowpass filter
-dataF = filtfilt(lpFilt,data');
+dataFemotion = filtfilt(lpFilt,data');
 
 %high pass if raw data
 % lpFiltHigh = designfilt('highpassiir','FilterOrder',8, ...
@@ -162,9 +162,9 @@ taskTimeEnd = closestValue(end);
 if alreadyFilteredData == 1
     % need to change path but also change the name if done in the future
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
+    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
 elseif alreadyFilteredData ~= 1
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
+    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,7 +205,7 @@ lpFilthigh = designfilt('highpassiir','FilterOrder',8, ...
 data = double(macrowiresCAR(chInterest, :));
 
 %lowpass filter
-dataF = filtfilt(lpFiltlow,data');
+dataFidentity = filtfilt(lpFiltlow,data');
 %highpass filter if raw
 %dataF = filtfilt(lpFilthigh,dataF');
 
@@ -220,18 +220,17 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 
 if alreadyFilteredData == 1
     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
 elseif alreadyFilteredData ~= 1
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataF, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
 end
 
 %% compare identity task/emotion task within a channel
 %create an "iti" baseline
-% TO DO, PLOT THE ITIS TO SHOW THAT IT IS PRETTY NEUTRAL.
 
-preStartData = dataF;
+preStartData = dataFidentity;
 trialLength = preTime + postTime;
-itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, 'trialLength', trialLength, 'trials', 200);
+itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'trialLength', trialLength, 'trials', 20, 'timeStamps', behavioralIndex(3:107));
 %THIS APPEARS NOT TO WORK, IT REALLY MUTES THE ITI DATA AND ENDS UP WITH IT
 %MAKING THE ENTIRE TRIAL LOOK POSITIVE.
 % idx3 = 1;
@@ -241,53 +240,26 @@ itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'shuffleLength', 0.5, '
 % end
 % itiData = itiDataTemp;
 
-[itiDataCompareFilt] = Analysis.emuEmot.nwbLFPchProcITI(itiDataTemp, 'chNum', chInterest);
+[itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(itiDataTemp, 'chNum', chInterest);
 
 for ff=1:length(chInterest)
     ch = num2str(chInterest(ff));
     channelName{ff} = ['ch' ch];
 end
 
+
+%itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
+
 %this is for creating a central threshold, but I'M NOT SURE IT REALLY WORKS
 %BECAUSE I CAN'T FIGURE OUT WHAT TO COMPARE THE REGULAR DATA TO
-for ii =1:length(chInterest)
-    itiDataTest = itiDataFilt.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
-    [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
-end
+% for ii =1:length(chInterest)
+%     itiDataTest = itiDataFiltIdentity.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
+%     [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
+%     [thresh(ii), tstatHisto{ii}] = stats.cluster_shuffleMeanBaseline_gpu3d(itiDataTest, 'xshuffles', 200);
+% 
+% end
+% 
 
-%%
-%this attempt removes spurious trials that have some high noise for some
-%reason THIS DOES NOT WORK, THERE MIGHT BE A WAY TO GET THE ACTUAL STD, BUT
-%RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
-clear abEpochP abEpochN
-idx1=1;
-idx2=1;
-for ii =1:length(chInterest)
-    itiDataTest = itiDataFilt.iti.(channelName{ii}).specD;
-    itiDataTest = normalize(itiDataTest,2);
-    stD1 = std(itiDataTest,[],2);
-    stD2 = std(stD1, [], 3);
-    mn1 = mean(itiDataTest, 2);
-    mn2 = mean(mn1,3);
-    for jj = 1:size(itiDataTest,3)
-        zz=itiDataTest(:,:,jj) >stD2*3.5;
-        if nnz(zz)
-            abEpochP(idx1,1) = jj;
-            abEpochP(idx1,2) = chInterest(ii); 
-            idx1=idx1+1;
-        end
-        zz=itiDataTest(:,:,jj) < std2*-3.5;
-        if nnz(zz)
-            abEpochN(idx2,1) = jj;
-            abEpochN(idx2,2) = chInterest(ii);
-            idx2=idx2+1;
-        end
-    end
-end
-%%        
-        %NEEED TO THEN TAKE THE MEAN OF THAT ONE
-        %AND THEN ADD THE SDS AND SEE IF IT'S BIGGER THAN THAT AND THEN
-       % REMOVE IT, BY REPLACING IT WITH THE MEAN
 
 
 
@@ -295,24 +267,12 @@ end
 
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
-%LOOKS LIKE THE STITCHED DATA IS SHOWING BIG SWATHS OF CHANGES AND NEEDS TO
-%BE PULLED FROM MORE RANDOM STUFf (ALTHOUGH MAYBE NOT, THE ZSCORE RANGE IS
-%PRETTY SMALL ACTUALLY. ALSO REMEMBER TO CHANGE THE ITI TO ZSCORE FOR
-%INPUT. THE FAKE DATA IS SUPRISINGLY STRONG. TO FIX THIS, I THINK I NEED TO
-%STITCH THE ITI DATA IN A DIFFERENT WAY OR EVEN JUST TAKE THE MEAN
-%ACTIVITY. ALSO FOR SOME REASON THE OUTPUT NBACKCOMPARE IS NOT ASSIGNING
-%IF I DO CONDITION COMPARISON. ALSO NOT SURE WHAT TO DO ABOUT THE ZSCORE
-%BUT MAYBE IT DOESNT MATTER?
 
-%TOMORROW, TRY NO ZSCORE AND TRY THE MAIN "GOOD ONE" AND SEE WHY IT'S NOT
-%BEING CALLED SIGNIFICANT. PROBABLY TRY IT AGAINST AN AVERAGED ITI, IT
-%SEEMS TO BE 0 ESSENTIALLY, BUT YOU'RE COMPARING IT TO A HISTOGRAM THAT
-%WASN'T DERIVED THAT WAY.
 
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 % NO IDEA WHY THE CLUSTERS ARE SO SMALL FOR THE REAL BUT NOT FOR THE ITI
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFilt, 'xshuffles', 100);
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltIdentity, 'xshuffles', 100);
 
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;

@@ -1,6 +1,11 @@
-function [ mnd1, mnd2, sd1, sd2, sigclust, rlab ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
-%USE THIS ONE
-% 
+function [ thresh, tstat_max ] = cluster_shuffleMeanBaseline_gpu3d( data, varargin )
+%USE THIS ONE OR CLUSTER_PERMUTATION_TTEST_GPU3D
+% The idea here is to just figure out the range of normal, then find
+% clusters of when it goes over that.
+
+%I think, but don't know, that using NON zscored data is better (the data
+%is the same but the values are larger for the ttest)
+
 % shuffle_stats shuffles the data between two data sets takes the mean and
 %std to make a distribution of the data to compare the true values to using
 %
@@ -9,15 +14,18 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, rlab ] = cluster_permutation_Ttest_gp
 %   means of the two new, shuffled groups, and takes the difference between
 %   those means.  Does that xshuffles number of times and tells where your
 %   actual difference in means falls on that distribution.
+% %INPUT:  
+%      data1 -matrix or vector of data, where the 3rd dimension is trials
+%      (not currently set up for 2d data, but probably should in the future
+%      optional data2 -matrix or vector of data
 % %OUTPUT:
-%     mn- the mean of data1 and data2 
-%     sd- the std of data1 and data2 
-%     est_p-the percentage of the distribution that is farther out than yours
-%     with the assumption that if it's less than 0.05, it's significant
+%     thresh- the threshold a cluster needs to be above to be significant
+%     t
 
+[varargin, data2]=util.argkeyval('data2', varargin, []); %can input a second data or create it from the first set
 
 [varargin, plt]=util.argkeyval('plt', varargin, false); %option to plot the historgram
-[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 500); %how many shuffles you want to do, default is 5k
+[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 100); %how many shuffles you want to do, default is 5k
 %adjust the alpha level that the permutations are compared to, meaning the percentile on the histogram, over which something is considered positive
 %0.00024 is 0.05/(64*3+20) the number of electrodes for the real touch
 [varargin, alph]=util.argkeyval('alph', varargin, 0.05); 
@@ -32,6 +40,29 @@ util.argempty(varargin); % check all additional inputs have been processed
 
 %calculate the size of the samples you want to take, default is just over
 %half
+
+
+alph = 1-alph;
+
+dataMean = mean(data, 3);
+dataMeanAllt = mean(dataMean,2);
+dataMeanAll = repmat(dataMeanAllt, 1, size(data,2));
+
+dataSD = std(data, [], 3);
+dataSDAllt = mean(dataSD,2);
+dataSDAll = repmat(dataSDAllt, 1, size(data,2));
+
+
+dataCombPos = dataMean + dataSD*2;
+
+dataCombNeg = dataMean - dataSD*2;
+
+dataCombMean = mean(dataComb,2);
+
+dataRep = repmat(dataCombMean, 1, size(dataComb,2));
+
+
+
 
 %preallocate
 if gpuOn
@@ -100,54 +131,14 @@ toc(tt)
 
 tstat_max=gather(tstat_max);
 
-
-%%
-%get the real mean difference and sd at each value
-mnd1=nanmean(data1,3);
-mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
-sd1=std(data1,0,3);
-sd2=std(data2,0,3);
-spR=sqrt(((L1-1)*sd1.^2+(L2-1)*sd2.^2)./(L1+L2-2));
-tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L2));
-tstat_R=gather(tstat_R);
-tstat_Rabs=abs(tstat_R); %take absolute for adjustment.  I looked into this, it needs to be absolute value to capture all (ultimately this is a two sided t test, so the tcdf needs to see the absolute value), IT'S POSSIBLE TO FIX THIS IN THE FUTURE IF DESIRED, BUT NEEDS SOME MORE THOUGHT
-r_pvalue=2*tcdf(-abs(tstat_Rabs), (L1+L2-2)); %get the p values for adjustment, this formula is straight from ttest2
-
-%% find which clusters are sig
-%allocate
-sigclust=zeros(size(tstat_R));
-%find the 0.05 level
+%find the alpha level
 temp_tsm=sort(tstat_max);
-thresh=temp_tsm(round(size(tstat_max,1)*.95));
-%%
-%begin clustering with bwconncomp
-thresh_binaryR=r_pvalue<0.01;%find those less than set p value
-clustR=bwconncomp(thresh_binaryR,8);
-clR=regionprops(clustR); %get the region properties
-cl_aR=[clR.Area];
-cl_keep=find(cl_aR>100); %get the ones with an area >100 pixels
-idxc=1;
-for ii=1:length(cl_keep)
-    mat=false(size(thresh_binaryR));
-    mat(clustR.PixelIdxList{cl_keep(ii)})=true;    
-    tstat_sums(ii)=sum(abs(tstat_R(mat)));
-    
-    if tstat_sums(ii)>thresh %save the ones that are over the thresh
-    sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;
-    idxc=idxc+1;
-    end
-end
+thresh=temp_tsm(round(size(tstat_max,1)*alph));
 
-%for testing
-% lab=labelmatrix(clustR);
-% lab=lab';
-% rlab=label2rgb(lab,@spring,'c','shuffle');
-bonc=0.05/(size(mnd1,1)*size(mnd1,2));
-rlab=r_pvalue<bonc;
 %%
 if plt
     figure
-    histogram(tstat_max, xshuffles)
+    histogram(temp_tsm, xshuffles)
 end
 
    

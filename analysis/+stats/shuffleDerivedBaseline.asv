@@ -40,11 +40,10 @@ if noStitch %this just takes a trial sized chunk
         end
     else
         for ii = 1:trials
-            timeStampIdx = randi(length(timeStamps));
-            st = timeStamps(timeStampIdx) + randi([-fs, fs]); %by doing fs, it will move it back and forth 1 second
+            st = randi(length(time))
+            st = randi(length(data)-trialLengthAdj);
             trialData(:,:,ii) = data(st:st+trialLengthAdj-1,:);
         end
-    end
 end
 
 

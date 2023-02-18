@@ -146,7 +146,8 @@ bonc=0.05/(size(mnd1,1)*size(mnd1,2));
 rlab=r_pvalue<bonc;
 %%
 if plt
-    histogram(tstat_res, xshuffles)
+    figure
+    histogram(tstat_max, xshuffles)
 end
 
    

@@ -2,6 +2,15 @@
 
 %% this is all scratch pad stuff for now.
 
+
+%%plotting
+xx=SdiffID{2};
+
+
+
+
+
+%%
 dataC = dataF(behavioralIndex(300):behavioralIndex(303),1);
     [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(dataC, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
 %% set up basic plotting
@@ -350,15 +359,7 @@ tt=emotionTaskLFP.time;
 ff=emotionTaskLFP.freq;
 
 
-for jj = 1: 10
-    for ii =1:200
-    if itiDataTemp(:, 5, ii) > 1200
-        xx(ii) = 1;
-    else
-        xx(ii) = 0;
-    end
-
-end
+%%
 for ii =1:5
     figure
     xx=identityTaskLFP.byidentity.ch148.image.specDzscore{1}(:,:,ii);

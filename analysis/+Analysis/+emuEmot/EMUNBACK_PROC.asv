@@ -228,9 +228,9 @@ end
 %% compare identity task/emotion task within a channel
 %create an "iti" baseline
 
-preStartData = dataFidentity(behavioralIndex(2):behavioralIndex(108),:);
+preStartData = dataFidentity;
 trialLength = preTime + postTime;
-itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'trialLength', trialLength, 'trials', 200);
+itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'trialLength', trialLength, 'trials', 20, 'timeStamps', behavioralIndex(3:107));
 %THIS APPEARS NOT TO WORK, IT REALLY MUTES THE ITI DATA AND ENDS UP WITH IT
 %MAKING THE ENTIRE TRIAL LOOK POSITIVE.
 % idx3 = 1;
@@ -247,17 +247,18 @@ for ff=1:length(chInterest)
     channelName{ff} = ['ch' ch];
 end
 
+
 %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
 
 %this is for creating a central threshold, but I'M NOT SURE IT REALLY WORKS
 %BECAUSE I CAN'T FIGURE OUT WHAT TO COMPARE THE REGULAR DATA TO
-for ii =1:length(chInterest)
-    itiDataTest = itiDataFiltIdentity.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
-    [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
-    [thresh(ii), tstatHisto{ii}] = stats.cluster_shuffleMeanBaseline_gpu3d(itiDataTest, 'xshuffles', 200);
-
-end
-
+% for ii =1:length(chInterest)
+%     itiDataTest = itiDataFiltIdentity.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
+%     [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
+%     [thresh(ii), tstatHisto{ii}] = stats.cluster_shuffleMeanBaseline_gpu3d(itiDataTest, 'xshuffles', 200);
+% 
+% end
+% 
 
 
 
@@ -276,7 +277,7 @@ end
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
 
-plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 2); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
+plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 3); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
 
 
 savePlot = 1;

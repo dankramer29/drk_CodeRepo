@@ -277,7 +277,7 @@ end
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
 
-plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 2); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
+plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
 
 
 savePlot = 1;

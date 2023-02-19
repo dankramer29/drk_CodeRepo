@@ -2,6 +2,15 @@
 
 %% this is all scratch pad stuff for now.
 
+
+%%plotting
+xx=SdiffID{2};
+
+
+
+
+
+%%
 dataC = dataF(behavioralIndex(300):behavioralIndex(303),1);
     [filtData, params, bandfilter] = Analysis.BasicDataProc.dataPrep(dataC, 'needsCombfilter', 0, 'fs', fs); %calls this function for my basic processing steps
 %% set up basic plotting

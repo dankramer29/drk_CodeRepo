@@ -24,8 +24,8 @@ if ~isempty(subjName)
     mkdir (folder_name)
     for ii=1:length(figs)
         h=figure(figs(ii));
-        saveas(h, get(h,'Name'), 'jpg')
-        saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
+        %saveas(h, get(h,'Name'), 'jpg')
+        saveas(h, [fullfile(folder_name),'\', get(h,'Name')], 'jpg');
     end
 % %THIS NEEDS FIXING BELOW TO MATCH WITH ABOVE    
 % elseif isempty(sessionName)

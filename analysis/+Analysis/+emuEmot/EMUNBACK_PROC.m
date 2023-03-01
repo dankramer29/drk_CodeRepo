@@ -9,11 +9,22 @@
 %SPECTROGRAM FUNCTION OR PSPECTRUM, WHATEVER MATLAB HAS AND FIGURE OUT THE
 %OUTPUTS SO YOU CAN NORMALIZE IT AND SEE WHAT IT LOOKS LIKE.
 
+
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
 % after that, but then image off, fixation on, then image 3 and decision
-% about if 2 and 3 were the same. TTLs are image on (TTL 2) then fixation
-% (TTL 3) and back and forth like that.
+% about if 2 and 3 were the same. TTLs are image on (TTL 2) then next image (TTL 4)
+% and back and forth like that. The other TTL is some TTL artifact like TTL
+% off.
+
+%Timestamps: There are two clocks, the first clock from the psychtoolbox is
+%from the "now" command (stores that output) at each timestamp (e.g.
+%ImageTimes). the second is date time, but is in microseconds
+%(beh_timestamps, but it's 500 samples/second and 1000ms/second, so
+%essentially on the clock, 500,000 clock ticks pass each 1 second).
+%ImageTimes(1) == beh_timestamps(2). Double checked and the psychtoolbox
+%output for ImageTimes can be up to 0.015 seconds. TTLs are very on, but
+%not necessarily behaviorally relevant.
 
 % set to 0 if running this with a new data set for the first time, set to
 % 1 if you saved the filtered data after running
@@ -36,23 +47,30 @@ rawData = 0; %turn to 0 if wanting to use the filtered data
 % EMUNBACK_PROC
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
+%% load prefiltered data of the entire trial of each task if done
+prefilteredAllData = 1;
+if prefilteredAllData
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTask.mat');
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTask.mat'); 
+else
+    itiDataFiltEmotion = [];
+    itiDataFiltIdentity = [];
+end
 %% setup details of the processing
 %MW3
 %chInterest = [69, 77, 148];
 %MW13
-chInterest = [23, 24, 31, 32, 33, 34, 83, 84, 97, 98];
-%REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT
-%OR DIXI) THEN 1 IS DISTAL 
-
-
+chInterest = [23, 24, 31, 32, 33, 34, 83, 84, 97, 98]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
-
 extraTime = 3; %amount in seconds, to add to the end of the recordings
-
 %time in seconds to add before and after the events
 preTime = 0.5; 
 postTime = 2; 
-
+% sets the shuffling parameters, so it's stitching post multi-tapered data,
+% then smoothing it.
+smoothingWindow = .025; % in seconds, gaussian smooth
+shuffleLength = .05; %in seconds, the length of the stitched shuffles
+stitchTrialNum = 100; %number of trials to make the stitching out of.
 
 %% Event files
 %MW3_Session14_filter.nwb (NBack Emotion): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
@@ -81,8 +99,6 @@ load(folderName)
 nbackData.task = matchStr;
 
 
-
-
 %% pull in wire ids
 %pull wire numbers and wire ids
 wireID{:,1} = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
@@ -97,6 +113,10 @@ for ii = 1:length(wireID{2})
     chName{ii,2} = wireID{3}(ii,:);
 end
 
+for ff=1:length(chInterest)
+    ch = num2str(chInterest(ff));
+    channelName{ff} = ['ch' ch];
+end
 
 %common average rerefernce
 macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
@@ -138,12 +158,19 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 idx1 = 1; idx2 = 1;
 for ii=2:length(beh_timestamps)
     timeStampDiff(idx1) = beh_timestamps(ii)-beh_timestamps(ii-1);    
-    if timeStampDiff(idx1) == 500000 %50000/500 = 1000ms
+    if timeStampDiff(idx1) >= 499001 || timeStampDiff <= 500999 %50000/500 = 1000ms
         imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (this is possibly not true!)
         idx2 = idx2 + 1;
     end
     idx1 = idx1 +1;
 end
+
+% find the timestamp conversion of the phys data and the psychtoolbox data
+
+ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
+
+M = [ones(length(TTLTimes),1) TTLTimes];
+Bx = ttl_beh\M;%PROBABLY NEED TO FLIP THIS AND THINK A LITTLE MORE ABOUT IT, OR JUST DO IT MY WAY
 
 
 
@@ -167,6 +194,24 @@ elseif alreadyFilteredData ~= 1
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
 end
 
+itiDataStitch = struct;
+
+%% compare identity task/emotion task within a channel
+%create an "iti" baseline
+
+preStartData = dataFemotion;
+trialLength = preTime + postTime;
+%creates the iti, really this filters the entire trial.
+if isempty(itiDataFiltEmotion)
+    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest);
+end
+
+%stritch the iti trials together
+for ii= 1:length(channelName)
+    S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
+    [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
+        'shuffleLength', .50, 'trials', 100, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', .100);
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -216,6 +261,21 @@ ma_timestampsDS=downsample(ma_timestamps, 8);
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
+
+% set up the behavioral timestamps to ensure they are the presentation of
+% the image
+idx1 = 1; idx2 = 1;
+for ii=2:length(beh_timestamps)
+    timeStampDiff(idx1) = beh_timestamps(ii)-beh_timestamps(ii-1);    
+    if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
+        imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (this is possibly not true!)
+        idx2 = idx2 + 1;
+    end
+    idx1 = idx1 +1;
+end
+
+
+
 [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
 
 if alreadyFilteredData == 1
@@ -230,23 +290,10 @@ end
 
 preStartData = dataFidentity;
 trialLength = preTime + postTime;
-itiDataTemp = stats.shuffleDerivedBaseline(preStartData, 'trialLength', trialLength, 'trials', 20, 'timeStamps', behavioralIndex(3:107));
-%THIS APPEARS NOT TO WORK, IT REALLY MUTES THE ITI DATA AND ENDS UP WITH IT
-%MAKING THE ENTIRE TRIAL LOOK POSITIVE.
-% idx3 = 1;
-% for ii = 1:10:480
-%     itiDataCompare(:, :, idx3) = mean(itiDataTemp(:,:,ii:ii+10),3);
-%     idx3 = idx3 + 1;
-% end
-% itiData = itiDataTemp;
-
-[itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(itiDataTemp, 'chNum', chInterest);
-
-for ff=1:length(chInterest)
-    ch = num2str(chInterest(ff));
-    channelName{ff} = ['ch' ch];
+%itiDataTemp = stats.shuffleDerivedBaseline(S1, 'trialLength', 399, 'trials', 20);
+if isempty(itiDataFiltIdentity)
+    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest);
 end
-
 
 %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
 
@@ -254,34 +301,44 @@ end
 %BECAUSE I CAN'T FIGURE OUT WHAT TO COMPARE THE REGULAR DATA TO
 % for ii =1:length(chInterest)
 %     itiDataTest = itiDataFiltIdentity.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
-%     [thresh(ii), tstatHisto{ii}] = stats.cluster_timeShift_Ttest_gpu3d(itiDataTest, 'xshuffles', 200);
+%    [thresh, tstatHisto] = stats.cluster_timeShift_Ttest_gpu3d(itiDataStitch.EmotionTask.ch23, 'xshuffles', 1000);
 %     [thresh(ii), tstatHisto{ii}] = stats.cluster_shuffleMeanBaseline_gpu3d(itiDataTest, 'xshuffles', 200);
 % 
 % end
 % 
 
 
-
-
+%create the iti from shuffled data
+for ii= 1:length(channelName)
+    S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
+    [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
+        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
+end
 
 
 %This will run stats to compare the same identities or same emotions but
 %across the two different tasks
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% compare the tasks
 
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 % NO IDEA WHY THE CLUSTERS ARE SO SMALL FOR THE REAL BUT NOT FOR THE ITI
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataFiltIdentity, 'xshuffles', 100);
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100);
 
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
 
-plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1); %comparison 1 is identitytask-emotiontask, 2 is identity only, 3 emotiontask only
+plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 
 
 savePlot = 1;
 if savePlot
     plt.save_plots([1:20], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
+
+% ULTIMATELY WILL COMPARE CHANNELS IN MULTIPLE AREAS SHOWING THAT SOME ARE
+% RELEVANT DURING SOME TASKS BUT NOT OTHERS. COULD DO A PSD DURING THE TIME
+% AFTER THE OFFSET OF THE CLEAR GAMMA ACTIVITY.
 

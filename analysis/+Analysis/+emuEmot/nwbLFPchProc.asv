@@ -119,7 +119,7 @@ if filterAllData
     end
 
     %% separate the data and adjust timestamps
-    filtD = filtData.dataSpec.data; %pulls non z scored spectrogram data.
+    filtD = filtData.dataSpec.data; %pulls z scored spectrogram data.
 
     %Adjust the timestamps. Now timeStampsSeconds will be seconds from the
     %start of the recording which will be zero, and can be matched to the time

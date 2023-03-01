@@ -6,7 +6,8 @@
 %%plotting
 xx=SdiffID{2};
 
-
+figure
+imagesc(S2); axis xy; colorbar;
 
 
 
@@ -247,6 +248,56 @@ macroCARch = macrowiresCAR(chInterest, :);
 %this attempt removes spurious trials that have some high noise for some
 %reason THIS DOES NOT WORK, THERE MIGHT BE A WAY TO GET THE ACTUAL STD, BUT
 %RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
+%%
+
+
+%RIGHT NOW I AM TRYING TO RE RUN IT WITH AN ITI SPECIFICALLY FOR THE
+%EMOTIONS.
+S1 = itiDataStitch.EmotionTask.(channelName{1});
+S2 = emotionTaskLFP.byemotion.(channelName{1}).image.specD{3};
+figure
+imagesc(normalize(mean(S1, 3),2)); axis xy; colorbar;
+
+
+for ii = 82:100
+    imagesc(normalize(S1(:, :, ii),2)); axis xy; colorbar;
+    
+end
+
+testT = stats.cluster_permutation_Ttest_gpu3d( S2, S1, 'xshuffles', 100);
+
+
+figure
+subplot (3,1,1)
+imagesc(normalize(mean1,2)); axis xy;
+colorbar
+subplot (3, 1,2)
+imagesc(normalize(mean2,2)); axis xy;colorbar;
+subplot (3, 1, 3)
+imagesc(thresh_binary); axis xy; colorbar;
+
+figure
+subplot (4,1,1)
+imagesc(normalize(mnd1,2)); axis xy; colorbar
+title('Mean of Trial data')
+colorbar
+subplot (4, 1,2)
+imagesc(normalize(mnd2,2)); axis xy;colorbar;
+%imagesc(sd1); axis xy;colorbar;
+title('Mean of shuffle data 100 epochs')
+subplot (4, 1, 3)
+imagesc(r_pvalue); axis xy; colorbar; colormap(inferno)
+title('pvalues from a ttest')
+subplot (4, 1, 4)
+imagesc(thresh_binaryR); axis xy; colorbar; colormap(inferno)
+title('p values below alpha 0.01')
+
+mat=false(size(thresh_binaryR));
+    mat(clustR.PixelIdxList{cl_keep(6)})=true;    
+    tstat_sums(ii)=sum(abs(tstat_R(mat)));
+subplot (3, 1, 3)
+imagesc(mat); axis xy; colorbar; colormap(inferno)
+title('tstats from a ttest')
 
 %%
 clear abEpochP abEpochN
@@ -275,6 +326,20 @@ for ii =1:length(chInterest)
     end
 end
 
+%TWO THINGS TO TRY, REMOVE A BASELINE MORE THAN JUST THE CAR. ALSO REALLY
+%FIGURE OUT WHAT'S HAPPENING IN THE SHUFFLED DATA. WHY IS IT SO STRONG?
+figure
+imagesc(normalize(mean(trialDataTemp,3),2)); axis xy; colorbar
+figure
+imagesc(normalize(mean(trialDataTemp2,3),2)); axis xy; colorbar
+
+figure
+plot(trialDataTemp(40,:,1))
+hold on
+plot(smoothdata(trialDataTemp(40,:,1), 2,'gaussian',smWin))
+
+shlAdj = 16;
+[comp] = stats.cluster_permutation_Ttest_gpu3d(S2, shuffleTrialStitch);
 
 
 %%
@@ -315,26 +380,6 @@ subplot(2,1,2)
 imagesc(tt,ff,yy); axis xy; colorbar;
 
 
-figure
-subplot (3,1,1)
-imagesc(normalize(mean1,2)); axis xy;
-colorbar
-subplot (3, 1,2)
-imagesc(normalize(mean2,2)); axis xy;colorbar;
-subplot (3, 1, 3)
-imagesc(thresh_binary); axis xy; colorbar;
-
-figure
-subplot (3,1,1)
-imagesc(normalize(mnd1,2)); axis xy; colorbar
-title('Mean of Trial data')
-colorbar
-subplot (3, 1,2)
-imagesc(normalize(mnd2,2)); axis xy;colorbar;
-title('Mean of shuffle data 200 epochs')
-subplot (3, 1, 3)
-imagesc(mat); axis xy; colorbar; colormap(inferno)
-title('tstats from a ttest')
 
 figure
 subplot (3,1,1)

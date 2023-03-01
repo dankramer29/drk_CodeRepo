@@ -148,14 +148,9 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
-        itiData = itiDataFilt.iti.(chName{ii}).specD; %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
+        itiDataId = itiDataFilt.IdentityTask.(chName{ii}); %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
+        itiDataEm = itiDataFilt.EmotionTask.(chName{ii}); %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
 
-       
-
-        itiDataMeanTemp = mean(itiData,2);
-
-        itiDataMean = repmat(itiDataMeanTemp, 1, size(itiData,2), 1);
-      
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)
@@ -177,10 +172,12 @@ if comparedToITI == 1
 
             [nback.(chName{ii}).(idName{jj}).identityTaskMean, ~, ...
                 nback.(chName{ii}).(idName{jj}).identityTaskSD, ~, ...
-                nback.(chName{ii}).(idName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiData, 'xshuffles', xshuffles);
+                nback.(chName{ii}).(idName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiDataId, 'xshuffles', xshuffles);
+            
+            
             [nback.(chName{ii}).(idName{jj}).emotionTaskMean, ~,...
                 nback.(chName{ii}).(idName{jj}).emotionTaskSD, ~, ...
-                nback.(chName{ii}).(idName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiData, 'xshuffles', xshuffles);
+                nback.(chName{ii}).(idName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiDataEm, 'xshuffles', xshuffles);
 
             %record if any significant clusters exist
             if sum(sum(nback.(chName{ii}).(idName{jj}).identityTasksigclust))>0
@@ -204,10 +201,10 @@ if comparedToITI == 1
         nback.(chName{ii}).allIdentities.emotionTaskData = dataEmotionTaskAllIdentities;
         [nback.(chName{ii}).allIdentities.identityTaskMean, ~,...
             nback.(chName{ii}).allIdentities.identityTaskSD, ~,...
-            nback.(chName{ii}).allIdentities.identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTaskAllIdentities, itiData, 'xshuffles', xshuffles);
+            nback.(chName{ii}).allIdentities.identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTaskAllIdentities, itiDataId, 'xshuffles', xshuffles);
         [nback.(chName{ii}).allIdentities.emotionTaskMean, ~,...
             nback.(chName{ii}).allIdentities.emotionTaskSD, ~,...
-            nback.(chName{ii}).allIdentities.emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTaskAllIdentities, itiData, 'xshuffles', xshuffles);
+            nback.(chName{ii}).allIdentities.emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTaskAllIdentities, itiDataEm, 'xshuffles', xshuffles);
         if sum(sum(nback.(chName{ii}).allIdentities.identityTasksigclust))>0
             significantComparisons{idxcomp,1} = chName{ii};
             significantComparisons{idxcomp,2} = 'allIdentities';
@@ -240,10 +237,10 @@ if comparedToITI == 1
 
             [nback.(chName{ii}).(emotName{jj}).identityTaskMean, ~,...
                 nback.(chName{ii}).(emotName{jj}).identityTaskSD, ~, ...
-                nback.(chName{ii}).(emotName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiData, 'xshuffles', xshuffles);
+                nback.(chName{ii}).(emotName{jj}).identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiDataId, 'xshuffles', xshuffles);
             [nback.(chName{ii}).(emotName{jj}).emotionTaskMean, ~,...
                 nback.(chName{ii}).(emotName{jj}).emotionTaskSD, ~,...
-                nback.(chName{ii}).(emotName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiData, 'xshuffles', xshuffles);
+                nback.(chName{ii}).(emotName{jj}).emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTask, itiDataEm, 'xshuffles', xshuffles);
 
             %record if any significant clusters exist
             if sum(sum(nback.(chName{ii}).(emotName{jj}).identityTasksigclust))>0
@@ -267,10 +264,10 @@ if comparedToITI == 1
         nback.(chName{ii}).allEmotions.emotionTaskData = dataEmotionTaskAllEmotions;
         [nback.(chName{ii}).allEmotions.identityTaskMean, ~,...
             nback.(chName{ii}).allEmotions.identityTaskSD, ~,...
-            nback.(chName{ii}).allEmotions.identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTaskAllEmotions, itiData, 'xshuffles', xshuffles);
+            nback.(chName{ii}).allEmotions.identityTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTaskAllEmotions, itiDataId, 'xshuffles', xshuffles);
         [nback.(chName{ii}).allEmotions.emotionTaskMean, ~,...
             nback.(chName{ii}).allEmotions.emotionTaskSD, ~,...
-            nback.(chName{ii}).allEmotions.emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTaskAllEmotions, itiData, 'xshuffles', xshuffles);
+            nback.(chName{ii}).allEmotions.emotionTasksigclust] = stats.cluster_permutation_Ttest_gpu3d( dataEmotionTaskAllEmotions, itiDataEm, 'xshuffles', xshuffles);
         if sum(sum(nback.(chName{ii}).allEmotions.identityTasksigclust))>0
             significantComparisons{idxcomp,1} = chName{ii};
             significantComparisons{idxcomp,2} = 'allEmotions';

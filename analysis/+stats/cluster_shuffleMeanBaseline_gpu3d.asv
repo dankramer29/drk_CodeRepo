@@ -24,12 +24,10 @@ function [ dataCombPosThresh, dataCombNegThresh, threshAlpha, tstat_max ] = clus
 %      iti.
 % %OUTPUT:
 %     thresh- the threshold a cluster needs to be above to be significant
-%     
-%       [testT] = stats.cluster_shuffleMeanBaseline_gpu3d(S1, 'data2', S2, 'trialLength', size(S2,2));
-
+%     t
 
 [varargin, data2]=util.argkeyval('data2', varargin, []); %can input a second data set to compare. 
-[varargin, SDsize]=util.argkeyval('SDsize', varargin, 0); %how many SDs above the mean you want to set your "positive" at
+[varargin, SDsize]=util.argkeyval('SDsize', varargin, 1); %how many SDs above the mean you want to set your "positive" at
 [varargin, shuffleOn]=util.argkeyval('shuffleOn', varargin, 1); %toggle on to take a bunch of shuffles from the data
 [varargin, comparisonOn]=util.argkeyval('comparisonOn', varargin, 1); %toggle on to compare a data set to the threshold.
 [varargin, trialLength]=util.argkeyval('trialLength', varargin, []); %give a trial length the size of the data chunks. make the size of the epochs in samples

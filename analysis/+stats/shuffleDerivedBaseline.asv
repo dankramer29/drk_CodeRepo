@@ -16,7 +16,7 @@ function [trialData] = shuffleDerivedBaseline(data,varargin)
 [varargin, trialLength]=util.argkeyval('trialLength', varargin, 2.5); %length of epoch to compare in s
 [varargin, noStitch]=util.argkeyval('noStitch', varargin, false); %if you want chunks that are the same size as the trial itself, this prevents the edge issues
 [varargin, stitchNoSmooth]=util.argkeyval('fs', varargin, false); %does a stitching method without smoothing it NOTE THIS WILL CAUSE EDGE EFFECTS IF USED FOR LFP
-[varargin, stitchSmooth]=util.argkeyval('stitchSmooth', varargin, false); %does a stitching method smoothed NOTE THIS WILL CAUSE EDGE EFFECTS IF USED FOR LFP
+[varargin, stitchSmooth]=util.argkeyval('fs', varargin, true); %does a stitching method smoothed NOTE THIS WILL CAUSE EDGE EFFECTS IF USED FOR LFP
 [varargin, smoothingWindow]=util.argkeyval('smoothingWindow', varargin, .100); %what your smoothing window is in s. does a gaussian but can do others.
 
 [varargin, timeStamps]=util.argkeyval('timeStamps', varargin, []); %include time stamps if you want to center on something and then shift.

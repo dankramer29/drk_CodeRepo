@@ -17,7 +17,7 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, rlab ] = cluster_permutation_Ttest_gp
 
 
 [varargin, plt]=util.argkeyval('plt', varargin, false); %option to plot the historgram
-[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 500); %how many shuffles you want to do, default is 5k
+[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 100); %how many shuffles you want to do, default is 5k
 %adjust the alpha level that the permutations are compared to, meaning the percentile on the histogram, over which something is considered positive
 %0.00024 is 0.05/(64*3+20) the number of electrodes for the real touch
 [varargin, alph]=util.argkeyval('alph', varargin, 0.05); 

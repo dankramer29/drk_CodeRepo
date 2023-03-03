@@ -1,14 +1,7 @@
 %% major script for running the processing of an individual patient
-%TO DO IS PLACE VARIABLES IN THE FILE NAMES TO EASILY SWITCH PATIENT
-%FEW THINGS STILL TO CHECK, CAUSE DOES STILL LOOK STREAKY. FIRST, JUST RUN
-%WITH REAL DATA WHEN JOHN GIVES IT TO YOU AND SEE WHAT IT LOOKS LIKE. THEN,
-%TRY THE OTHER LOWPASS FILTER FUNCTION. CHECK THAT IT'S GOING THE CORRECT
-%DIRECTION WHEN FILTERING (I THINK IT ERRORS THE OTHER WAY, BUT EASY ENOUGH
-%TO FLIP IT AND FIND OUT AND TRY THE OTHER FUNCTION). TRY THE OTHER
-%NORMALIZE FUNCTION EVEN THOUGH YOU TRIED THAT...ALSO TRY THE OTHER
-%SPECTROGRAM FUNCTION OR PSPECTRUM, WHATEVER MATLAB HAS AND FIGURE OUT THE
-%OUTPUTS SO YOU CAN NORMALIZE IT AND SEE WHAT IT LOOKS LIKE.
-
+%%
+% EMUNBACK_PROC
+addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
@@ -28,41 +21,35 @@
 %output for ImageTimes can be up to 0.015 seconds. TTLs are very on, but
 %not necessarily behaviorally relevant.
 
-% set to 0 if running this with a new data set for the first time, set to
-% 1 if you saved the filtered data after running
-% Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
-%Set up if you are saving and then loading the filtered data
-sessionName = '5_29_2022session';
-subjName = 'MW13';
-taskName = 'Emotion';
-matName = 'NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat';
 
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matName);
-
-
-alreadyFilteredData = 0; 
-
-%% choose raw data or not
-rawData = 0; %turn to 0 if wanting to use the filtered data
-
-%%
-% EMUNBACK_PROC
-addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
-
-%% load prefiltered data of the entire trial of each task if done
-prefilteredAllData = 1;
-if prefilteredAllData
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTask.mat');
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTask.mat'); 
-else
-    itiDataFiltEmotion = [];
-    itiDataFiltIdentity = [];
-end
-%% setup details of the processing
+%% Event files
+%MW3_Session14_filter.nwb (NBack Emotion): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
+%MW3_Session12_filter.nwb (NBack Identity): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
 %MW3
 %chInterest = [69, 77, 148];
+%(MW3_Session11_filter.nwb = MW3_Session12_filter.nwb but the filtering is
+%better)
+
+% MW13_Session_9_filter.nwb — NBack_IDENTITY_2022_5_29…
+% MW13_Session_10_filter.nwb — NBack_EMOTION_2022_5_29…
+
+
+%run the script to pull in the data from nwb if needed
+%% change the details for each patient
 %MW13
 chInterest = [23, 24, 31, 32, 33, 34, 83, 84, 97, 98]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
+preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
+alreadyFilteredData = true; %toggle to true if you've run the entire dataset through LFP processing already
+
+sessionName = '5_29_2022session';
+subjName = 'MW13';
+
+matNameEm = 'NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat';
+matNameId = 'NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat';
+emotionFilter = 'MW13_Session_10_filter.nwb';
+identityFilter = 'MW13_Session_9_filter.nwb';
+
+%% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 extraTime = 3; %amount in seconds, to add to the end of the recordings
 %time in seconds to add before and after the events
@@ -70,26 +57,36 @@ preTime = 0.5;
 postTime = 2; 
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
+multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms
 smoothingWindow = .025; % in seconds, gaussian smooth
 shuffleLength = .05; %in seconds, the length of the stitched shuffles
 stitchTrialNum = 100; %number of trials to make the stitching out of.
 
-%% Event files
-%MW3_Session14_filter.nwb (NBack Emotion): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
-%MW3_Session12_filter.nwb (NBack Identity): start event stamp = 2; end event stamp = 109 (final event stamp (or 110) - 1)
-%(MW3_Session11_filter.nwb = MW3_Session12_filter.nwb but the filtering is
-%better)
-% MW13_Session_9_filter.nwb — NBack_IDENTITY_2022_5_29…
-% MW13_Session_10_filter.nwb — NBack_EMOTION_2022_5_29…
-%What this means is that beh_timestamps(2) = ImageTimes(1) = Image 1 and then beh_timestamps(4) = ImageTimes(2) = Image 2 
-%run the script to pull in the data from nwb if needed
+%% choose raw data or not
+rawData = 0; %turn to 0 if wanting to use the filtered data (DON'T NEED TO DO THIS)
+
+%%
+taskName = 'Emotion';
+folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameEm);
+
+%%
+% set to 0 if running this with a new data set for the first time, set to
+% 1 if you saved the filtered data after running
+% Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
+%Set up if you are saving and then loading the filtered data
+
+if alreadyFilteredData
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTask.mat');
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTask.mat'); 
+else
+    itiDataFiltEmotion = [];
+    itiDataFiltIdentity = [];
+end
 
 %% Load NWB
 % Emotion
-
 if rawData == 0
-       % testfile = nwbRead('MW3_Session_13_filter.nwb');
-                testfile = nwbRead('MW13_Session_10_filter.nwb');
+                testfile = nwbRead(emotionFilter);
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
 end
@@ -99,7 +96,6 @@ run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 %load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\EmotionSession\NBack_2021_05_04.12_53_08_BLIND.mat')
 load(folderName)
 nbackData.task = matchStr;
-
 
 %% pull in wire ids
 %pull wire numbers and wire ids
@@ -154,7 +150,6 @@ dataFemotion = filtfilt(lpFilt,data');
 ma_timestampsDS=downsample(ma_timestamps, 8);
 
 %% 
-
 % set up the behavioral timestamps to ensure they are the presentation of
 % the image
 idx1 = 1; idx2 = 1;
@@ -168,9 +163,7 @@ for ii=2:length(beh_timestamps)
 end
 
 % find the timestamp conversion of the phys data and the psychtoolbox data
-
 ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
-
 
 ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjEm = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
@@ -183,45 +176,49 @@ Response(isnan(Response)) = [];
 CorrectTrialsEm = CorrectResponse == Response;
 
 
-
-
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
-[behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+[behavioralIndexTTL, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+[behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjEm, ma_timestampsDS);
+[behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjEm, ma_timestampsDS);
+
 
 %% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
 taskTimeSt = closestValue(1);
 taskTimeEnd = closestValue(end);
 
-
-%% process data with main proc function (see above to set this)
-
-if alreadyFilteredData == 1
-    % need to change path but also change the name if done in the future
-    load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
-elseif alreadyFilteredData ~= 1
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
-end
-
-itiDataStitch = struct;
-
-%% compare identity task/emotion task within a channel
-%create an "iti" baseline
-
-preStartData = dataFemotion;
-trialLength = preTime + postTime;
-%creates the iti, really this filters the entire trial.
-if isempty(itiDataFiltEmotion)
+%% Filter all the data
+preStartData = dataFemotion; %can adjust if want to exclude part of the data
+%filters the entire trial.
+if alreadyFilteredData == 0
     [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest);
 end
 
+%% process data with main proc function (see above to set this)
+%this will break up the data. Can adjust the spectrogram window center
+%point here (so beginning (1), middle(2), or end(3) of the moving window)
+if preSpectrogramData
+   [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
+       PresentedIdentityIdx, 'timeStampsImage', behavioralIndexImageOn, 'timeStampsResponse',...
+       behavioralIndexResponse , 'fs', fs, 'chNum', chInterest,...
+       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+else
+    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
+        PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
+        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+end
+%% create and iti
+itiDataStitch = struct;
+trialLength = preTime + postTime;
+shuffleLength
 %stritch the iti trials together
 for ii= 1:length(channelName)
     S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
-    [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
-        'shuffleLength', .50, 'trials', 100, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', .100);
+    [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
+        size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
+        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
+        true, 'TimeFreqData', true, 'multiTaperWindow',  'smoothingWindow', smoothingWindow);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
@@ -229,12 +226,11 @@ end
 %%
 %Identity run
 taskName = 'Identity';
-matName = 'NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat';
 
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matName);
+folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameId);
 
      %   testfile = nwbRead('MW3_Session_11_filter.nwb');
-            testfile = nwbRead('MW13_Session_9_filter.nwb');
+            testfile = nwbRead(identityFilter);
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 %mw3
 %load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')

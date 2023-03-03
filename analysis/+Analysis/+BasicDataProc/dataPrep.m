@@ -39,6 +39,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 %% Filters
 [varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, true);  %if you want to do it with spectrogram method
 [varargin, pSpectrum] = util.argkeyval('pSpectrum',varargin, true);  %if you want to do it with spectrogram method from pspectrum with matlab 
+[varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .200);  %the multitaper window in seconds
 
 [varargin, BandPassed] = util.argkeyval('Bandpassed', varargin, false); %if you want to also run basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
 [varargin, DoBandFilterBroad] = util.argkeyval('DoBandFilterBroad', varargin, false);  %if you want to also run basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
@@ -71,7 +72,7 @@ params.pad = 1;
 %params.err = [1 0.05];
 params.err=0;
 params.trialave = 0; % average across trials
-params.win = [.2 0.005];   % size and step size for windowing continuous data
+params.win = [multiTaperWindow 0.005];   % size and step size for windowing continuous data
 params.bipolar=false;
 params.dbPower=dBPower;
 params.zScore=zScore;

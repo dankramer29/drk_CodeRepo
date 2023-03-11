@@ -192,7 +192,7 @@ taskTimeEnd = closestValue(end);
 preStartData = dataFemotion; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest);
+    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 %% process data with main proc function (see above to set this)
@@ -200,25 +200,24 @@ end
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 if preSpectrogramData
    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
-       PresentedIdentityIdx, 'timeStampsImage', behavioralIndexImageOn, 'timeStampsResponse',...
-       behavioralIndexResponse , 'fs', fs, 'chNum', chInterest,...
+       PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
+       'fs', fs, 'chNum', chInterest,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 else
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
-        PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
+        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 %% create and iti
 itiDataStitch = struct;
 trialLength = preTime + postTime;
-shuffleLength
 %stritch the iti trials together
 for ii= 1:length(channelName)
     S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
     [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
-        size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
+        size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
-        true, 'TimeFreqData', true, 'multiTaperWindow',  'smoothingWindow', smoothingWindow);
+        true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
@@ -265,6 +264,7 @@ dataFidentity = filtfilt(lpFiltlow,data');
 %downsamle the timestamps
 ma_timestampsDS=downsample(ma_timestamps, 8);
 
+%% 
 % set up the behavioral timestamps to ensure they are the presentation of
 % the image
 idx1 = 1; idx2 = 1;
@@ -288,27 +288,98 @@ ResponseTimesAdjId = ttl_beh+ResponseTimesDiff; %moves the time into neural time
 
 %find if the responses were correct or not
 Response(isnan(Response)) = [];
-CorrectTrialsId = CorrectResponse == Response;
-[behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+CorrectTrialsEm = CorrectResponse == Response;
 
 
-%% process the data
-if alreadyFilteredData == 1
-    load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
-elseif alreadyFilteredData ~= 1
-    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
+%finds the index in the data of the behavioral indices
+%behavioralIndex now points to the row in data that is closest to the
+%behavioral time stamps. 
+[behavioralIndexTTL, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+[behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjId, ma_timestampsDS);
+[behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDS);
+
+
+%% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
+taskTimeSt = closestValue(1);
+taskTimeEnd = closestValue(end);
+
+%% Filter all the data
+preStartData = dataFidentity; %can adjust if want to exclude part of the data
+%filters the entire trial.
+if alreadyFilteredData == 0
+    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
-%% compare identity task/emotion task within a channel
-%create an "iti" baseline
-
-preStartData = dataFidentity;
+%% process data with main proc function (see above to set this)
+%this will break up the data. Can adjust the spectrogram window center
+%point here (so beginning (1), middle(2), or end(3) of the moving window)
+if preSpectrogramData
+   [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
+       PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
+       'fs', fs, 'chNum', chInterest,...
+       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+else
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx,...
+        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
+        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+end
+%% create and iti
+itiDataStitch = struct;
 trialLength = preTime + postTime;
-%itiDataTemp = stats.shuffleDerivedBaseline(S1, 'trialLength', 399, 'trials', 20);
-if isempty(itiDataFiltIdentity)
-    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest);
+%stritch the iti trials together
+for ii= 1:length(channelName)
+    S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
+    [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
+        size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
+        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
+        true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
 end
+
+% LIKELY CAN CUT ALL BELOW
+% % set up the behavioral timestamps to ensure they are the presentation of
+% % the image
+% idx1 = 1; idx2 = 1;
+% for ii=2:length(beh_timestamps)
+%     timeStampDiff(idx1) = beh_timestamps(ii)-beh_timestamps(ii-1);    
+%     if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
+%         imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (this is possibly not true!)
+%         idx2 = idx2 + 1;
+%     end
+%     idx1 = idx1 +1;
+% end
+% 
+% % find the timestamp conversion of the phys data and the psychtoolbox data
+% ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
+% 
+% ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
+% ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
+% 
+% ResponseTimesDiff = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+% ResponseTimesAdjId = ttl_beh+ResponseTimesDiff; %moves the time into neural time scale
+% 
+% %find if the responses were correct or not
+% Response(isnan(Response)) = [];
+% CorrectTrialsId = CorrectResponse == Response;
+% [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+% 
+% 
+% %% process the data
+% if alreadyFilteredData == 1
+%     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
+%     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
+% elseif alreadyFilteredData ~= 1
+%     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
+% end
+% 
+% %% compare identity task/emotion task within a channel
+% %create an "iti" baseline
+% 
+% preStartData = dataFidentity;
+% trialLength = preTime + postTime;
+% %itiDataTemp = stats.shuffleDerivedBaseline(S1, 'trialLength', 399, 'trials', 20);
+% if isempty(itiDataFiltIdentity)
+%     [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest);
+% end
 
 %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
 

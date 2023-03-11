@@ -1,31 +1,35 @@
-function [nback, nbackFilterAllData] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, varargin)
+function [nback] = nwbLFPchProc(data, PresentedEmotionIdx, PresentedIdentityIdx, timeStampsImage, timeStampsResponse, varargin)
 %nwbLFPchProc Basic processing function for EMU 
 %   Inputs:
-%        channel - vector or matrix of channels
+%        data - vector or matrix of channels, or if processed lfp, then
+%        output of Analysis.emuEmot.nwbLFPchProcITI.
 
 % example: 
 
 
 [varargin, fs] = util.argkeyval('fs',varargin, 500); %sampling rate, default is 500
-[varargin, timeStampsImage] = util.argkeyval('timeStampsImage',varargin, []); %pull in the behavioral time stamps, which default is just 1 and the end of the recording
-[varargin, timeStampsResponse] = util.argkeyval('timeStampsResponse',varargin, []); %pull in the behavioral time stamps, which default is just 1 and the end of the recording
+
 [varargin, preTime] = util.argkeyval('preTime',varargin, 0.5); %time before image presentation
 [varargin, postTime] = util.argkeyval('preTime',varargin, 2); %time after image presentation
 [varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, filterByTrial] = util.argkeyval('filterByTrial',varargin, false); %if true, will process by breaking the trials up then filters them each time.
 [varargin, filterAllData] = util.argkeyval('filterAllData',varargin, true); %if true, will  process by filtering all the data then breaking it up.
-[varargin, spectrogramWin] = util.argkeyval('spectrogramWin',varargin, .2); %what the window of the spectrogram was to adjust timing
-[varargin, spectrogramWinTimeAdj] = util.argkeyval('spectrogramWinTimeAdj',varargin, .2); %for a window for multitapering, can be at the beginning (1), middle (2) or end of the event(3). Adjust here
-
+[varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %what the window of the spectrogram was to adjust timing
+[varargin, spectrogramWinTimeAdj] = util.argkeyval('spectrogramWinTimeAdj',varargin, 1); %for a window for multitapering, can be at the beginning (1), middle (2) or end of the window(3). Adjust here
 
 if isempty(chNum)
     chNum = 1:size(data, 1);
 end
 
-if isempty(timeStampsImage)
-    timeStampsImage(1) = 1;
-    timeStampsImage(2) = length(data);
+
+switch spectrogramWinTimeAdj
+    case 1
+        windowCenter = 0;
+    case 2
+        windowCenter = round(multiTaperWindow/2);
+    case 3
+        windowCenter = multiTaperWindow;
 end
 
 %TO DO, PROBABLY NEED TO ROUND THE PRETIME CONVERSIONS IN CASE
@@ -52,8 +56,8 @@ if filterByTrial
     idxID1 = 0; idxEmot1 = 0;
     idxID2 = 0; idxEmot2 = 0;
     idxID3 = 0; idxEmot3 = 0;
-    for ii = 2:2:length(timeStampsImage) - 2
-        if timeStampsImage(ii) + postTime > length(data) %make sure data not too long
+    for ii = 1:length(timeStampsImage)
+        if timeStampsImage(ii) + postTime > length(data) || timeStampsResponse(ii) + postTime > length(data)%make sure data not too long
             break
         else
             switch PresentedIdentityIdx(idx1)
@@ -96,7 +100,7 @@ if filterByTrial
 
                 %response epoch
 
-                [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(timeStampsImage(ii+1) - (preTimeC): timeStampsImage(ii+1) + (postTimeC), cc), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow); %calls this function for my basic processing stepsdata
+                [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(timeStampsResponse(ii) - (preTimeC): timeStampsResponse(ii) + (postTimeC), cc), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow); %calls this function for my basic processing stepsdata
                 %by identity
                 nback.byidentity.(chName{cc}).response.specDzscore{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.dataZ;
                 nback.byidentity.(chName{cc}).response.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtDataTemp.dataSpec.data;
@@ -112,15 +116,18 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%pull the time from the filt data
-timeStampsFiltData = data.time;
 
 %% filter the data
 %This is code to filter the whole session and break it up
-nbackFilterAllData = struct;
+nback = struct;
 if filterAllData
+    %pull the time from the filt data
+    timeStampsFiltData = data.time;
+
     %% separate the data and adjust timestamps
     for cc = 1:length(chNum)
+        %currently not pulling the specDz scored data, can but mostly z
+        %scoring after running
         filtD = data.iti.(chName{cc}).specD; %pulls non z scored spectrogram data. (the iti struct is not actually the iti, ignore that)
 
         %Adjust the timestamps. Now timeStampsSeconds will be seconds from the
@@ -128,15 +135,18 @@ if filterAllData
         %output from filtData.
         %Each timestamp is a row and each row is fs ms.Convert to seconds and
         %subtract one time stamps worth since row 1 = time 0 of the recording data.
-        timeStampsSeconds = (timeStampsImage/fs)-1/fs;
+        timeStampsImageSeconds = (timeStampsImage/fs)-1/fs;
+        timeStampsResponseSeconds = (timeStampsResponse/fs)-1/fs;
 
 
 
         %find the time stamps of all events for cutting the data up
         %behavioralIndex now points to the time spot in filtD to take for each
         %event stamp
-        [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(timeStampsSeconds, timeStampsFiltData);
+        [behavioralIndexImage, closestValueImage] = Analysis.emuEmot.timeStampConversion(timeStampsImageSeconds, timeStampsFiltData);
+        [behavioralIndexResponse, closestValueResponse] = Analysis.emuEmot.timeStampConversion(timeStampsResponseSeconds, timeStampsFiltData);
 
+        
         %convert postTime to units of spectral data
         preTimeC = round(preTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
         postTimeC = round(postTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
@@ -149,8 +159,8 @@ if filterAllData
         idxID1 = 0; idxEmot1 = 0;
         idxID2 = 0; idxEmot2 = 0;
         idxID3 = 0; idxEmot3 = 0;
-        for ii = 2:2:length(behavioralIndex) - 2
-            if behavioralIndex(ii) + postTimeC > length(filtD) %make sure data not too long
+        for ii = 1:length(behavioralIndexImage)
+            if behavioralIndexImage(ii) + postTimeC > length(filtD) || behavioralIndexResponse(ii) + postTimeC > length(filtD)%make sure data not too long
                 break
             else
                 switch PresentedIdentityIdx(idx1)
@@ -176,12 +186,12 @@ if filterAllData
                         idxEmot = idxEmot3;
                 end
                 for cc = 1:length(chNum)
-                    nbackFilterAllData.byidentity.(chName{cc}).image{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-                    nbackFilterAllData.byidentity.(chName{cc}).response{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
+                    nback.byidentity.(chName{cc}).image.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
+                    nback.byidentity.(chName{cc}).response.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexResponse(ii) - (preTimeC): behavioralIndexResponse(ii) + (postTimeC));
 
                     %by emotion
-                    nbackFilterAllData.byemotion.(chName{cc}).image{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii) - (preTimeC): behavioralIndex(ii) + (postTimeC), cc);
-                    nbackFilterAllData.byemotion.(chName{cc}).response{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndex(ii+1) - (preTimeC): behavioralIndex(ii+1) + (postTimeC), cc);
+                    nback.byemotion.(chName{cc}).image.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
+                    nback.byemotion.(chName{cc}).response.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexResponse(ii) - (preTimeC): behavioralIndexResponse(ii) + (postTimeC));
                 end
                 idx1 = idx1 + 1;
             end
@@ -194,9 +204,11 @@ if filterByTrial
     nback.time = timePlot;
     nback.freq = filtDataTemp.dataSpec.f;
 elseif filterAllData 
-    timePlot = filtDataTemp.dataSpec.tplot-preTime;
-    nbackFilterAllData.time = timePlot;
-    nbackFilterAllData.freq = filtData.dataSpec.f;
+    timeInterval = timeStampsFiltData(1);
+    timePlot = -preTime:timeInterval:((preTimeC+postTimeC)*timeInterval-preTime);
+    timePlot = timePlot + windowCenter; %this adjusts the time window for plotting.
+    nback.time = timePlot;
+    nback.freq = data.freq;
 end
 
 end

@@ -250,6 +250,8 @@ macroCARch = macrowiresCAR(chInterest, :);
 %RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
 %%
 
+S1 = normalize(nbackCompare.ch23.id1.emotionTaskMean,2);
+figure; imagesc(tt,ff,S1); axis xy; colorbar;
 
 %RIGHT NOW I AM TRYING TO RE RUN IT WITH AN ITI SPECIFICALLY FOR THE
 %EMOTIONS.

@@ -237,8 +237,7 @@ run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 load(folderName)
 nbackData.task = matchStr;
 
-%%
-alreadyFilteredData = 0;
+
 %% common average rerefernce
 macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
 
@@ -324,7 +323,6 @@ else
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 %% create and iti
-itiDataStitch = struct;
 trialLength = preTime + postTime;
 %stritch the iti trials together
 for ii= 1:length(channelName)
@@ -392,18 +390,16 @@ end
 % 
 % end
 % 
+% 
+% 
+% %create the iti from shuffled data
+% for ii= 1:length(channelName)
+%     S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
+%     [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
+%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
+% end
 
 
-%create the iti from shuffled data
-for ii= 1:length(channelName)
-    S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
-    [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
-        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-end
-
-
-%This will run stats to compare the same identities or same emotions but
-%across the two different tasks
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compare the tasks
@@ -411,7 +407,7 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 % NO IDEA WHY THE CLUSTERS ARE SO SMALL FOR THE REAL BUT NOT FOR THE ITI
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100);
+[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest(1), 'itiDataFilt', itiDataStitch, 'xshuffles', 100);
 
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;

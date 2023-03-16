@@ -250,6 +250,13 @@ macroCARch = macrowiresCAR(chInterest, :);
 %RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
 %%
 
+% TRY GETTING THE PERIOD AFTER RESPONSE BEFORE IMAGE
+
+S1= mean(itiFiltered.iti.ch31.specD,3);
+S1= normalize(S1,2);
+figure
+imagesc(S1);axis xy; colorbar;
+
 %% plotting
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;

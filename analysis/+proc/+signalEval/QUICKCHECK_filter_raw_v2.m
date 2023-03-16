@@ -13,6 +13,8 @@
 % 
 % end
 
+nwbLOC = 'C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion';
+
 
 %% 4a. Use CLASE007
 
@@ -25,8 +27,9 @@ hemi2f = 'L';
 % CSC# / Rows: CSC 1:8 / matrix rows 1:8
 
 %% 4b. Load in NWB filtered
-%cd(nwbLOC);
-eleCtable = testfile.general_extracellular_ephys_electrodes.vectordata;
+cd(nwbLOC);
+tmpLoad = nwbRead("MW13_Session_10_filter.nwb");
+eleCtable = tmpLoad.general_extracellular_ephys_electrodes.vectordata;
 
 chanID = eleCtable.get('channID').data.load();
 hemis = cellstr(eleCtable.get('hemisph').data.load());
@@ -40,7 +43,7 @@ macro_location = location(macroROWS);
 macro_wire = wireID(macroROWS);
 
 % load macrodata
-macroDATA = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load();
+macroDATA = tmpLoad.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load();
 
 % Brain area index
 brainAind = matches(macro_location,bAREA);
@@ -51,12 +54,12 @@ macroINDs = find(brainAind & hemiIND);
 amyData_filter = macroDATA(macroINDs,:);
 
 %% Plot Filtered Macro data (FMD)
-% Raw voltage stack plot MAY WANT TO DO PSD TO COVER MORE TIME
-[stkTaball, stkTabBP] = proc.signalEval.convertRAWmac2stktab('seeg',amyData_filter,500,1);
+% Raw voltage stack plot
+[stkTaball, stkTabBP] = convertRAWmac2stktab('seeg',amyData_filter,500,1);
 
 %% Stack of all (FMD)
 close all
-toplotTime = 5*500; % seconds x sampling frequency %INCREASE HERE TO SEE MORE
+toplotTime = 5*500; % seconds x sampling frequency
 maxY_FMD_all = max(table2array(stkTaball),[],'all');
 minY_FMD_all = min(table2array(stkTaball),[],'all');
 s_FMD_all = stackedplot(stkTaball(1:toplotTime,:));
@@ -68,7 +71,7 @@ end
 figure;
 maxY_FMD_bp = max(table2array(stkTabBP),[],'all');
 minY_FMD_bp = min(table2array(stkTabBP),[],'all');
-s_FMD_bp = stackedplot(stkTabBP(1:toplotTime,:)); %THIS FEEDS INTO PSD
+s_FMD_bp = stackedplot(stkTabBP(1:toplotTime,:));
 for yC = 1:width(stkTabBP)
     s_FMD_bp.AxesProperties(yC).YLimits = [minY_FMD_bp maxY_FMD_bp];
 end

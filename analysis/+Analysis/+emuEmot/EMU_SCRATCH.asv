@@ -250,6 +250,8 @@ macroCARch = macrowiresCAR(chInterest, :);
 %RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
 %%
 
+% TRY GETTING THE PERIOD AFTER RESPONSE BEFORE IMAGE
+
 %% plotting
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
@@ -266,7 +268,9 @@ imagesc(normalize(mean(S1, 3),2)); axis xy; colorbar;
 
 
 %CAN TRY AGAIN TO DO MEAN AND STD. TAKE THE MEAN OF THE SIGNAL, AND 2STD
-%AND THEN CLUSTER EVERYTHING ABOVE IT. SO MAKE THAT THE "P VALUES"
+%AND THEN CLUSTER EVERYTHING ABOVE IT. SO MAKE THAT THE "P VALUES". 
+
+%NEED TO REMOVE NOISE I THINK.
 
 xx=mean(S1,2);
 sd=std(S1,[],2);
@@ -277,7 +281,8 @@ sdd = std(S2,[],3);
 hold on
 plot(xxx(45,:))
 
-figur
+figure
+plot(S1(45,:))
 
 figure
 imagesc(normalize(mnd1,2));

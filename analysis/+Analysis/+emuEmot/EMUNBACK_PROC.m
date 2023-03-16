@@ -88,7 +88,7 @@ end
 %% Load NWB
 % Emotion
 if rawData == 0
-                testfile = nwbRead(emotionFilter);
+        testfile = nwbRead(emotionFilter);
 elseif rawData == 1
         testfile = nwbRead('MW3_Session_11_raw.nwb');
 end
@@ -171,6 +171,7 @@ ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjEm = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
 ResponseTimesDiffEmotion = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+itiTimeEmotion = (ImageTimes(3:end)-ResponseTimes(2:end-1))*24*60*60;
 ResponseTimesAdjEm = ttl_beh+ResponseTimesDiffEmotion; %moves the time into neural time scale
 
 %find if the responses were correct or not
@@ -201,9 +202,9 @@ end
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 if preSpectrogramData
-   [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
+   [emotionTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
-       'fs', fs, 'chNum', chInterest,...
+       'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 else
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
@@ -286,6 +287,7 @@ ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
 ResponseTimesDiffIdentity = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+itiTimeIdentity = (ImageTimes(3:end)-ResponseTimes(2:end-1))*24*60*60;
 ResponseTimesAdjId = ttl_beh+ResponseTimesDiffIdentity; %moves the time into neural time scale
 
 %find if the responses were correct or not
@@ -316,15 +318,17 @@ end
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 if preSpectrogramData
-   [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
+   [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
-       'fs', fs, 'chNum', chInterest,...
+       'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 else
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
+
+
 %% create and iti
 trialLength = preTime + postTime;
 %stritch the iti trials together

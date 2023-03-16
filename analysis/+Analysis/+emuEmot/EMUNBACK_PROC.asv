@@ -44,6 +44,8 @@ alreadyFilteredData = true; %toggle to true if you've run the entire dataset thr
 sessionName = '5_29_2022session';
 subjName = 'MW13';
 
+MW13 = struct;
+
 matNameEm = 'NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat';
 matNameId = 'NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat';
 emotionFilter = 'MW13_Session_10_filter.nwb';
@@ -168,8 +170,8 @@ ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified thes
 ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjEm = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
-ResponseTimesDiff = (ResponseTimes-TTLTimes)*24*60*60*1e6;
-ResponseTimesAdjEm = ttl_beh+ResponseTimesDiff; %moves the time into neural time scale
+ResponseTimesDiffEmotion = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+ResponseTimesAdjEm = ttl_beh+ResponseTimesDiffEmotion; %moves the time into neural time scale
 
 %find if the responses were correct or not
 Response(isnan(Response)) = [];
@@ -237,8 +239,7 @@ run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 load(folderName)
 nbackData.task = matchStr;
 
-%%
-alreadyFilteredData = 0;
+
 %% common average rerefernce
 macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
 
@@ -283,12 +284,12 @@ ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified thes
 ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
-ResponseTimesDiff = (ResponseTimes-TTLTimes)*24*60*60*1e6;
-ResponseTimesAdjId = ttl_beh+ResponseTimesDiff; %moves the time into neural time scale
+ResponseTimesDiffIdentity = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+ResponseTimesAdjId = ttl_beh+ResponseTimesDiffIdentity; %moves the time into neural time scale
 
 %find if the responses were correct or not
 Response(isnan(Response)) = [];
-CorrectTrialsEm = CorrectResponse == Response;
+CorrectTrialsId = CorrectResponse == Response;
 
 
 %finds the index in the data of the behavioral indices
@@ -324,7 +325,6 @@ else
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 %% create and iti
-itiDataStitch = struct;
 trialLength = preTime + postTime;
 %stritch the iti trials together
 for ii= 1:length(channelName)
@@ -335,96 +335,37 @@ for ii= 1:length(channelName)
         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
 end
 
-% LIKELY CAN CUT ALL BELOW
-% % set up the behavioral timestamps to ensure they are the presentation of
-% % the image
-% idx1 = 1; idx2 = 1;
-% for ii=2:length(beh_timestamps)
-%     timeStampDiff(idx1) = beh_timestamps(ii)-beh_timestamps(ii-1);    
-%     if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
-%         imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (this is possibly not true!)
-%         idx2 = idx2 + 1;
-%     end
-%     idx1 = idx1 +1;
-% end
-% 
-% % find the timestamp conversion of the phys data and the psychtoolbox data
-% ttl_beh = beh_timestamps(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
-% 
-% ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
-% ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
-% 
-% ResponseTimesDiff = (ResponseTimes-TTLTimes)*24*60*60*1e6;
-% ResponseTimesAdjId = ttl_beh+ResponseTimesDiff; %moves the time into neural time scale
-% 
-% %find if the responses were correct or not
-% Response(isnan(Response)) = [];
-% CorrectTrialsId = CorrectResponse == Response;
-% [behavioralIndex, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
-% 
-% 
-% %% process the data
-% if alreadyFilteredData == 1
-%     load C:\Users\kramdani\Documents\Data\EMU_nBack\EmotionSession\FiltData_NBack_2021_05_04.12_53_08_BLIND.mat
-%     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'filtData', filtData, 'preTime', preTime, 'postTime', postTime);
-% elseif alreadyFilteredData ~= 1
-%     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx, PresentedIdentityIdx, 'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest, 'preTime', preTime, 'postTime', postTime);
-% end
-% 
-% %% compare identity task/emotion task within a channel
-% %create an "iti" baseline
-% 
-% preStartData = dataFidentity;
-% trialLength = preTime + postTime;
-% %itiDataTemp = stats.shuffleDerivedBaseline(S1, 'trialLength', 399, 'trials', 20);
-% if isempty(itiDataFiltIdentity)
-%     [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest);
-% end
-
-%itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
-
-%this is for creating a central threshold, but I'M NOT SURE IT REALLY WORKS
-%BECAUSE I CAN'T FIGURE OUT WHAT TO COMPARE THE REGULAR DATA TO
-% for ii =1:length(chInterest)
-%     itiDataTest = itiDataFiltIdentity.iti.(channelName{ii}).specD; %itiDataFilt is not averaged across chunks of trials, and itiDataCompareFilt is
-%    [thresh, tstatHisto] = stats.cluster_timeShift_Ttest_gpu3d(itiDataStitch.EmotionTask.ch23, 'xshuffles', 1000);
-%     [thresh(ii), tstatHisto{ii}] = stats.cluster_shuffleMeanBaseline_gpu3d(itiDataTest, 'xshuffles', 200);
-% 
-% end
-% 
-
-
-%create the iti from shuffled data
-for ii= 1:length(channelName)
-    S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
-    [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs', size(identityTaskLFP.byemotion.ch97.image.specD{2}, 2)/trialLength, ...
-        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth', true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-end
-
-
-%This will run stats to compare the same identities or same emotions but
-%across the two different tasks
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compare the tasks
 
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
-% NO IDEA WHY THE CLUSTERS ARE SO SMALL FOR THE REAL BUT NOT FOR THE ITI
-[nbackCompare, sigComparison] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP, 'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100);
+[nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
+    'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100, 'eventChoice', 1);
+[nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
+    'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100, 'eventChoice', 1);
 
+
+%% plotting
 tt = identityTaskLFP.time;
 ff = identityTaskLFP.freq;
 
-plt.nbackPlotSpectrogram(nbackCompare,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+comparisonName = 'Image On';
+plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+comparisonName = 'Response';
+plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+
+%% response times
 
 
+
+%% save plots
+hh =  findobj('type','figure'); 
+nn = length(hh);
 savePlot = 1;
 if savePlot
-    plt.save_plots([1:20], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
+    plt.save_plots([1:nn], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
 
-% ULTIMATELY WILL COMPARE CHANNELS IN MULTIPLE AREAS SHOWING THAT SOME ARE
-% RELEVANT DURING SOME TASKS BUT NOT OTHERS. COULD DO A PSD DURING THE TIME
-% AFTER THE OFFSET OF THE CLEAR GAMMA ACTIVITY.
+[MW13.ResponseTimesEmotionTask, MW13.ResponseTimesIdentityTask] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ResponseTimesDiffIdentity, ResponseTimesDiffEmotion, identityTaskLFP, emotionTaskLFP);
 

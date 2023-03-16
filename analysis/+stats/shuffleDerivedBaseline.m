@@ -43,10 +43,10 @@ else
 end
 
 if isempty(fs)
-            
-        else
-            shLAdj = round(shuffleLength*fs);
-        end
+
+else
+    shLAdj = round(shuffleLength*fs);
+end
 
 
 if noStitch %this just takes a trial sized chunk

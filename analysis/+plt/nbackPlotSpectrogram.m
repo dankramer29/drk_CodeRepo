@@ -3,16 +3,20 @@ function [outputArg1,outputArg2] = nbackPlotSpectrogram(nbackCompare, varargin)
 %   Detailed explanation goes here
 
 [varargin, comparison]=util.argkeyval('comparison', varargin, 1); %toggle between 1, and 2 for now. 1 shows identity next to emotion. 2 shows difference, will want to load in stats between the two
+[varargin, figTitleName]=util.argkeyval('figTitleName', varargin, 'Image On'); %Name of what you are comparing
 [varargin, timePlot]=util.argkeyval('timePlot', varargin, []); %pull in the time plot vector
 [varargin, frequencyRange]=util.argkeyval('frequencyRange', varargin, []); %pull in the frequency range
 [varargin, chName]=util.argkeyval('chName', varargin, []); %use the channel names for labeling
 [varargin, adjustedColorMap]=util.argkeyval('adjustedColorMap', varargin, false); %this will adjust a colormap to prevent outliers from making the map too dull
 [varargin, flatColorMap]=util.argkeyval('flatColorMap', varargin, true); %this just sets it at 3 SD (can adjust below to a different set). if both of these are off the heatmaps will set their own colormaps
+[varargin, doMask]=util.argkeyval('doMask', varargin, true); %set a mask for only the significant portions
+
+
 
 if comparison == 1
-    comparisonTitle = 'Identity Task compared to Emotion Task ';
+    comparisonTitle = ['Identity Task compared to Emotion Task ', figTitleName];
 elseif comparison == 2
-    comparisonTitle = 'Identity Task minus Emotion Task';
+    comparisonTitle = ['Identity Task minus Emotion Task ', figTitleName];
 end
 
 
@@ -114,7 +118,9 @@ for ii = 1:length(chNum)
             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
             colormap(inferno(100));
             mask = ones(size(SdiffIDTask{jj})); %this fades the color except where positive
-            mask = mask*.75;
+            if doMask
+                mask = mask*.75;
+            end
             if nnz(sigClustIDTask{jj})
                 mask(logical(sigClustIDTask{jj})) = 1;
             end
@@ -135,7 +141,9 @@ for ii = 1:length(chNum)
             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
             colormap(inferno(100));
             mask = ones(size(SdiffEmTask{jj})); %this fades the color except where positive
-            mask = mask*.75;
+            if doMask
+                mask = mask*.75;
+            end
             if nnz(sigClustEmTask{jj})
                 mask(logical(sigClustEmTask{jj})) = 1;
             end
@@ -168,7 +176,9 @@ for ii = 1:length(chNum)
             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
             colormap(inferno(100));
             mask = ones(size(SdiffIDTask{jj})); %this fades the color except where positive
-            mask = mask*.75;
+            if doMask
+                mask = mask*.75;
+            end
             if nnz(sigClustIDTask{jj})
                 mask(logical(sigClustIDTask{jj})) = 1;
             end
@@ -189,7 +199,9 @@ for ii = 1:length(chNum)
             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
             colormap(inferno(100));
             mask = ones(size(SdiffIDTask{jj})); %this fades the color except where positive
-            mask = mask*.75;
+            if doMask
+                mask = mask*.75;
+            end
             if nnz(sigClustEmTask{jj})
                 mask(logical(sigClustEmTask{jj})) = 1;
             end

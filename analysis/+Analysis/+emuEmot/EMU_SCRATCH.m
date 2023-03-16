@@ -250,6 +250,10 @@ macroCARch = macrowiresCAR(chInterest, :);
 %RIGHT NOW STD1 IS GIVING A STD OF 1, PROBABLY BECAUSE IT'S NORMALIZED?
 %%
 
+%% plotting
+tt = identityTaskLFP.time;
+ff = identityTaskLFP.freq;
+
 S1 = normalize(nbackCompare.ch23.id1.emotionTaskMean,2);
 figure; imagesc(tt,ff,S1); axis xy; colorbar;
 
@@ -261,6 +265,42 @@ figure
 imagesc(normalize(mean(S1, 3),2)); axis xy; colorbar;
 
 
+%CAN TRY AGAIN TO DO MEAN AND STD. TAKE THE MEAN OF THE SIGNAL, AND 2STD
+%AND THEN CLUSTER EVERYTHING ABOVE IT. SO MAKE THAT THE "P VALUES". 
+
+%NEED TO REMOVE NOISE I THINK.
+
+xx=mean(S1,2);
+sd=std(S1,[],2);
+
+S2 = identityTaskLFP.byemotion.ch23.image.specD{1};
+xxx = mean(S2,3);
+sdd = std(S2,[],3);
+hold on
+plot(xxx(45,:))
+
+figure
+plot(S1(45,:))
+
+figure
+imagesc(normalize(mnd1,2));
+hold on
+plot(140, 45, 'b*')
+xx=mnd2(45,:);
+figure
+plot(xx)
+hold on
+plot([1 417],[xx(45) xx(45)])
+hold on
+plot([1 417], [xx(45)+sd(45)*2 xx(45)+sd(45)*2])
+
+yy = std(mnd2(45,:), [], 2);
+zzz= mean(sd2,2);
+zz=zzz(45,:);
+plot([1 417], [mean(xx)+2*yy mean(xx)+2*yy])
+plot([1 417], [mean(xx)+zz mean(xx)+zz])
+plot(mnd1(45,:))
+
 for ii = 82:100
     imagesc(normalize(S1(:, :, ii),2)); axis xy; colorbar;
     
@@ -269,14 +309,29 @@ end
 testT = stats.cluster_permutation_Ttest_gpu3d( S2, S1, 'xshuffles', 100);
 
 
+
+
 figure
-subplot (3,1,1)
+subplot (6,1,1)
 imagesc(normalize(mean1,2)); axis xy;
 colorbar
-subplot (3, 1,2)
+subplot (6, 1,2)
 imagesc(normalize(mean2,2)); axis xy;colorbar;
-subplot (3, 1, 3)
+subplot (6, 1, 3)
+imagesc(tstat_res(:,:,ii)); axis xy; colorbar;
+subplot (6, 1, 4)
+title('tstat_res')
+imagesc(thresh_binaryP); axis xy; colorbar;
+title('positive no - no abs')
+subplot (6, 1, 5)
+imagesc(thresh_binaryN); axis xy; colorbar;
+title('negative - no abs')
+subplot (6, 1, 6)
 imagesc(thresh_binary); axis xy; colorbar;
+title('- abs')
+
+clear ttestT
+[h, ttestT] = ttest(data1,[],'Dim', 3);
 
 figure
 subplot (4,1,1)
@@ -285,14 +340,44 @@ title('Mean of Trial data')
 colorbar
 subplot (4, 1,2)
 imagesc(normalize(mnd2,2)); axis xy;colorbar;
+title('Mean of shuffled data')
 %imagesc(sd1); axis xy;colorbar;
-title('Mean of shuffle data 100 epochs')
 subplot (4, 1, 3)
-imagesc(r_pvalue); axis xy; colorbar; colormap(inferno)
-title('pvalues from a ttest')
+imagesc(thresh_binaryRPos); axis xy; colorbar; colormap(inferno)
+title('threshold <.025 Pos deflections')
 subplot (4, 1, 4)
-imagesc(thresh_binaryR); axis xy; colorbar; colormap(inferno)
-title('p values below alpha 0.01')
+matT = false(size(thresh_binaryRPos));
+matT(clustRPos.PixelIdxList{10}) = true;
+imagesc(thresh_binaryRNeg); axis xy; colorbar; colormap(inferno); caxis([0 0.10])
+title('threshold <.025 Neg deflections')
+
+
+figure
+imagesc(matT); axis xy;
+
+hold on
+plot(centroid(1),centroid(2), 'b*')
+
+figure
+subplot (4,1,1)
+imagesc(normalize(mnd1,2)); axis xy; colorbar
+title('Mean of Trial data')
+colorbar
+subplot (4, 1,2)
+imagesc(r_pvalue); axis xy;colorbar;
+%imagesc(sd1); axis xy;colorbar;
+title('p value')
+subplot (4, 1, 3)
+imagesc(r_pvaluePos); axis xy; colorbar; colormap(inferno)
+title('pos')
+subplot (4, 1, 4)
+imagesc(r_pvalueNeg); axis xy; colorbar; colormap(inferno)
+title('Neg')
+
+
+
+
+cn = clR(89).Centroid;
 
 mat=false(size(thresh_binaryR));
     mat(clustR.PixelIdxList{cl_keep(6)})=true;    
@@ -330,10 +415,11 @@ end
 
 %TWO THINGS TO TRY, REMOVE A BASELINE MORE THAN JUST THE CAR. ALSO REALLY
 %FIGURE OUT WHAT'S HAPPENING IN THE SHUFFLED DATA. WHY IS IT SO STRONG?
+Ss = itiDataStitch.IdentityTask.ch23;
 figure
-imagesc(normalize(mean(trialDataTemp,3),2)); axis xy; colorbar
+imagesc(tt, ff, normalize(mean(Ss,3),2)); axis xy; colorbar
 figure
-imagesc(normalize(mean(trialDataTemp2,3),2)); axis xy; colorbar
+imagesc(normalize(mean(trialDataGaus,3),2)); axis xy; colorbar
 
 figure
 plot(trialDataTemp(40,:,1))

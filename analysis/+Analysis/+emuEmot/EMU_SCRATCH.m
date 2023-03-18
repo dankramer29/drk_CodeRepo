@@ -355,8 +355,32 @@ title('threshold <.025 Pos deflections')
 subplot (4, 1, 4)
 matT = false(size(thresh_binaryRPos));
 matT(clustRPos.PixelIdxList{10}) = true;
-imagesc(thresh_binaryRNeg); axis xy; colorbar; colormap(inferno); caxis([0 0.10])
+imagesc(matPos); axis xy; colorbar; colormap(inferno); caxis([0 0.10])
 title('threshold <.025 Neg deflections')
+
+figure
+imagesc(tt,ff, SdiffEmTask{jj}); axis xy; 
+xx= min(min(SdiffEmTask{jj}));
+bww = bw;
+bww(bww>0) = xx;
+
+Ss = SdiffEmTask{jj};
+
+Ss(bw>0) = xx;
+
+figure
+imagesc(tt,ff, Ss); axis xy; 
+
+figure
+imagesc(tt,ff,sigClustEmTask{jj}); axis xy;
+
+
+
+matT=false(size(thresh_binaryRPos));
+matT(clRPos.Image)=true;
+figure
+imagesc(matT); axis xy;
+
 
 
 figure

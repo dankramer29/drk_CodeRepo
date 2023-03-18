@@ -25,8 +25,7 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, rlab ] = cluster_permutatio
 [varargin, gpuOn]=util.argkeyval('gpuOn', varargin, false); %turn on gpu or not
 [varargin, tt]=util.argkeyval('tt', varargin, []); %include a tplot if you want to plot
 [varargin, ff]=util.argkeyval('ff', varargin, []); %include a freq if you want to plot
-
-
+[varargin, splitPosNeg]=util.argkeyval('splitPosNeg', varargin, 1); %if you want to split positive and negative deflections into own one tailed ttest. 0 is no and will do one tailed ttest on abs of data
 
 
 util.argempty(varargin); % check all additional inputs have been processed
@@ -51,15 +50,22 @@ tstat_maxP = tstat_max; tstat_maxN = tstat_max;
 est_p=struct;
 centroid = [1,1]; centroidPos = [1,1]; centroidNeg = [1,1];
 
-%if the iti is not as large as the trial length, add a mirrored end to the iti. NOT SET UP FOR OTHER WAY
-%AROUND AS IF THE TRIAL IS NOT LONG ENOUGH, MIRRORING WOULD OVER ESTIMATE
-%THE NOISE IN THE ITI, I THINK.
-if size(data2,1)<size(data1,1)
-    extr=size(data1,1)-size(data2,1)-1;
-    temp=data2(end-extr:end, :, :);
-    data2_temp=cat(1,temp, data2);
+%if the iti is not as large as the trial length, add a mirrored end to the iti.
+if size(data2,2)<size(data1,2)
+    extr=ceil(size(data1,2)/size(data2,2));
+    data2_temp = data2;
+    for ii = 1:extr
+        if mod(ii,2) %if odd numbered
+            temp = flip(data2,2);
+        else
+            temp = data2;
+        end
+        data2_temp = cat(2,data2_temp, temp);
+    end
+    
+    data2_temp(:,size(data1,2)+1:end,:) = [];
 else
-    data2_temp=data2;
+    data2_temp = data2;
 end
 
 L1 = size(data1, 3);
@@ -101,34 +107,46 @@ for ii=1:xshuffles
         thresh_binarydP=gather(thresh_binaryP);
         thresh_binarydN=gather(thresh_binaryN);
         
-        %cluster positive deflections separately
-        clustP=bwconncomp(thresh_binarydP,8);
-        clP=regionprops(clustP); %get the region properties
-        cl_aP=[clP.Area];
-        [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
-        max_matP=false(size(thresh_binarydP));
-        max_matP(clustP.PixelIdxList{max_idxP})=true;
-        tstat_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
-        
-        %cluster negative deflections separately
-        clustN=bwconncomp(thresh_binarydN,8);
-        clN=regionprops(clustN); %get the region properties
-        cl_aN=[clN.Area];
-        [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
-        max_matN=false(size(thresh_binarydN));
-        max_matN(clustN.PixelIdxList{max_idxN})=true;
-        tstat_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area   
-        
-        %WILL WANT TO TOGGLE THIS SINCE DON'T NEED BOTH
-        %cluster two tailed (both positive and negative) separately 
-        clust=bwconncomp(thresh_binaryd,8);
-        cl=regionprops(clust); %get the region properties
-        cl_a=[cl.Area];
-        [~,max_idx]=max(cl_a); %get the index of the largest cluster
-        max_mat=false(size(thresh_binaryd));
-        max_mat(clust.PixelIdxList{max_idx})=true;
-        tstat_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
+        if splitPosNeg
+            %cluster positive deflections separately
+            clustP=bwconncomp(thresh_binarydP,8);
+            if clustP.NumObjects>=1
+                clP=regionprops(clustP); %get the region properties
+                cl_aP=[clP.Area];
+                [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
+                max_matP=false(size(thresh_binarydP));
+                max_matP(clustP.PixelIdxList{max_idxP})=true;
+                tstat_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
+            else
+                tstat_maxP(ii) = 1;
+            end
 
+            %cluster negative deflections separately
+            clustN=bwconncomp(thresh_binarydN,8);
+            if clustN.NumObjects>=1
+                clN=regionprops(clustN); %get the region properties
+                cl_aN=[clN.Area];
+                [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
+                max_matN=false(size(thresh_binarydN));
+                max_matN(clustN.PixelIdxList{max_idxN})=true;
+                tstat_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
+            else
+                tstat_maxN(ii) = 1;
+            end
+        else
+            %cluster two tailed (both positive and negative) separately
+            if clust.NumObjects>=1
+                clust=bwconncomp(thresh_binaryd,8);
+                cl=regionprops(clust); %get the region properties
+                cl_a=[cl.Area];
+                [~,max_idx]=max(cl_a); %get the index of the largest cluster
+                max_mat=false(size(thresh_binaryd));
+                max_mat(clust.PixelIdxList{max_idx})=true;
+                tstat_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
+            else
+                tstat_max(ii) = 1;
+            end
+        end
     end
 end
 toc(tt)
@@ -144,7 +162,7 @@ tstat_max=gather(tstat_max);
 mnd1=nanmean(data1,3);
 mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
 sd1=std(data1,0,3);
-sd2=std(data2,0,3);
+sd2=std(data2_temp,0,3);
 spR=sqrt(((L1-1)*sd1.^2+(L2-1)*sd2.^2)./(L1+L2-2));
 tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L2));
 tstat_R=gather(tstat_R);
@@ -173,7 +191,7 @@ thresh_binaryR=r_pvalue<alph;%find those less than set p value
 
 %REPEAT THIS FOR EACH
 clustRPos=bwconncomp(thresh_binaryRPos,8);
-clRPos=regionprops(clustRPos); %get the region properties
+clRPos=regionprops(clustRPos, 'all'); %get the region properties
 cl_aRPos=[clRPos.Area];
 cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
 idxc=1;

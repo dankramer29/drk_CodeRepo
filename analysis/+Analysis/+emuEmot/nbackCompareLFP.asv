@@ -148,8 +148,8 @@ if comparedToITI == 1
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
-        itiDataId = itiDataFilt.IdentityTask.(chName{ii}); %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
-        itiDataEm = itiDataFilt.EmotionTask.(chName{ii}); %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
+        itiDataId = itiDataFilt.IdentityTask.(chName{ii}).specD; %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
+        itiDataEm = itiDataFilt.EmotionTask.(chName{ii}).specD; %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
 
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
@@ -170,10 +170,10 @@ if comparedToITI == 1
             tt=identityTaskLFP.time;
             ff=identityTaskLFP.freq;
 
-%             [nback.(chName{ii}).(idName{jj}).identityTaskMean, ~, ...
-%                 nback.(chName{ii}).(idName{jj}).identityTaskSD, ~, ...
-%                 nback.(chName{ii}).(idName{jj}).identityTasksigclust,...
-%                 nback.(chName{ii}).(idName{jj}).identityTaskcentroid] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiDataId, 'xshuffles', xshuffles);
+            [nback.(chName{ii}).(idName{jj}).identityTaskMean, ~, ...
+                nback.(chName{ii}).(idName{jj}).identityTaskSD, ~, ...
+                nback.(chName{ii}).(idName{jj}).identityTasksigclust,...
+                nback.(chName{ii}).(idName{jj}).identityTaskcentroid] = stats.cluster_permutation_Ttest_gpu3d( dataIdentityTask, itiDataId, 'xshuffles', xshuffles);
             
             
             [nback.(chName{ii}).(idName{jj}).emotionTaskMean, ~,...

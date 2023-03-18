@@ -194,15 +194,15 @@ taskTimeEnd = closestValue(end);
 %% Filter all the data
 preStartData = dataFemotion; %can adjust if want to exclude part of the data
 %filters the entire trial.
-% if alreadyFilteredData == 0
-%     [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
-% end
+if alreadyFilteredData == 0
+    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+end
 
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 if preSpectrogramData
-   [emotionTaskLFP, itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
+   [emotionTaskLFP, itiDataReal.EmotionTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
@@ -287,6 +287,7 @@ ImageTimesDiff = (ImageTimes-TTLTimes)*24*60*60*1e6; %convert to microseconds
 ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
 ResponseTimesDiffIdentity = (ResponseTimes-TTLTimes)*24*60*60*1e6;
+itiTimeIdentity = (ImageTimes(3:end)-ResponseTimes(2:end-1))*24*60*60;
 ResponseTimesAdjId = ttl_beh+ResponseTimesDiffIdentity; %moves the time into neural time scale
 
 %find if the responses were correct or not
@@ -309,15 +310,15 @@ taskTimeEnd = closestValue(end);
 %% Filter all the data
 preStartData = dataFidentity; %can adjust if want to exclude part of the data
 %filters the entire trial.
-% if alreadyFilteredData == 0
-%     [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
-% end
+if alreadyFilteredData == 0
+    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+end
 
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 if preSpectrogramData
-   [identityTaskLFP, itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
+   [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
@@ -326,6 +327,8 @@ else
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
+
+
 %% create and iti
 trialLength = preTime + postTime;
 %stritch the iti trials together
@@ -344,7 +347,7 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100, 'eventChoice', 1);
 

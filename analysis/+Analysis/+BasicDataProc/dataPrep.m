@@ -38,7 +38,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 %% Filters
 [varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, true);  %if you want to do it with spectrogram method
-[varargin, pSpectrum] = util.argkeyval('pSpectrum',varargin, true);  %if you want to do it with spectrogram method from pspectrum with matlab 
+[varargin, pSpectrum] = util.argkeyval('pSpectrum',varargin, false);  %if you want to do it with spectrogram method from pspectrum with matlab 
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .200);  %the multitaper window in seconds
 
 [varargin, BandPassed] = util.argkeyval('Bandpassed', varargin, false); %if you want to also run basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
@@ -52,7 +52,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 [varargin, bandfilter] = util.argkeyval('bandfilter',varargin, []);  % check if filters already made so you don't have to keep making them each run
 [varargin, filterClassBand] = util.argkeyval('dataClassBand',varargin, []);  % check if classic broad filters already made so you don't have to keep making them each run
-[varargin, classicBand]= util.argkeyval('classicBand', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 200]);
+[varargin, classicBand]= util.argkeyval('classicBand', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 150]);
 %flip data if suspect it's in channels x data
 if size(data,1)<=size(data,2)
     %warning('data in channels x voltage, not voltage x channels, converted to voltage x channels for analysis');
@@ -199,8 +199,7 @@ elseif BandPassed
         end
         
         %% set up the filtering
-        lblA=fieldnames(bandfilter);
-        
+        lblA=fieldnames(bandfilter);  
         
         
         %% run the filters

@@ -231,9 +231,18 @@ imagesc(tplot, ff, dataFinalZ(:,:,tr)); axis xy;
 macroCARch = macrowiresCAR(chInterest, :);
 
 %%
+%centroid
+tt=emotionTaskLFP.time;
+ff=emotionTaskLFP.freq;
 
-
-
+S1 = nback.ch23.emotion1.emotionTaskMean;
+S1 = normalize(S1,2);
+figure
+imagesc(S1); axis xy; colorbar;
+cent = nback.ch23.emotion1.emotionTaskcentroid(2, :);
+centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+hold on
+plot(centA(1), centA(2), '*b')
 
 
 %% sig clusters

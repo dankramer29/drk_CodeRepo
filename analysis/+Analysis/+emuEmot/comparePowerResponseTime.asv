@@ -26,11 +26,31 @@ RTDIsec(1) = [];
 [pos, summaryStats.ReactionTimesEmotTaskvIdTask, ci, stats] = ttest(RTDEsec, RTDIsec);
 
 %look at high gamma for areas that were positive
+idx1 = 1;
 for cc = 1:length(chNum)
     for nn = 1:length(conditionName)
-        if nback.(chNum{1}).(conditionName{nn})
+        if nn ~= 4 || nn ~= 8
+            %identity task
+            if nnz(nnz(nback.(chNum{1}).(conditionName{nn}).(resultName{3})))>0
+                for ii = 1:size(nback.(chNum{1}).(conditionName{nn}).(resultName{4}),1)
+                    cent = nback.(chNum{1}).(conditionName{nn}).(resultName{4})(ii,1);
+                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+                    if centA(2)>=50 && centA(2)<=140
+                        gammaCentId(idx1,:) = centA;
+                        %for jj = 1:
+                        idx1 = idx1+1;
+                    end
+                end
+                for ii = 1:size(nback.(chNum{1}).(conditionName{nn}).(resultName{7}),1)
+                    cent = nback.(chNum{1}).(conditionName{nn}).(resultName{8})(ii,1);
+                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+                    if centA(2)>=50 && centA(2)<=140
+                        gammaCentEm(idx2,:) = centA;
+                        idx2 = idx2+1;
+                    end
+                end
 
-            
+            end
         end
     end
 end

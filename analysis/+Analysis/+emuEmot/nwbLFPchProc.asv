@@ -225,8 +225,6 @@ if filterAllData
                 nback.byemotion.(chName{cc}).image.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
                 if ii ~=1
                     nback.byemotion.(chName{cc}).response.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexResponse(ii) - (preTimeCRes): behavioralIndexResponse(ii) + (postTimeCRes));
-                    nback.byemotion.(chName{cc}).responseTimesInSec{PresentedIdentityIdx(idx1)}(idxID,:) = ResponseTimesAdj(ii);
-                    nback.byemotion.(chName{cc}).correctTrial{PresentedIdentityIdx(idx1)}(idxID,:) = CorrectTrials(ii);
                 end
                 idx1 = idx1 + 1;
             end

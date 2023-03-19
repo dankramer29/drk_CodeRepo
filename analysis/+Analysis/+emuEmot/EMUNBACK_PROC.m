@@ -294,7 +294,6 @@ ResponseTimesAdjId = ttl_beh+ResponseTimesDiffIdentity; %moves the time into neu
 Response(isnan(Response)) = [];
 CorrectTrialsId = CorrectResponse == Response;
 
-
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
@@ -321,7 +320,8 @@ if preSpectrogramData
    [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
-       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow',...
+       multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesAdjId);
 else
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
@@ -349,7 +349,7 @@ end
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataStitch, 'xshuffles', 100, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
 
 
 %% plotting

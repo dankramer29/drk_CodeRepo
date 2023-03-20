@@ -244,6 +244,16 @@ centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
 hold on
 plot(centA(1), centA(2), '*b')
 
+%filtering
+dataT = dataFidentity(10000:20000,1);
+xx = Analysis.BasicDataProc.dataPrep(dataT);
+
+tempClassicBand=filtfilt(filterClassBand.(lblB{ii}), dataM);
+
+figure
+plot(rms(tempClassicBand))
+hold on
+plot(tempClassicBandFF)
 
 %% sig clusters
 %THINGS TO DO, WILL NEED TO RUN THE CLUSTER PERMUTATION AGAINST ALL SORTS

@@ -37,13 +37,13 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 [varargin, mirroredEnd] = util.argkeyval('mirroredEnd',varargin, .3); 
 
 %% Filters
-[varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, true);  %if you want to do it with spectrogram method
-[varargin, pSpectrum] = util.argkeyval('pSpectrum',varargin, false);  %if you want to do it with spectrogram method from pspectrum with matlab 
+[varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, false);  %if you want to do it with spectrogram method
+[varargin, doPSpectrum] = util.argkeyval('doPSpectrum',varargin, false);  %if you want to do it with spectrogram method from pspectrum with matlab 
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .200);  %the multitaper window in seconds
 
-[varargin, BandPassed] = util.argkeyval('Bandpassed', varargin, false); %if you want to also run basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
-[varargin, DoBandFilterBroad] = util.argkeyval('DoBandFilterBroad', varargin, false);  %if you want to also run basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
-[varargin, IIR] = util.argkeyval('IIR',varargin, 1);  % IIR vs FIR, UCSF uses FIR for phase stuff
+[varargin, BandPassed] = util.argkeyval('Bandpassed', varargin, false); %alternate to spectrogram to run filters and build them on top of each other at 2 hz bands
+[varargin, DoBandFilterBroad] = util.argkeyval('DoBandFilterBroad', varargin, true);  %if you want to also run canonical basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
+[varargin, IIR] = util.argkeyval('IIR',varargin, true);  % IIR vs FIR, UCSF uses FIR for phase stuff
 
 
 [varargin, Freq_BandWidth] = util.argkeyval('Freq_BandWidth',varargin, 2);  %width of the bands you are filtering (DOESN'T SEEM TO WORK RIGHT NOW)
@@ -145,7 +145,7 @@ end
 filtData.dataBasicFilter=dataM(ramp:end-ramp,:); 
 
 %design a lowpass filter for smoothing after power
-if BandPassed
+if BandPassed || DoBandFilterBroad
 lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
          'PassbandFrequency',15,'PassbandRipple',0.2, ...
          'SampleRate',fs);
@@ -175,7 +175,7 @@ if Spectrogram
         filtData.params=params;
         bandfilter=[]; %have an empty return of bandfilter
 
-        if pSpectrum %can also do it with pspectrum to compare, f does 1024 at nyquist, so just cut it off.
+        if doPSpectrum %can also do it with pspectrum to compare, f does 1024 at nyquist, so just cut it off.
             [sPspectrum, f, t] = pspectrum(dataM, fs, "spectrogram", TimeResolution=  params.win(1), OverlapPercent = params.OverlapPercentage); %will need to do normalize
             tplotTempT=t-mirroredEnd;
             zr=find(tplotTempT>0 & tplotTempT<tplotTempT(end)-mirroredEnd); %find the row for time=0
@@ -275,7 +275,7 @@ if DoBandFilterBroad
             negTemp=find(tempClassicBandFF<0);
             tempClassicBandFF(negTemp)=tempClassicBandFF(negTemp)*-1;
             tempCBC(:,ii,:)=tempClassicBandFF; %data x band x channel
-            dataTempClassicBandAngle(:,ii)=[];
+            %dataTempClassicBandAngle(:,ii)=[];
         end
         
     else %do an FIR with the ucsf code    
@@ -293,7 +293,9 @@ if DoBandFilterBroad
     %remove the mirrored end
     dataClassicBandfilt=tempClassicBand(ramp:end-ramp,:,:);
     dataTempClassicBandPow=tempCBC(ramp:end-ramp,:,:);
-    dataTempClassicBandAngle=tempCBAngle(ramp:end-ramp,:,:);
+    if ~IIR
+        dataTempClassicBandAngle=tempCBAngle(ramp:end-ramp,:,:);
+    end
     %set up plotting with time and frequency bands
     %get the time for plotting
     tplotCB = 0:1/fs:(size(data,1)-1)/fs;
@@ -337,7 +339,7 @@ if BandPassed || Spectrogram || DoBandFilterBroad
             baseTemp=dataTemp(:,:,ii);
             [a, b]=proc.basic.zScore(baseTemp, 'z-score', 2); %get the z score mean and std
             dataFinalZ(:,:,ii)=(baseTemp-a)./b;
-            if pSpectrum
+            if doPSpectrum
                 sPspectrumZ(:,:,ii) = normalize(sPspectrum(:,:,ii),2); %auto normalizes
             end
 
@@ -371,9 +373,11 @@ if BandPassed || Spectrogram || DoBandFilterBroad
     clear dataFinal
     filtData.dataSpec.dataZ=dataFinalZ;
     clear dataFinal
-    filtData.dataSpec.pSpectrum.data=sPspectrum;
-    clear sPspectrum
-    filtData.dataSpec.pSpectrum.data=sPspectrumZ;
+    if doPSpectrum
+        filtData.dataSpec.pSpectrum.data=sPspectrum;
+        clear sPspectrum
+        filtData.dataSpec.pSpectrum.data=sPspectrumZ;
+    end
 
     
     if DoBandFilterBroad
@@ -383,11 +387,11 @@ if BandPassed || Spectrogram || DoBandFilterBroad
                 filtData.ClassicBand.PowerZ.(lblB{ii})=dataFinalCBZ(:, ii, :);
             end
             filtData.ClassicBand.t=tplotC;
-            filtData.ClassicBand.Angle.(lblB{ii})=dataTempClassicBandAngle(:, ii, :);
-            filtData.ClassicBand.FiltOnly.(lblB{ii})=dataClassicBandfilt(:,ii,:);
-            
-            
+            if ~IIR
+                filtData.ClassicBand.Angle.(lblB{ii})=dataTempClassicBandAngle(:, ii, :);
+            end            
         end
+        %filtData.ClassicBand.FiltOnly.(lblB{ii})=dataClassicBandfilt;         
     end
     
 end

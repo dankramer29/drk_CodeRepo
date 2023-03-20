@@ -238,10 +238,14 @@ ff=emotionTaskLFP.freq;
 S1 = nback.ch23.emotion1.emotionTaskMean;
 S1 = normalize(S1,2);
 figure
-imagesc(tt,ff,S1); axis xy; colorbar;
-cent = nback.ch23.emotion1.emotionTaskcentroid(1, :);
+imagesc(S1); axis xy; colorbar;
+cent = nback.ch23.emotion1.emotionTaskcentroid(2, :);
+centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
 hold on
-plot(cent(1), cent(1), '*b')
+plot(centA(1), centA(2), '*b')
+
+%filtering
+
 
 
 %% sig clusters

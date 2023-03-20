@@ -29,9 +29,10 @@ itiFiltered = struct;
 
 for cc = 1:length(chNum) %channels
     for ii = 1:size(data,3) %trials        
-        [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(:, cc, ii), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow); %calls this function for my basic processing stepsdata
+        [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(:, cc, ii), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow, 'DoBandFilterBroad', true, 'BandPassed', false); %calls this function for my basic processing stepsdata
         itiFiltered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
         itiFiltered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
+        itiFiltered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;%if end up doing this trial by trial, will need to figure out how to add the trials here, struct will screw it up.
     end
 end
 

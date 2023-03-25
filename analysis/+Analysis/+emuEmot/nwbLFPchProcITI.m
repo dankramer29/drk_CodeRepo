@@ -1,4 +1,4 @@
-function [itiFiltered, nbackFilterAllData] = nwbLFPchProcITI(data,varargin)
+function [Filtered] = nwbLFPchProcITI(data,varargin)
 %nwbLFPchProc Basic processing function for EMU for iti data
 %   Inputs:
 %        data which is the output of stats.shuffleDerivedBaseline
@@ -25,21 +25,21 @@ end
 %% this is breaking the data up by session, then filtering, see below for an alternative DO NOT NEED TO DO BOTH, JUST TROUBLESHOOTING
 
 
-itiFiltered = struct;
-
+Filtered = struct;
+filterClassicBand = [];
 for cc = 1:length(chNum) %channels
     for ii = 1:size(data,3) %trials        
-        [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(:, cc, ii), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow, 'DoBandFilterBroad', true, 'BandPassed', false); %calls this function for my basic processing stepsdata
-        itiFiltered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
-        itiFiltered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
-        itiFiltered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;%if end up doing this trial by trial, will need to figure out how to add the trials here, struct will screw it up.
+        [filtDataTemp, ~, ~, ~, filterClassicBand] =  Analysis.BasicDataProc.dataPrep(data(:, cc, ii), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow, 'DoBandFilterBroad', true, 'BandPassed', false, 'filterClassBand', filterClassicBand, 'Spectrogram', true); %calls this function for my basic processing stepsdata
+        Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
+        Filtered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
+        Filtered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;%if end up doing this trial by trial, will need to figure out how to add the trials here, struct will screw it up.
     end
 end
 
 
 
-itiFiltered.time = filtDataTemp.dataSpec.tplot;
-itiFiltered.freq = filtDataTemp.dataSpec.f;
+Filtered.time = filtDataTemp.dataSpec.tplot;
+Filtered.freq = filtDataTemp.dataSpec.f;
 
 
 end

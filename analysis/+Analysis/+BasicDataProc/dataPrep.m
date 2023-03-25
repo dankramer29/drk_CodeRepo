@@ -37,7 +37,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 [varargin, mirroredEnd] = util.argkeyval('mirroredEnd',varargin, .3); 
 
 %% Filters
-[varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, false);  %if you want to do it with spectrogram method
+[varargin, Spectrogram] = util.argkeyval('Spectrogram',varargin, true);  %if you want to do it with spectrogram method
 [varargin, doPSpectrum] = util.argkeyval('doPSpectrum',varargin, false);  %if you want to do it with spectrogram method from pspectrum with matlab 
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .200);  %the multitaper window in seconds
 

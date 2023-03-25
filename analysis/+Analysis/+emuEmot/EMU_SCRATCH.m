@@ -2,14 +2,16 @@
 
 %% this is all scratch pad stuff for now.
 
-
 %%plotting
 xx=SdiffID{2};
 
 figure
 imagesc(S2); axis xy; colorbar;
 
-
+%%
+for ii=1:length(channelName)
+    itiDataFiltIdentity.iti.(channelName{ii}).bandPassed = itiDataFiltIdentityT.iti.(channelName{ii}).bandPassed;
+end
 
 %%
 dataC = dataF(behavioralIndex(300):behavioralIndex(303),1);
@@ -247,6 +249,16 @@ plot(centA(1), centA(2), '*b')
 %filtering
 dataT = dataFidentity(10000:20000,1);
 xx = Analysis.BasicDataProc.dataPrep(dataT);
+
+xxx = xx.ClassicBand.Power.filter8to13;
+
+figure
+plot(xxx)
+
+for cc=1:length(channelName)
+    itiDataFiltIdentity.iti.(channelName{cc}).bandPassed = itiDataFiltIdentityBand.iti.(channelName{cc}).bandPassed;
+end
+
 
 tempClassicBand=filtfilt(filterClassBand.(lblB{ii}), dataM);
 

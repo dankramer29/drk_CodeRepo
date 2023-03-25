@@ -1,4 +1,4 @@
-function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, rlab ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
+function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, rlab ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
 %USE THIS ONE
 % 
 % shuffle_stats shuffles the data between two data sets takes the mean and
@@ -151,12 +151,6 @@ for ii=1:xshuffles
 end
 toc(tt)
 
-tstat_maxP=gather(tstat_maxP);
-tstat_maxN=gather(tstat_maxN);
-tstat_max=gather(tstat_max);
-
-
-
 %%
 %get the real mean difference and sd at each value
 mnd1=nanmean(data1,3);
@@ -167,91 +161,111 @@ spR=sqrt(((L1-1)*sd1.^2+(L2-1)*sd2.^2)./(L1+L2-2));
 tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L2));
 tstat_R=gather(tstat_R);
 %tstat_Rabs=abs(tstat_R); %take absolute for adjustment. makes negative deflections and positive deflections of equal value. don't do this if there is a difference between the degrees of positive and negative deflections
-
-r_pvalueNeg=2*tcdf((tstat_R), (L1+L2-2)); %Gets the p values for negative deflections (two tailed), straight from ttest
-r_pvaluePos=2*tcdf(-(tstat_R), (L1+L2-2)); %Gets the p values for positive deflections (two tailed), 
-r_pvalue=2*tcdf(-abs(tstat_R), (L1+L2-2)); %get the p values for both adjustments (makes it one tailed), this formula is straight from ttest2
 %% find which clusters are sig
 %allocate
 sigclust=zeros(size(tstat_R));
-
-%% find the 0.05 level
-temp_tsmP=sort(tstat_maxP);
-threshP=temp_tsmP(round(size(tstat_maxP,1)*alphaHistoHalf));
-temp_tsmN=sort(tstat_maxN);
-threshN=temp_tsmN(round(size(tstat_maxN,1)*alphaHistoHalf));
-temp_tsm=sort(tstat_max);
-thresh=temp_tsm(round(size(tstat_max,1)*alphaHistoAdj));
-
 %%
-%begin clustering with bwconncomp
-thresh_binaryRPos=r_pvaluePos<alph/2;%find those less than set p value
-thresh_binaryRNeg=r_pvalueNeg<alph/2;%find those less than set p value
-thresh_binaryR=r_pvalue<alph;%find those less than set p value
+if splitPosNeg
+    sigclustPos=zeros(size(tstat_R));
+    sigclustNeg=zeros(size(tstat_R));
+    tstat_maxP=gather(tstat_maxP);
+    tstat_maxN=gather(tstat_maxN);
+    r_pvalueNeg=2*tcdf((tstat_R), (L1+L2-2)); %Gets the p values for negative deflections (two tailed), straight from ttest
+    r_pvaluePos=2*tcdf(-(tstat_R), (L1+L2-2)); %Gets the p values for positive deflections (two tailed),
 
-%REPEAT THIS FOR EACH
-clustRPos=bwconncomp(thresh_binaryRPos,8);
-clRPos=regionprops(clustRPos, 'all'); %get the region properties
-cl_aRPos=[clRPos.Area];
-cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
-idxc=1;
-for ii=1:length(cl_keepPos)
-    matPos=false(size(thresh_binaryRPos));
-    matPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=true;    
-    tstat_sumsPos(ii)=sum(abs(tstat_R(matPos)));
-    
-    if tstat_sumsPos(ii)>threshP %save the ones that are over the thresh
-    sigclustPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=idxc;
-    centroidPos(idxc,1:2) = clRPos(cl_keepPos(ii)).Centroid;
-    idxc=idxc+1;
+    %% find the 0.05 level
+    temp_tsmP=sort(tstat_maxP);
+    threshP=temp_tsmP(round(size(tstat_maxP,1)*alphaHistoHalf));
+    temp_tsmN=sort(tstat_maxN);
+    threshN=temp_tsmN(round(size(tstat_maxN,1)*alphaHistoHalf));
+
+
+    %%
+    %begin clustering with bwconncomp
+    thresh_binaryRPos=r_pvaluePos<alph/2;%find those less than set p value
+    thresh_binaryRNeg=r_pvalueNeg<alph/2;%find those less than set p value
+
+    %REPEAT THIS FOR EACH
+    clustRPos=bwconncomp(thresh_binaryRPos,8);
+    clRPos=regionprops(clustRPos, 'all'); %get the region properties
+    cl_aRPos=[clRPos.Area];
+    cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
+    idxc=1;
+    tstat_sumsP = 0; tstat_sumsN = 0;
+    for ii=1:length(cl_keepPos)
+        matPos=false(size(thresh_binaryRPos));
+        matPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=true;
+        tstat_sumsPos(ii)=sum(abs(tstat_R(matPos)));
+
+        if tstat_sumsPos(ii)>threshP %save the ones that are over the thresh
+            sigclustPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=idxc;
+            centroidPos(idxc,1:2) = clRPos(cl_keepPos(ii)).Centroid;
+            tstat_sumsP(idxc,1) = tstat_sumsPos(ii);
+            idxc=idxc+1;
+        end
     end
-end
-clustRNeg=bwconncomp(thresh_binaryRNeg,8);
-clRNeg=regionprops(clustRNeg); %get the region properties
-cl_aRNeg=[clRNeg.Area];
-cl_keepNeg=find(cl_aRNeg>100); %get the ones with an area >100 pixels
-idxc=1;
-for ii=1:length(cl_keepNeg)
-    matNeg=false(size(thresh_binaryRNeg));
-    matNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=true;    
-    tstat_sumsNeg(ii)=sum(abs(tstat_R(matNeg)));
-    
-    if tstat_sumsNeg(ii)>threshN %save the ones that are over the thresh
-    sigclustNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=idxc;
-    centroidNeg(idxc,1:2) = clRNeg(cl_keepNeg(ii)).Centroid;
-    idxc=idxc+1;
+    clustRNeg=bwconncomp(thresh_binaryRNeg,8);
+    clRNeg=regionprops(clustRNeg); %get the region properties
+    cl_aRNeg=[clRNeg.Area];
+    cl_keepNeg=find(cl_aRNeg>100); %get the ones with an area >100 pixels
+    idxc=1;
+    for ii=1:length(cl_keepNeg)
+        matNeg=false(size(thresh_binaryRNeg));
+        matNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=true;
+        tstat_sumsNeg(ii)=sum(abs(tstat_R(matNeg)));
+
+        if tstat_sumsNeg(ii)>threshN %save the ones that are over the thresh
+            sigclustNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=idxc;
+            centroidNeg(idxc,1:2) = clRNeg(cl_keepNeg(ii)).Centroid;
+            tstat_sumsN(idxc,1) = tstat_sumsNeg(ii);
+            idxc=idxc+1;
+        end
+    end
+    centroid =vertcat(centroidPos, centroidNeg);
+    tstatSum = vertcat(tstat_sumsP, tstat_sumsN);
+    sigclust = sigclustPos;
+    sigclust = sigclustNeg;
+
+else
+    tstat_max=gather(tstat_max);
+    temp_tsm=sort(tstat_max);
+    thresh=temp_tsm(round(size(tstat_max,1)*alphaHistoAdj));
+    r_pvalue=2*tcdf(-abs(tstat_R), (L1+L2-2)); %get the p values for both adjustments (makes it one tailed), this formula is straight from ttest2
+
+    thresh_binaryR=r_pvalue<alph;%find those less than set p value
+    clustR=bwconncomp(thresh_binaryR,8);
+    clR=regionprops(clustR); %get the region properties
+    cl_aR=[clR.Area];
+    cl_keep=find(cl_aR>100); %get the ones with an area >100 pixels
+    idxc=1;
+    for ii=1:length(cl_keep)
+        mat=false(size(thresh_binaryR));
+        mat(clustR.PixelIdxList{cl_keep(ii)})=true;
+        tstat_sums(ii)=sum(abs(tstat_R(mat)));
+
+        if tstat_sums(ii)>thresh %save the ones that are over the thresh
+            sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;
+            centroid(idxc,1:2) = clR(cl_keep(ii)).Centroid;
+            tstatSum(idxc,1) = tstat_sums(ii);
+            idxc=idxc+1;
+        end
     end
 end
 
-clustR=bwconncomp(thresh_binaryR,8);
-clR=regionprops(clustR); %get the region properties
-cl_aR=[clR.Area];
-cl_keep=find(cl_aR>100); %get the ones with an area >100 pixels
-idxc=1;
-for ii=1:length(cl_keep)
-    mat=false(size(thresh_binaryR));
-    mat(clustR.PixelIdxList{cl_keep(ii)})=true;    
-    tstat_sums(ii)=sum(abs(tstat_R(mat)));
-    
-    if tstat_sums(ii)>thresh %save the ones that are over the thresh
-    sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;
-    centroid(idxc,1:2) = clR(cl_keep(ii)).Centroid;
-    idxc=idxc+1;
-    end
-end
+
 
 
 %for testing
 % lab=labelmatrix(clustR);
 % lab=lab';
 % rlab=label2rgb(lab,@spring,'c','shuffle');
-bonc=0.05/(size(mnd1,1)*size(mnd1,2));
-rlab=r_pvalue<bonc;
+% bonc=0.05/(size(mnd1,1)*size(mnd1,2));
+% rlab=r_pvalue<bonc;
 %%
 if plt
     figure
     histogram(tstat_maxP, xshuffles)
 end
 
-   
+
 end

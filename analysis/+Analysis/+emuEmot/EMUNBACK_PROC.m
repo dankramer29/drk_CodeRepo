@@ -186,6 +186,8 @@ CorrectTrialsEm = CorrectResponse == Response;
 [behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjEm, ma_timestampsDS);
 [behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjEm, ma_timestampsDS);
 
+trialStartTimeEm = testfile.session_start_time;
+
 
 %% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
 taskTimeSt = closestValue(1);
@@ -195,7 +197,7 @@ taskTimeEnd = closestValue(end);
 preStartData = dataFemotion; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+    [itiDataFiltEmotionT] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 %% process data with main proc function (see above to set this)
@@ -205,12 +207,14 @@ if preSpectrogramData
    [emotionTaskLFP, itiDataReal.EmotionTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
-       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+       'preTime', preTime, 'postTime', postTime, 'multiTaperWindow',...
+       multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
 else
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
+
 %% create and iti
 itiDataStitch = struct;
 trialLength = preTime + postTime;
@@ -294,13 +298,14 @@ ResponseTimesAdjId = ttl_beh+ResponseTimesDiffIdentity; %moves the time into neu
 Response(isnan(Response)) = [];
 CorrectTrialsId = CorrectResponse == Response;
 
+trialStartTimeId = testfile.session_start_time;
+
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
 [behavioralIndexTTL, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
 [behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjId, ma_timestampsDS);
 [behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDS);
-
 
 %% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
 taskTimeSt = closestValue(1);
@@ -310,7 +315,7 @@ taskTimeEnd = closestValue(end);
 preStartData = dataFidentity; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+    [itiDataFiltIdentityT] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 %% process data with main proc function (see above to set this)
@@ -321,15 +326,25 @@ if preSpectrogramData
        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow',...
-       multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesAdjId);
+       multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 else
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 
+%% figure out which trial started first
+%1 means it was the second trial, 0 means it was the first.
+if trialStartTimeId > trialStartTimeEm
+    identityTaskLFP.secondTrial = 1;
+    emotionTaskLFP.secondTrial = 0;
+else
+    identityTaskLFP.secondTrial = 0;
+    emotionTaskLFP.secondTrial = 1;
+end
 
-%% create and iti
+
+%% create iti
 trialLength = preTime + postTime;
 %stritch the iti trials together
 for ii= 1:length(channelName)
@@ -347,14 +362,14 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 20, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
 
 
 %% plotting
-tt = identityTaskLFP.time;
-ff = identityTaskLFP.freq;
+ttImage = identityTaskLFP.tPlotImage;
+ff = itiDataFiltIdentity.freq;
 
 comparisonName = 'Image On';
 plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
@@ -373,5 +388,9 @@ if savePlot
     plt.save_plots([1:nn], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
 
-[MW13.ResponseTimesEmotionTask, MW13.ResponseTimesIdentityTask] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ResponseTimesDiffIdentity, ResponseTimesDiffEmotion, identityTaskLFP, emotionTaskLFP);
+ResponseTime = ResponseTimesDiffEmotion;
+ResponseTime(:,2) = ResponseTimesDiffIdentity;
+
+
+[MW13.ResponseTimesEmotionTask, MW13.ResponseTimesIdentityTask] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP, emotionTaskLFP, 'responseTime', ResponseTime);
 

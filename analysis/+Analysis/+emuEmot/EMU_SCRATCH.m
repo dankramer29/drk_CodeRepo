@@ -5,12 +5,24 @@
 %%plotting
 xx=SdiffID{2};
 
+S2 = nback.ch23.id3.identityTaskmean;
 figure
-imagesc(S2); axis xy; colorbar;
+imagesc(tt,ff,normalize(S2,2)); axis xy; colorbar;
+hold on
+plot(centA(1), centA(2), 'b*');
+
+ttt=identityTaskLFP.tPlotImageBandPass;
+figure
+plot(ttt,bData(jj,:))
 
 %%
-for ii=1:length(channelName)
-    itiDataFiltIdentity.iti.(channelName{ii}).bandPassed = itiDataFiltIdentityT.iti.(channelName{ii}).bandPassed;
+for rr=1:length(chNum)
+    for ll = 1:length(conditionName)
+        S1 = nback.(chNum{rr}).(conditionName{ll}).(resultName{3});
+        S2 = nback.(chNum{rr}).(conditionName{ll}).(resultName{8});
+        figure; imagesc(tt,ff,S1); axis xy;
+        figure; imagesc(tt,ff,S2); axis xy;
+    end
 end
 
 %%

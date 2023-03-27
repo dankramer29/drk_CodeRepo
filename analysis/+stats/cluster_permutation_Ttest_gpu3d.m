@@ -48,7 +48,7 @@ end
 tstat_maxP = tstat_max; tstat_maxN = tstat_max;
 %difftot=zeros(size(data1,1), size(data1,2), xshuffles);
 est_p=struct;
-centroid = [1,1]; centroidPos = [1,1]; centroidNeg = [1,1];
+centroid = []; centroidPos = []; centroidNeg = [];
 
 %if the iti is not as large as the trial length, add a mirrored end to the iti.
 if size(data2,2)<size(data1,2)
@@ -191,7 +191,7 @@ if splitPosNeg
     cl_aRPos=[clRPos.Area];
     cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
     idxc=1; idxd=1;
-    tstat_sumsP = 0; tstat_sumsN = 0;
+    tstat_sumsP = []; tstat_sumsN = [];
     for ii=1:length(cl_keepPos)
         matPos=false(size(thresh_binaryRPos));
         matPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=true;
@@ -221,10 +221,9 @@ if splitPosNeg
             idxc=idxc+1; idxd=idxd+1;
         end
     end
-    centroid =vertcat(centroidPos, centroidNeg);
+    centroid = vertcat(centroidPos, centroidNeg);
     tstatSum = vertcat(tstat_sumsP, tstat_sumsN);
     sigclust = sigclustPos + sigclustNeg;
-
 else
     tstat_max=gather(tstat_max);
     temp_tsm=sort(tstat_max);

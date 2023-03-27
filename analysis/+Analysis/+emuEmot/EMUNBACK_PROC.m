@@ -37,7 +37,7 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 %run the script to pull in the data from nwb if needed
 %% change the details for each patient
 %MW13
-chInterest = [23, 24, 31, 32, 33, 34, 83, 84, 97, 98]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
+chInterest = [23, 97]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = true; %toggle to true if you've run the entire dataset through LFP processing already
 
@@ -362,9 +362,9 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 20, 'eventChoice', 1);
-[nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
+% [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
+%     'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 100, 'eventChoice', 1);
 
 
 %% plotting
@@ -377,7 +377,8 @@ comparisonName = 'Response';
 plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 
 %% response times
-
+ResponseTime = ResponseTimesDiffEmotion;
+ResponseTime(:,2) = ResponseTimesDiffIdentity;
 
 
 %% save plots
@@ -388,9 +389,16 @@ if savePlot
     plt.save_plots([1:nn], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
 
-ResponseTime = ResponseTimesDiffEmotion;
-ResponseTime(:,2) = ResponseTimesDiffIdentity;
 
 
-[MW13.ResponseTimesEmotionTask, MW13.ResponseTimesIdentityTask] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP, emotionTaskLFP, 'responseTime', ResponseTime);
 
+[AllPatientsSummStats.MW13] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
+    emotionTaskLFP, 'responseTime', ResponseTime, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150]);
+
+%% for summary of each patient
+
+if exist(AllResponseTime)
+    AllResponseTime = vertcat(AllResponseTime, ResponseTime);
+else
+    AllResponseTime = ResponseTime;
+end

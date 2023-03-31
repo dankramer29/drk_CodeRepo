@@ -136,14 +136,8 @@ for ff=1:length(chInterest)
     chLocationName{ff,1} = strcat(hemis(chInterest(ff)), {' '}, strout);
 end
 
-
-
-%common average rerefernce
+%% common average rerefernce
 macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
-
-%this pulls a whole set of data in, that you can pull info from, if more
-%than wireID is needed:
-%columns = testfile.general_extracellular_ephys_electrodes.vectordata;
 
 %% run a noise/artifact rejection
 
@@ -229,24 +223,26 @@ if preSpectrogramData
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
-else
+else %NOT USING THE BELOW PART
     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 
-%% create and iti
-itiDataStitch = struct;
-trialLength = preTime + postTime;
-%stritch the iti trials together
-for ii= 1:length(channelName)
-    S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
-    
-    [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
-        size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
-        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
-        true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-end
+%% create and iti NO LONGER USING
+% itiDataStitch = struct;
+% trialLength = preTime + postTime;
+% %stritch the iti trials together
+% for ii= 1:length(channelName)
+%     S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
+%     
+%     [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
+%         size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
+%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
+%         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
+% end
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -347,7 +343,7 @@ if preSpectrogramData
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
-else
+else %NOT USING THE BELOW PART
     [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFidentity, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
@@ -364,17 +360,17 @@ else
 end
 
 
-%% create iti
-trialLength = preTime + postTime;
-%stritch the iti trials together
-for ii= 1:length(channelName)
-    S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
-
-    [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
-        size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
-        'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
-        true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-end
+% %% create iti
+% trialLength = preTime + postTime;
+% %stritch the iti trials together
+% for ii= 1:length(channelName)
+%     S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
+% 
+%     [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
+%         size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
+%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
+%         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compare the tasks
@@ -415,7 +411,8 @@ end
 
 
 [AllPatientsSummStats.MW13] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
-    emotionTaskLFP, 'responseTime', ResponseTime, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150], 'chName', chLocationName);
+    emotionTaskLFP, 'responseTime', ResponseTime, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
+    'chName', chLocationName, 'patientName', subjName);
 
 %% for summary of each patient
 

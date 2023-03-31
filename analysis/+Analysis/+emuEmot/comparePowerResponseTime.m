@@ -9,6 +9,7 @@ function [RTDEsec, RTDIsec, summaryStats] = comparePowerResponseTime(nback, iden
 [varargin, timeMinMax]=util.argkeyval('timeMin', varargin, [.100 .700]); %Time, in S, that you want to find the peaks between 
 [varargin, freqMinMax]=util.argkeyval('freqMinMax', varargin, [50 150]); %Freq, that you want to find the peaks between 
 [varargin, chName]=util.argkeyval('chName', varargin, 'chX'); %for arranging the outputs by channel
+[varargin, patientName]=util.argkeyval('patientName', varargin, 'PtX'); %for storing a total table
 
 
 summaryStats = struct;
@@ -50,9 +51,9 @@ RTDIsec = RTDsec(:,2);
 for cc = 1:length(chNum)
     %identity task
     T1 = []; T2 = [];
-    clusterCenter = [];
-    tstatCluster = [];
-    imageType = [];
+    ClusterCenter = [];
+    TstatCluster = [];
+    ImageType = [];
     MaxValue =[];
     pkIndex = [];
     TimeofMax=[];
@@ -62,9 +63,9 @@ for cc = 1:length(chNum)
     idx2 = 1;   
     for nn = 1:3  %runs through each id      
         T1 = [];
-        clusterCenter = [];
-        tstatCluster = [];
-        imageType = [];
+        ClusterCenter = [];
+        TstatCluster = [];
+        ImageType = [];
         MaxValue =[];
         pkIndex = [];
         TimeofMax=[];
@@ -91,9 +92,13 @@ for cc = 1:length(chNum)
                     figure; imagesc(tt,ff, normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2)); axis xy
                     hold on; plot(centA(1), centA(2), '*b');
                     for jj = 1:size(bData,1)
-                        clusterCenter(jj,:) = centA;
-                        tstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{5})(ii,1); %if it's gamma, grab that tstat
-                        imageType{jj,1} = (conditionName{nn});
+                        RecordingLocation(jj,1) = chName{cc};
+                        ChannelNumber{jj} = chNum{cc};
+                        PatientName{jj} =  patientName;
+                        TrialType = 'identityTask';
+                        ClusterCenter(jj,:) = centA;
+                        TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{5})(ii,1); %if it's gamma, grab that tstat
+                        ImageType{jj,1} = (conditionName{nn});
                         [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand));
                         TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms                     
                         SecondTrial(jj,1) = identityTaskLFP.secondTrial;
@@ -102,12 +107,8 @@ for cc = 1:length(chNum)
                         RecordingLocation(jj,1) = chName{cc};
                         jj = jj + 1;
                     end
-                    [rval pval]=corr(TimeofMax, ResponseTime); 
-                    RhoPeakXResponseTime(1:size(bData,1),1) = rval;
-                    pPeakXResponseTime(1:size(bData,1),1) = pval;
-                    T1 = table(RecordingLocation, imageType, clusterCenter, tstatCluster,  MaxValue, TimeofMax,...
-                        CorrectResponse, ResponseTime, SecondTrial, RhoPeakXResponseTime,...
-                        pPeakXResponseTime);
+                   T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, ImageType, ClusterCenter, TstatCluster,  MaxValue, TimeofMax,...
+                        CorrectResponse, ResponseTime, SecondTrial); 
                 end
             end
         end
@@ -120,9 +121,9 @@ for cc = 1:length(chNum)
     idx2 = 1;   
     for nn = 1:3 %runs through each emotion
         T1 = [];
-        clusterCenter = [];
-        tstatCluster = [];
-        imageType = [];
+        ClusterCenter = [];
+        TstatCluster = [];
+        ImageType = [];
         MaxValue =[];
         pkIndex = [];
         TimeofMax=[];
@@ -143,38 +144,30 @@ for cc = 1:length(chNum)
                 if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
                     bData = identityTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{6}){2};
                     for jj = 1:size(bData,1)
-                        clusterCenter(jj,:) = centA;
-                        tstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{10})(ii,1); %if it's gamma, grab that tstat
-                        imageType{jj,1} = (conditionName{nn});
+                        RecordingLocation(jj,1) = chName{cc};
+                        ChannelNumber{jj} = chNum{cc};
+                        PatientName{jj} =  patientName;
+                        TrialType{jj} = 'emotionTask';
+                        ClusterCenter(jj,:) = centA;
+                        TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{10})(ii,1); %if it's gamma, grab that tstat
+                        ImageType{jj,1} = (conditionName{nn});
                         [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand));
                         TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
                         SecondTrial(jj,1) = identityTaskLFP.secondTrial;
                         CorrectResponse(jj,1) = identityTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}(jj);
                         ResponseTime(jj,1) = identityTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2}(jj);
-                        RecordingLocation(jj,1) = chName{cc};
                     end
-                    [rval pval]=corr(TimeofMax, ResponseTime);
-                    RhoPeakXResponseTime(1:size(bData,1),1) = rval;
-                    pPeakXResponseTime(1:size(bData,1),1) = pval;
-                    T1 = table(RecordingLocation, imageType, clusterCenter, tstatCluster,  MaxValue, TimeofMax,...
-                        CorrectResponse, ResponseTime, SecondTrial, RhoPeakXResponseTime,...
-                        pPeakXResponseTime);
+                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, ImageType, ClusterCenter, TstatCluster,  MaxValue, TimeofMax,...
+                        CorrectResponse, ResponseTime, SecondTrial); 
                 end
             end
         end
-        T3 = [T3; T1];        
+        T2 = [T2; T1];        
         idx2 = idx2+1;
-    end
-    summaryStats.(chNum{cc}).emotionTask = T3;
-    [clusterPeakTimingTaskComparisonpValue, h, stats] = ranksum(T2.TimeofMax, T3.TimeofMax);
-    summaryStats.(chNum{cc}).PeakTimingTaskComparison = tstatTaskComparison;
-    TimeofMax = vertcat(T2.TimeofMax, T3.TimeofMax);
-    ResponseTime = vertcat(T2.ResponseTime, T3.ResponseTime);
-    [rval pval]=corr(TimeofMax, ResponseTime);
-    summaryStats.(chNum{cc}).RhoPeakXResponseTime = rval;
-    summaryStats.(chNum{cc}).pPeakXResponseTime = pval;
-    
+    end    
 end
+summaryStats = T3;
+
 %% create comparisons
 %compare the reaction times to correct trial response
 summaryStats.ReactionTimeAll = vertcat(ResponseTimeId, ResponseTimeEm);

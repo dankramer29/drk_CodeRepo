@@ -53,9 +53,9 @@ for ii = 1:length(chNum)
             sigClustIDTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{5});
             mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
             mn(idx2) = min(min(S1)); idx2 = idx2+1;
-            S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{7});%emotion task allIDs/allEmots mean
+            S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{8});%emotion task allIDs/allEmots mean
             S2 = normalize(S2, 2);
-            sigClustEmTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{9});
+            sigClustEmTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{10});
             mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
             mn(idx2) = min(min(S2)); idx2 = idx2+1;
         else
@@ -64,9 +64,9 @@ for ii = 1:length(chNum)
             sigClustIDTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{3});
             mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
             mn(idx2) = min(min(S1)); idx2 = idx2+1;
-            S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{5});%emotion task mean
+            S2 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{6});%emotion task mean
             S2 = normalize(S2, 2);
-            sigClustEmTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{7});
+            sigClustEmTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultName{8});
             mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
             mn(idx2) = min(min(S2)); idx2 = idx2+1;
         end
@@ -96,9 +96,8 @@ for ii = 1:length(chNum)
     %plot the identities for both tasks
     if comparison == 1
         %% identities for both tasks
-        figtitle=[comparisonTitle, ' Identities for ', (chName{ii,1}), ' ', (chNum{ii}), ' Heatmap'];
-
-        figure('Name', figtitle, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
+        figtitle = strcat('Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}), ' Power');        
+        figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         sgtitle(figtitle); %gives a supertitle
 
     
@@ -114,6 +113,8 @@ for ii = 1:length(chNum)
             if nnz(sigClustIDTask{jj})
                 mask(logical(sigClustIDTask{jj})) = 1;
                 bw = bwperim(sigClustIDTask{jj});
+            else
+                bw = zeros(size(sigClustIDTask{jj}));
             end
             SS = SdiffIDTask{jj};
             minV= min(min(SS));
@@ -142,6 +143,8 @@ for ii = 1:length(chNum)
             if nnz(sigClustEmTask{jj})
                 mask(logical(sigClustEmTask{jj})) = 1;
                 bw = bwperim(sigClustEmTask{jj});
+            else
+                bw = zeros(size(sigClustEmTask{jj}));
             end
             SS = SdiffEmTask{jj};
             minV= min(min(SS));
@@ -165,9 +168,8 @@ for ii = 1:length(chNum)
           
         end
         %% emotions for both tasks
-        figtitle=[comparisonTitle, ' Emotions for  ', (chName{ii,1}), ' ', (chNum{ii}), ' Heatmap'];
-
-        figure('Name', figtitle, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
+        figtitle = strcat('Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}), ' Power');        
+        figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         sgtitle(figtitle); %gives a supertitle
 
     
@@ -182,6 +184,8 @@ for ii = 1:length(chNum)
             if nnz(sigClustIDTask{jj})
                 mask(logical(sigClustIDTask{jj})) = 1;
                 bw = bwperim(sigClustIDTask{jj});
+            else
+                bw = zeros(size(sigClustIDTask{jj}));
             end
             SS = SdiffIDTask{jj};
             minV= min(min(SS));
@@ -201,28 +205,7 @@ for ii = 1:length(chNum)
             im.AlphaData = mask;
             idx1 = idx1+2;
 
-              
-%             im=imagesc(tt,ff, SdiffIDTask{jj}); axis xy;
-%             ax=gca;
-%             if jj == 8
-%                 title(['Identity Task: All Emotions '])
-%             else
-%                 title(['Identity Task: Emotion ' num2str(idx3)])
-%             end    
-%             xlabel('Time (s)','Fontsize',13);
-%             ylabel('Frequency (Hz)','Fontsize',13);
-%             colorbar;
-%             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
-%             colormap(inferno(100));
-%             mask = ones(size(SdiffIDTask{jj})); %this fades the color except where positive
-%             if doMask
-%                 mask = mask*maskPerc;
-%             end
-%             if nnz(sigClustIDTask{jj})
-%                 mask(logical(sigClustIDTask{jj})) = 1;
-%             end
-%             im.AlphaData = mask;
-%             idx1 = idx1+2;
+
             %emotion task
             subplot(4, 2, idx2)
             mask = ones(size(SdiffEmTask{jj})); %this fades the color except where positive
@@ -232,6 +215,8 @@ for ii = 1:length(chNum)
             if nnz(sigClustEmTask{jj})
                 mask(logical(sigClustEmTask{jj})) = 1;
                 bw = bwperim(sigClustEmTask{jj});
+            else
+                bw = zeros(size(sigClustEmTask{jj}));
             end
             SS = SdiffEmTask{jj};
             minV= min(min(SS));
@@ -251,36 +236,11 @@ for ii = 1:length(chNum)
             
             im.AlphaData = mask;
             idx2 = idx2+2;
-            idx3 = idx3+1;
+            idx3 = idx3+1;          
             
-            
-%             subplot(4, 2, idx2)
-%             im=imagesc(tt,ff, SdiffEmTask{jj}); axis xy;
-%             ax=gca;
-%             if jj == 8
-%                 title(['Emotion Task: All Emotions '])
-%             else
-%                 title(['Emotion Task: Emotion ' num2str(idx3)])
-%             end   
-%             xlabel('Time (s)','Fontsize',13);
-%             ylabel('Frequency (Hz)','Fontsize',13);
-%             colorbar;
-%             if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
-%             colormap(inferno(100));
-%             mask = ones(size(SdiffIDTask{jj})); %this fades the color except where positive
-%             if doMask
-%                 mask = mask*maskPerc;
-%             end
-%             if nnz(sigClustEmTask{jj})
-%                 mask(logical(sigClustEmTask{jj})) = 1;
-%             end
-%             im.AlphaData = mask;
-%             idx2 = idx2+2;
-%             idx3 = idx3+1;
-%           
         end
 
-    else
+    else %THIS PART HAS NOT BEEN CHECKED RECENTLY AND WILL NEED TO BE ADJUSTED FOR NEW RESULTNAMES BUT ALSO JUST USE THE ONE ABOVE IT
 
         %ID 1
         subplot(6,4, [1 2 5 6])

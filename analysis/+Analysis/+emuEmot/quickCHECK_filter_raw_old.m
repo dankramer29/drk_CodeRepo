@@ -1,4 +1,4 @@
-% PCname = getenv('COMPUTERNAME'); 
+% % PCname = getenv('COMPUTERNAME'); 
 % 
 % switch PCname
 %     case 'DESKTOP-95LU6PO'

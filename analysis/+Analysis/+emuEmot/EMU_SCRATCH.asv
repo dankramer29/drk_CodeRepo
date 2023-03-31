@@ -17,8 +17,7 @@ plot(ttt,bData(jj,:))
 
 %% PAC
 
-%try creating a bigger swath of bands to PAC. can maybe filter the data to
-%some band and then add it back in.
+%try creating a bigger swath of bands to PAC. can maybe filter the signal
 signal=Analysis.SampleData.PACsampleData(1:100, 20, 70);
 [bandfilterAmp, bandfilterPhase] = Analysis.PAC.bandfiltersAP(fs);
 clear bandFilter

@@ -38,6 +38,7 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 %% change the details for each patient
 %MW13
 chInterest = [23, 97]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
+
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = true; %toggle to true if you've run the entire dataset through LFP processing already
 
@@ -101,9 +102,23 @@ nbackData.task = matchStr;
 
 %% pull in wire ids
 %pull wire numbers and wire ids
+eleCtable = testfile.general_extracellular_ephys_electrodes.vectordata;
+
+chanID = eleCtable.get('channID').data.load();
+hemis = cellstr(eleCtable.get('hemisph').data.load());
+label = cellstr(eleCtable.get('label').data.load());
+location = cellstr(eleCtable.get('location').data.load());
+wireID = eleCtable.get('wireID').data.load();
+
+macroROWS = contains(label,'MA_');
+macro_hemi = hemis(macroROWS);
+macro_location = location(macroROWS);
+macro_wire = wireID(macroROWS);
+
 wireID{:,1} = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
 wireID{:,2} = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
 wireID{:,3} = testfile.general_extracellular_ephys_electrodes.vectordata.get('channID').data.load(); 
+
 
 %setup for accessing channels
 %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
@@ -116,7 +131,12 @@ end
 for ff=1:length(chInterest)
     ch = num2str(chInterest(ff));
     channelName{ff} = ['ch' ch];
+    str = location(chInterest(ff));
+    strout = plt.lowup(str);
+    chLocationName{ff,1} = strcat(hemis(chInterest(ff)), {' '}, strout);
 end
+
+
 
 %common average rerefernce
 macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
@@ -315,7 +335,7 @@ taskTimeEnd = closestValue(end);
 preStartData = dataFidentity; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltIdentityT] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 %% process data with main proc function (see above to set this)
@@ -370,11 +390,13 @@ end
 %% plotting
 ttImage = identityTaskLFP.tPlotImage;
 ff = itiDataFiltIdentity.freq;
+ttResponse = identityTaskLFP.tPlotResponse;
+
 
 comparisonName = 'Image On';
-plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, 'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 comparisonName = 'Response';
-plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', tt, 'frequencyRange', ff, 'chName', chName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, 'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 
 %% response times
 ResponseTime = ResponseTimesDiffEmotion;
@@ -393,7 +415,7 @@ end
 
 
 [AllPatientsSummStats.MW13] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
-    emotionTaskLFP, 'responseTime', ResponseTime, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150]);
+    emotionTaskLFP, 'responseTime', ResponseTime, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150], 'chName', chLocationName);
 
 %% for summary of each patient
 

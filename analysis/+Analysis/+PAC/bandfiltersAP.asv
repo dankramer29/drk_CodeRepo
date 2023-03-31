@@ -25,7 +25,7 @@ function [bandfilterAmp, bandfilterPhase, bandfilterP, bandfilterS, bandfilterC]
 [varargin, filterSteps] = util.argkeyval('filterSteps',varargin, 1);  % step the filter through. Different than the band widths of the filters, i.e. if 1, will have lots of overlap.
 
 [varargin, AmpFreq_BandWidth] = util.argkeyval('AmpFreq_BandWidth',varargin, 2);  % amplitude frequency band width to create the bandwidths around
-[varargin, MaxAmpFreq] = util.argkeyval('MaxAmpFreq',varargin, 100);  % maximum Amplitude frequency for your bands, amplitude being the higher frequency bands
+[varargin, MaxAmpFreq] = util.argkeyval('MaxAmpFreq',varargin, 150);  % maximum Amplitude frequency for your bands, amplitude being the higher frequency bands
 [varargin, MinAmpFreq] = util.argkeyval('MinAmpFreq',varargin, 10);  % minimium Amplitude frequency for your bands
 %%
 [varargin, PhaseFreq] = util.argkeyval('PhaseFreq',varargin, true);  % run separate phase filtering for the phases, if the filters are used for both phase and amp, don't need it.
@@ -78,7 +78,10 @@ if nerdcoPACFilter
             Af1 = PhaseFreqVector(ii)-PhaseFreq_BandWidth/2;
             Af2 = PhaseFreqVector(ii)+PhaseFreq_BandWidth/2;
             if Af1 <= 0
-                continue
+                Af1 = 1;
+            end
+            if Af2 <= 0
+                Af2 = 1;
             end
             lbl{1} = strcat('filter', num2str(Af1), 'to', num2str(Af2));
             bandfilterPhase.(lbl{1})=designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',Af1,'CutoffFrequency2',Af2, 'SampleRate',fs);

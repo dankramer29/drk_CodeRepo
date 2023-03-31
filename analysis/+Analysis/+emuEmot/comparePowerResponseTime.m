@@ -73,7 +73,7 @@ for cc = 1:length(chNum)
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2);
                 %check that it's between the frequencies desired
-                if true %centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
                     bData = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{6}){idx2};
 %                     meanbData = mean(bData,1);
 %                     figure; plot(bTT,normalize(meanbData), 'LineWidth', 3); hold on; plot(bTT,normalize(bData,2))
@@ -132,7 +132,7 @@ for cc = 1:length(chNum)
                 cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{9})(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{6}),2);
-                if true %centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
                     bData = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{6}){2};
                     for jj = 1:size(bData,1)
                         RecordingLocation(jj,1) = chName{cc};

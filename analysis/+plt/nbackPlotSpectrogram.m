@@ -96,7 +96,7 @@ for ii = 1:length(chNum)
     %plot the identities for both tasks
     if comparison == 1
         %% identities for both tasks
-        figtitle = strcat('Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}), ' Power');        
+        figtitle = strcat('LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
         figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         sgtitle(figtitle); %gives a supertitle
 
@@ -168,7 +168,7 @@ for ii = 1:length(chNum)
           
         end
         %% emotions for both tasks
-        figtitle = strcat('Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}), ' Power');        
+        figtitle = strcat('LFP Power during ', {' '}, figTitleName, ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
         figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         sgtitle(figtitle); %gives a supertitle
 
@@ -192,7 +192,7 @@ for ii = 1:length(chNum)
             SS(bw>0) = minV;
             im=imagesc(tt,ff, SS); axis xy;
             ax=gca;
-            if jj == 4
+            if jj == 8
                 title(['Identity Task: All Emotions '])
             else
                 title(['Identity Task: Emotion ' num2str(idx3)])
@@ -223,7 +223,7 @@ for ii = 1:length(chNum)
             SS(bw>0) = minV;
             im=imagesc(tt,ff, SS); axis xy;
             ax=gca;
-            if jj == 4
+            if jj == 8
                 title(['Emotion Task: All Emotions '])
             else
                 title(['Emotion Task: Emotion ' num2str(idx3)])

@@ -45,7 +45,6 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 [varargin, DoBandFilterBroad] = util.argkeyval('DoBandFilterBroad', varargin, true);  %if you want to also run canonical basic band filters (different than the 2 hz filter method below) in classic frequencies (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
 [varargin, IIR] = util.argkeyval('IIR',varargin, true);  % IIR vs FIR, UCSF uses FIR for phase stuff
 
-
 [varargin, Freq_BandWidth] = util.argkeyval('Freq_BandWidth',varargin, 2);  %width of the bands you are filtering (DOESN'T SEEM TO WORK RIGHT NOW)
 [varargin, MinFreq] = util.argkeyval('MinFreq',varargin, 1);  % minimium frequency to run
 [varargin, MaxFreq] = util.argkeyval('MaxFreq',varargin, 150);  % maximum  frequency to run
@@ -253,14 +252,12 @@ end
         
         
 if DoBandFilterBroad
-    
-
     if  IIR
         if isempty(filterClassBand)
         %create the filters if not done previously, for the classic bands,
         %the Freq_BandWidth is actually not used here, but just runs it
         %smoothly
-        [~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(Freq_BandWidth, fs, 'AmpFreqVectorRun', false, 'ClassicBand', true); %create the band filters
+        [~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(Freq_BandWidth, fs, 'AmpFreqVectorRun', false, 'nerdcoPACFilternerdcoPACFilter', false, 'ClassicBand', true); %create the band filters
         end
         %% set up the filtering
         lblB=fieldnames(filterClassBand);

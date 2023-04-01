@@ -54,7 +54,7 @@ if addPACtoSignal %adds a pac to a known signal
         data = data';
     end
     mx = max(data);
-    AmpBase=mx; %the amplitude range you want
+    AmpBase=mx*.1; %the amplitude range you want
     %signalfinal=zeros(1,length(t));
     idx1=1;
 %     for ii=1:length(f)
@@ -63,6 +63,11 @@ if addPACtoSignal %adds a pac to a known signal
         phse=0;      
         Amp=AmpBase*1/ii; %amplitude, 1/f        
         noise=Amp/noiseFactor*(rand(1,length(t)));
+        Af1 = lowFreq-5;
+        Af2 = lowFreq+5;
+        bandFilt1 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',Af1,'CutoffFrequency2',Af2, 'SampleRate',fs);
+        dataLow = filtfilt(bandFilt1, data);
+        signalfreq=Amp*dataLow;
         signalfreq=Amp*sin(2*pi*ii*t+phse);
         signalfreq=signalfreq+noise; %add the noise
         
@@ -80,7 +85,11 @@ if addPACtoSignal %adds a pac to a known signal
         ampF=[ampF zeros(1,dif)];
         ampF=ampF+1; %add 1 so that this becomes a multiplication factor to amplify only the in phase stuff
         Amp = AmpBase*1/jj;
-        signalfreq=Amp*sin(2*pi*jj*t+phse);
+        Af1 = highFreq-5;
+        Af2 = highFreq+5;
+        bandFilt2 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',Af1,'CutoffFrequency2',Af2, 'SampleRate',fs);
+        dataHigh = filtfilt(bandFilt2, data);
+        signalfreq=Amp*dataHigh;
         signalfreq=signalfreq+noise; %add the noise
         signalfreq=signalfreq.*ampF;
         %signalPh(:,idx1)=signalfreq;

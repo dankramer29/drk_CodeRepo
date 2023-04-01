@@ -20,7 +20,7 @@ plot(ttt,bData(jj,:))
 %try creating a bigger swath of bands to PAC. can maybe filter the data to
 %some band and then add it back in.
 signal=Analysis.SampleData.PACsampleData(1:100, 20, 70);
-[bandfilterAmp, bandfilterPhase] = Analysis.PAC.bandfiltersAP(fs);
+[bandfilterAmp, bandfilterPhase] = Analysis.PAC.bandfiltersAP(fs, 'nerdcoPACFilter', true);
 clear bandFilter
 bandFilter.bandfilterAmp = bandfilterAmp;
 bandFilter.bandfilterPhase = bandfilterPhase;
@@ -44,7 +44,7 @@ Analysis.PAC.nerdcoPAC(signal, signal, 'fs', 500, 'epochLength', 3, 'bandFilter'
 signal = Analysis.SampleData.PACsampleData(1:100, 20, 70, 'data', dataTest);
 
 figure; plot(signal);
-figure; plot(data); hold on; plot(dataT)
+figure; plot(dataTest); hold on; plot(dataT)
 %%
 
 for rr=1:length(chNum)

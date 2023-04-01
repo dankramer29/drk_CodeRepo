@@ -48,10 +48,11 @@ t=0:fsS:T; %x input, i.e. the points
 %amount, if 2, you are dividing the amplitude of the noise by half the
 %amplitude of that frequency
 noiseFactor=2; 
-
 %% this allows adding of a PAC to a known signal so the signal is real and infinite
 if addPACtoSignal %adds a pac to a known signal
-    data = data'; 
+    if size(data,1) > size (data,2)
+        data = data';
+    end
     mx = max(data);
     AmpBase=mx; %the amplitude range you want
     %signalfinal=zeros(1,length(t));
@@ -62,6 +63,9 @@ if addPACtoSignal %adds a pac to a known signal
         phse=0;      
         Amp=AmpBase*1/ii; %amplitude, 1/f        
         noise=Amp/noiseFactor*(rand(1,length(t)));
+        Af1 = lowFreq-5;
+        Af2 = lowFreq+5;
+        bandFilt1 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',Af1,'CutoffFrequency2',Af2, 'SampleRate',fs);
         signalfreq=Amp*sin(2*pi*ii*t+phse);
         signalfreq=signalfreq+noise; %add the noise
         
@@ -79,7 +83,11 @@ if addPACtoSignal %adds a pac to a known signal
         ampF=[ampF zeros(1,dif)];
         ampF=ampF+1; %add 1 so that this becomes a multiplication factor to amplify only the in phase stuff
         Amp = AmpBase*1/jj;
-        signalfreq=Amp*sin(2*pi*jj*t+phse);
+        Af1 = highFreq-5;
+        Af2 = highFreq+5;
+        bandFilt2 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',Af1,'CutoffFrequency2',Af2, 'SampleRate',fs);
+
+        signalfreq=Amp*bandFilt;
         signalfreq=signalfreq+noise; %add the noise
         signalfreq=signalfreq.*ampF;
         %signalPh(:,idx1)=signalfreq;
@@ -98,13 +106,15 @@ end
 
 
 
-%% SET FREQUENCY PARAMETERS
-%% CONCERN THAT THE SIGNAL IS NOT INFINITE SINCE STITCHED TOGETHER
+
+%% Make a fake random signal, however, probably don't use due to:
+% CONCERN THAT THE SIGNAL IS NOT INFINITE SINCE STITCHED TOGETHER
 
 %frequency of your signal
 %complex signal,builds a signal from your low to high frequencies, starting
 %at 1Hz
 if completelyFakeSignal
+    %% SET FREQUENCY PARAMETERS
     f=freqRange; %can also make independent fs, e.g. f=[20 80]
     AmpBase=0.25; %the amplitude range you want
     signalfinal=zeros(1,length(t));

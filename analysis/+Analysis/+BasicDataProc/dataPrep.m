@@ -257,7 +257,7 @@ if DoBandFilterBroad
         %create the filters if not done previously, for the classic bands,
         %the Freq_BandWidth is actually not used here, but just runs it
         %smoothly
-        [~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(Freq_BandWidth, fs, 'AmpFreqVectorRun', false, 'nerdcoPACFilternerdcoPACFilter', false, 'ClassicBand', true); %create the band filters
+        [~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(fs, 'AmpFreqVectorRun', false, 'nerdcoPACFilternerdcoPACFilter', false, 'ClassicBand', true); %create the band filters
         end
         %% set up the filtering
         lblB=fieldnames(filterClassBand);

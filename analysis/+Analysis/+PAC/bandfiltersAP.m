@@ -46,7 +46,8 @@ function [bandfilterAmp, bandfilterPhase, bandfilterP, bandfilterS, bandfilterC]
 %%
 util.argempty(varargin); % check all additional inputs have been processed
 
-
+bandfilterAmp= struct;
+bandfilterPhase = struct;
 bandfilterA= struct;
 bandfilterP= struct;
 bandfilterS= struct;

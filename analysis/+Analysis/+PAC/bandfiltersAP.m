@@ -41,7 +41,6 @@ function [bandfilterAmp, bandfilterPhase, bandfilterP, bandfilterS, bandfilterC]
 [varargin, SubBand] = util.argkeyval('SubBand',varargin, true);  % the narrow beta range changes plotted
 [varargin, SubBandRange] = util.argkeyval('SubBandRange',varargin, [15 17 24 26]);  % the narrow subband ranges
 
-[varargin, ClassicBand] = util.argkeyval('SubBand',varargin, true);  % create the classic bands (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
 
 %%
 util.argempty(varargin); % check all additional inputs have been processed
@@ -53,7 +52,7 @@ bandfilterP= struct;
 bandfilterS= struct;
 bandfilterC= struct;
 
-classicBand=[1 4; 4 8; 8 13; 13 30; 30 50; 50 200];
+classicBandRange=[1 4; 4 8; 8 13; 13 30; 30 50; 50 200];
 
 %% filters for nerdcoPAC
 if nerdcoPACFilter
@@ -167,9 +166,9 @@ if SubBand
 end
 
 if ClassicBand
-    for kk=1:size(classicBand, 1)
-        Pf1 = classicBand(kk, 1);
-        Pf2 = classicBand(kk, 2);
+    for kk=1:size(classicBandRange, 1)
+        Pf1 = classicBandRange(kk, 1);
+        Pf2 = classicBandRange(kk, 2);
         lbl{1} = strcat('filter', num2str(Pf1), 'to', num2str(Pf2));
         bandfilterC.(lbl{1})=designfilt('bandpassiir',...
             'DesignMethod','butter',...

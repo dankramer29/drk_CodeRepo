@@ -114,7 +114,7 @@ macro_location = location(macroROWS);
 wireID = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
 shortBAn = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
 
-TableChannel = table(location, hemis, macroROWS, label, chanID, wireID, shortBAn, channID);
+TableChannel = table(location, hemis, macroROWS, label, wireID, shortBAn, channID);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %

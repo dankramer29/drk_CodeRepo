@@ -1,7 +1,7 @@
 %% major script for running the processing of an individual patient
 %%
 % EMUNBACK_PROC
-addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+% addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
@@ -38,15 +38,23 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 %% change the details for each patient
 %MW13
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
-alreadyFilteredData = true; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
+
+% Change to false to check current data set
+alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
+
+% Unique subject / session information 
 
 sessionName = '5_29_2022session';
 subjName = 'MW13';
 
 MW13 = struct;
 
+% PsychToolBox output
 matNameEm = 'NBack_EMOTION_2022_5_29.18_10_57_BLIND.mat';
 matNameId = 'NBack_IDENTITY_2022_5_29.18_5_50_BLIND.mat';
+
+% SWTICH BETWEEN SESSIONS
+% NWB raw data (filtered)
 emotionFilter = 'MW13_Session_10_filter.nwb';
 identityFilter = 'MW13_Session_9_filter.nwb';
 
@@ -54,14 +62,16 @@ identityFilter = 'MW13_Session_9_filter.nwb';
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 
 %time in seconds to add before and after the events
+% Image onset
 preTime = 0.5; %time before and after image on
-postTime = 2; 
+postTime = 2;
+% Patient response
 preTimeRes = 1; %time befoe and after response
 postTimeRes = 0.5;
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
 multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms (mtspectrogramc, also option to do pspectrum, but haven't used it)
-xshuffles = 10; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
+xshuffles = 100; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
 DoPlot = 1; %toggle plotting on or off
 savePlot = 0; %toggle on if you want to save the plots up front, probably better to look at them individually first
 
@@ -73,14 +83,26 @@ savePlot = 0; %toggle on if you want to save the plots up front, probably better
 %% START OF EMOTION PROCESSING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 taskName = 'Emotion';
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameEm);
+%folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameEm);
+
+folderName = [matDIR , '\' matNameEm];
+
+% folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\',...
+%     sessionName, '\', taskName, '\', matNameEm);
+
+
+
+
 
 %%
 % set to 0 if running this with a new data set for the first time, set to
 % 1 if you saved the filtered data after running
 % Analysis.emuEmot.nwbLFPchProc and don't want to keep running it
 %Set up if you are saving and then loading the filtered data
+
 rawData = false; %PREVIOUSLY COULD DO RAWDATA, STILL CAN BUT I REMOVED IT TO REDUCE CLUTTER
+
+% SET FLAG ABOVE
 
 if alreadyFilteredData
    load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTask.mat');
@@ -91,6 +113,10 @@ else
 end
 
 %% Load NWB
+
+% Go to NWB location
+% nwbDIR = 'C:\Users\Admin\Downloads\OneDrive_1_3-31-2023';
+cd(nwbDIR)
 % Emotion
 testfile = nwbRead(emotionFilter);
 
@@ -102,6 +128,8 @@ nbackData.task = matchStr;
 %% pull in wire ids
 %pull wire numbers and wire ids
 eleCtable = testfile.general_extracellular_ephys_electrodes.vectordata;
+wireID = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
+shortBAn = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
 
 channID = eleCtable.get('channID').data.load();
 hemis = cellstr(eleCtable.get('hemisph').data.load());
@@ -110,11 +138,12 @@ location = cellstr(eleCtable.get('location').data.load());
 macroROWS = contains(label,'MA_');
 macro_hemi = hemis(macroROWS);
 macro_location = location(macroROWS);
-%macro_wire = wireID(macroROWS);
-wireID = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
-shortBAn = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
+macro_wire = wireID(macroROWS);
 
-TableChannel = table(location, hemis, macroROWS, label, chanID, wireID, shortBAn, channID);
+
+% TableChannel = table(location, hemis, macroROWS, label, chanID, wireID, shortBAn, channID);
+% chanID is not found
+TableChannel = table(location, hemis, macroROWS, label, wireID, shortBAn, channID);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %
@@ -197,6 +226,7 @@ taskTimeSt = closestValue(1);
 taskTimeEnd = closestValue(end);
 
 %% Filter all the data
+% check the timestamp vector if modified
 preStartData = dataFemotion; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
@@ -241,10 +271,13 @@ end
 %Identity run
 taskName = 'Identity';
 
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameId);
+%folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameId);
+folderName = [matDIR , '\' matNameId];
+
+%%%%% MAKE SURE TO CHECK WHEN SWITCHING BETWEEN EMOTION AND IDENTITY
 
      %   testfile = nwbRead('MW3_Session_11_filter.nwb');
-            testfile = nwbRead(identityFilter);
+testfile = nwbRead(identityFilter);
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 %mw3
 %load('C:\Users\kramdani\Documents\Data\EMU_nBack\4_12_2022session\FacialRecSession\NBack_2021_05_04.12_43_46_BLIND.mat')
@@ -332,7 +365,7 @@ if preSpectrogramData
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 else %NOT USING THE BELOW PART
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
+    [identityTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
@@ -368,9 +401,9 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 10, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 10, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 
 
 %% plotting
@@ -401,6 +434,10 @@ end
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
+
+% EXPLORE
+
+
 [AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
     emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
     'chName', chLocationName, 'patientName', subjName);

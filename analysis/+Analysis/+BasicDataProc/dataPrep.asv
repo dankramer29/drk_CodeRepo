@@ -51,7 +51,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 [varargin, bandfilter] = util.argkeyval('bandfilter',varargin, []);  % check if filters already made so you don't have to keep making them each run
 [varargin, filterClassBand] = util.argkeyval('dataClassBand',varargin, []);  % check if classic broad filters already made so you don't have to keep making them each run
-[varargin, classicBand]= util.argkeyval('classicBand', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 150]);
+[varargin, classicBandRange]= util.argkeyval('classicBandRange', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 150]); %filtered data classic
 %flip data if suspect it's in channels x data
 if size(data,1)<=size(data,2)
     %warning('data in channels x voltage, not voltage x channels, converted to voltage x channels for analysis');
@@ -257,7 +257,7 @@ if DoBandFilterBroad
         %create the filters if not done previously, for the classic bands,
         %the Freq_BandWidth is actually not used here, but just runs it
         %smoothly
-        [~, ~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(fs, 'AmpFreqVectorRun', false, 'nerdcoPACFilternerdcoPACFilter', false, 'ClassicBand', true); %create the band filters
+        [~, ~, ~, ~, filterClassBand]=Analysis.PAC.bandfiltersAP(fs, 'AmpFreqVectorRun', false, 'nerdcoPACFilternerdcoPACFilter', false, 'ClassicBand', true, 'classicBandRange', classicBandRange); %create the band filters
         end
         %% set up the filtering
         lblB=fieldnames(filterClassBand);
@@ -277,9 +277,9 @@ if DoBandFilterBroad
         
     else %do an FIR with the ucsf code    
         bandSt=3;
-        for ii=bandSt:length(classicBand) %skipping delta and theta due to constraints on the filter epochs.
-            lblB{ii-bandSt+1}=strcat(num2str('FIR', classicBand(ii, 1)), 'to', num2str(classicBand(ii, 2)));
-            tCB=eegfilt_FIR(dataM', fs, classicBand(ii, 1), classicBand(ii, 2));
+        for ii=bandSt:length(classicBandRange) %skipping delta and theta due to constraints on the filter epochs.
+            lblB{ii-bandSt+1}=strcat(num2str('FIR', classicBandRange(ii, 1)), 'to', num2str(classicBandRange(ii, 2)));
+            tCB=eegfilt_FIR(dataM', fs, classicBandRange(ii, 1), classicBandRange(ii, 2));
             tempClassicBand(:, ii-bandSt+1, :)=tCB';
             tempCBC(:,ii-bandSt+1,:)=abs(hilbert(tempClassicBand(:,ii-bandSt+1,:))); %a power function essentially
             tempCBAngle(:,ii-bandSt+1,:)=angle(hilbert(tempClassicBand(:,ii-bandSt+1,:)));

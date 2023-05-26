@@ -122,8 +122,8 @@ TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBA
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-%chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146, 155, 156]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL (confirmed)
-chInterest = [17,25,45,61,75,83,97];
+chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146, 155, 156]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL (confirmed)
+%chInterest = [17,25,45,61,75,83,97];
 
 %setup for accessing channels
 %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal

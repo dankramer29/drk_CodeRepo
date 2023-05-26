@@ -24,7 +24,7 @@ for cc = 1:length(channelName)
         for ii = 1:size(Sall,1)
             mx = max(Sall(ii,:));
             mn = min(Sall(ii,:));
-            if mx >= (meanSall + stdAbove*sdSline) || mn <= (meanSall -stdAbove*sdSLine)
+            if mx > meanSall + stdAbove*sdSline || mn < meanSall -stdAbove*sdSLine
                 flaggedTrials(idxFl) = ii; 
                 flaggedChannel{idxFl} = channelName{cc}; 
                 flaggedTrialType{idxFl} = 1;
@@ -68,4 +68,14 @@ if plotNoiseCheck
         title(channelName{jj})
         periodogram(allChannelMean(jj),[],size(allChannelMean(jj),1), fs);
     end
+end
+
+%
+for ii=1:size(emotionTaskLFP.byemotion.(channelName{cc}).image.bandPassed.filter1to200{jj},1)
+    S1 = emotionTaskLFP.byemotion.ch97.image.bandPassed.filter1to200{3}(ii,:);
+    figure
+    subplot(2,1,1)
+    plot(tplotBP,S1);
+    subplot(2,1,2)
+    periodogram(S1,[],length(S1), fs);
 end

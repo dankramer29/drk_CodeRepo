@@ -36,7 +36,7 @@ function [bandfilterAmp, bandfilterPhase, bandfilterP, bandfilterS, bandfilterC]
 [varargin, SubBand] = util.argkeyval('SubBand',varargin, false);  % the narrow beta range changes plotted
 [varargin, SubBandRange] = util.argkeyval('SubBandRange',varargin, [15 17 24 26]);  % the narrow subband ranges
 
-[varargin, ClassicBand] = util.argkeyval('ClassicBand',varargin, true);  % create the classic bands (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
+[varargin, doClassicBand] = util.argkeyval('doClassicBand',varargin, true);  % create the classic bands (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200)
 [varargin, classicBandRange] = util.argkeyval('classicBandRange',varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 200]);  % create the classic bands (delta 1-4 theta 4-8 alpha 8-13 beta 13-30 gamma 30-50 high gamma 50 to 200, but can be adjustable)
 
 [varargin, SubBand] = util.argkeyval('SubBand',varargin, true);  % the narrow beta range changes plotted
@@ -165,7 +165,7 @@ if SubBand
     end
 end
 
-if ClassicBand
+if doClassicBand
     for kk=1:size(classicBandRange, 1)
         Pf1 = classicBandRange(kk, 1);
         Pf2 = classicBandRange(kk, 2);

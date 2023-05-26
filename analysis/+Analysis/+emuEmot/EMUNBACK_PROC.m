@@ -1,7 +1,7 @@
 %% major script for running the processing of an individual patient
 %%
 % EMUNBACK_PROC
-addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+
 
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
@@ -37,6 +37,8 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 %run the script to pull in the data from nwb if needed
 %% change the details for each patient
 %MW13
+addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = true; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
 
@@ -61,7 +63,7 @@ postTimeRes = 0.5;
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
 multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms (mtspectrogramc, also option to do pspectrum, but haven't used it)
-xshuffles = 10; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
+xshuffles = 100; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
 DoPlot = 1; %toggle plotting on or off
 savePlot = 0; %toggle on if you want to save the plots up front, probably better to look at them individually first
 
@@ -83,8 +85,8 @@ folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName
 rawData = false; %PREVIOUSLY COULD DO RAWDATA, STILL CAN BUT I REMOVED IT TO REDUCE CLUTTER
 
 if alreadyFilteredData
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTask.mat');
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTask.mat'); 
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTaskCh17_25_45_61_75_83_97.mat');
+   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTaskCh17_25_45_61_75_83_97.mat'); 
 else
     itiDataFiltEmotion = [];
     itiDataFiltIdentity = [];
@@ -114,12 +116,14 @@ macro_location = location(macroROWS);
 wireID = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
 shortBAn = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
 
-TableChannel = table(location, hemis, macroROWS, label, chanID, wireID, shortBAn, channID);
+TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBAn);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
-chInterest = [23,98]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL 
+
+%chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146, 155, 156]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL (confirmed)
+chInterest = [17,25,45,61,75,83,97];
 
 %setup for accessing channels
 %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
@@ -368,9 +372,9 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 10, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', 10, 'eventChoice', 1);
+    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 
 
 %% plotting

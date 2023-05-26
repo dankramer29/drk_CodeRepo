@@ -171,8 +171,9 @@ for ii = 1:length(chNum)
         %% emotions for both tasks
         figtitle = strcat('LFP Power during ', {' '}, figTitleName, newline, ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
         figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
-        figtitleSplit = strcat('LFP Power during ', {' '}, figTitleName, '\n', ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));
-        sgtitle(compose(figtitleSplit)); %gives a supertitle
+                figtitle = strcat('LFP Power during ', {' '}, figTitleName, newline, ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
+
+        sgtitle(figtitle); %gives a supertitle
 
     
         idx1 = 1; idx2 = 2; idx3 = 1;

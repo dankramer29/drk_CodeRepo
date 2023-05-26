@@ -15,6 +15,26 @@ ttt=identityTaskLFP.tPlotImageBandPass;
 figure
 plot(ttt,bData(jj,:))
 
+
+%% cluster evalution of peaks and troughs
+
+for ii=1:18
+    S1 = emotionTaskLFP.byemotion.ch97.image.specD{3}(:,:,ii);
+    S1n = normalize(S1,2);
+    figure
+    imagesc(ttImage,ff,S1n); axis xy; colorbar;
+end
+
+tplotBP = emotionTaskLFP.tPlotImageBandPass;
+for ii=1:16
+    S1 = emotionTaskLFP.byemotion.ch97.image.bandPassed.filter1to200{3}(ii,:);
+    figure
+    subplot(2,1,1)
+    plot(tplotBP,S1);
+    subplot(2,1,2)
+    periodogram(S1,[],length(S1), fs);
+end
+
 %% PAC
 
 %try creating a bigger swath of bands to PAC. can maybe filter the data to

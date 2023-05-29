@@ -122,7 +122,7 @@ TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBA
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
+chInterest = [1, 9, 29, 45, 59, 67, 81, 139 ]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
 %chInterest = [17,25,45,61,75,83,97];
 
 %setup for accessing channels
@@ -131,9 +131,9 @@ chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146]; %
 for ff=1:length(chInterest)
     ch = num2str(chInterest(ff));
     channelName{ff} = ['ch' ch];
-    str = location(chInterest(ff));
+    str = location(channID ==chInterest(ff));
     strout = plt.lowup(str); %converts to upper case for plotting later
-    chLocationName{ff,1} = strcat(hemis(chInterest(ff)), {' '}, strout);
+    chLocationName{ff,1} = strcat(hemis(channID == chInterest(ff)), {' '}, strout);
 end
 
 %% common average rerefernce

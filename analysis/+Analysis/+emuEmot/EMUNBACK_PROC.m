@@ -122,7 +122,7 @@ TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBA
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146]; %REMEMBER, IF THE MICROWIRES, IT'S ADTECH AND 8 IS DISTAL, IF IT'S NOT MICROWIRE (I.E. PMT OR DIXI) THEN 1 IS DISTAL (confirmed)
+chInterest = [18, 26, 33, 34, 46, 62, 76, 85, 93, 94, 98, 135, 136, 145, 146]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
 %chInterest = [17,25,45,61,75,83,97];
 
 %setup for accessing channels
@@ -344,8 +344,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % NOISE TEST
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName);
+%can turn on plotting for these, but it makes a lot of plots. Definitely
+%worth looking at once.
+[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskName', 'EmotionTask');
 TNoise = Temot;
+[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskName', 'IdentityTask');
+TNoise = [TNoise, Tident];
+
 
 
 %plot the periodogram for the mean of all trials across all channels

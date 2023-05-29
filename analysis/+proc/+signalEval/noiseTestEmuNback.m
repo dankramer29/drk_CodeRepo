@@ -4,7 +4,7 @@ function [T, meanSacrosstrials] = noiseTestEmuNBack(dataLFP, channelName, vararg
 
 [varargin, stdAbove] = util.argkeyval('stdAbove',varargin, 10); %number of STDs above the mean something needs to be to flag the system
 [varargin, plotNoiseCheckAll] = util.argkeyval('plotNoiseCheckAll',varargin, false); %plot the noise check or not
-[varargin, flaggedplotNoiseCheck] = util.argkeyval('flaggedplotNoiseCheck',varargin, true); %plot the noise check or not
+[varargin, flaggedplotNoiseCheck] = util.argkeyval('flaggedplotNoiseCheck',varargin, false); %plot the noise check or not
 [varargin, taskName] = util.argkeyval('taskName',varargin, 'EmotionTask'); %what is the type of task you are looking at
 
 
@@ -16,13 +16,13 @@ flaggedTrialType = [];
 tplotBP = dataLFP.tPlotImageBandPass;
 tplotSp = dataLFP.tPlotImage;
 ff = dataLFP.freq;
+idxFl = 1;
 for cc = 1:length(channelName)
-    for jj = 1:3        
-        idxFl = 1;
+    for jj = 1:3                
         sAll = dataLFP.byemotion.(channelName{cc}).image.bandPassed.filter1to200{jj};
         meanS = mean(sAll,2);        
         if jj == 1
-            meanSacrosstrials = mean(sAll,1);
+            meanSacrosstrials(cc,:) = mean(sAll,1);
         end
         meanSall = mean(meanS);              
         sdS = std(sAll, [], 2);
@@ -33,10 +33,10 @@ for cc = 1:length(channelName)
             mx = max(sAll(ii,:));
             mn = min(sAll(ii,:));
             if mx >= (meanSall + (stdAbove*sdSall)) || mn <= (meanSall - (stdAbove*sdSall))
-                flaggedTrials(idxFl) = ii; 
-                flaggedChannel{idxFl} = channelName{cc}; 
-                flaggedVariant(idxFl) = jj;
-                flaggedTrialType{idxFl} = taskName; %place holder. will be emotion or identity
+                flaggedTrials(idxFl,1) = ii; 
+                flaggedChannel{idxFl,1} = channelName{cc}; 
+                flaggedVariant(idxFl,1) = jj;
+                flaggedTrialType{idxFl,1} = taskName; %place holder. will be emotion or identity
                 idxFl = idxFl + 1;
                 if flaggedplotNoiseCheck
                     [subN1, subN2] = plt.subplotSize(size(sAll,1));

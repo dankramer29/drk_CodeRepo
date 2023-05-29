@@ -1,8 +1,10 @@
 % NOISE TESTING SCRIPT
 % basic noise testing for EMUNBACKPROC
 
+%taskName = fields(dataLFP);
+
 stdAbove = 4; %number of STDs above the mean something needs to be to flag the system
-pltNoiseCheck = true; %if you want to plot
+plotNoiseCheck = true; %if you want to plot
 
 
 tplotBP = emotionTaskLFP.tPlotImageBandPass;
@@ -11,61 +13,52 @@ ff = emotionTaskLFP.freq;
 for cc = 1:length(channelName)
     for jj = 1:3        
         idxFl = 1;
-        Sall = emotionTaskLFP.byemotion.(channelName{cc}).image.bandPassed.filter1to200{jj};
-        meanS = mean(Sall,2);
+        sAll = emotionTaskLFP.byemotion.(channelName{cc}).image.bandPassed.filter1to200{jj};
+        meanS = mean(sAll,2);
+        meanSacrosstrials = mean(sAll,1);
         if jj == 1
-            allChannelMean(:, cc) = meanS;
+            allChannelMean(:, cc) = meanSacrosstrials;
         end
         meanSall = mean(meanS);              
-        sdS = std(Sall, [], 2);
+        sdS = std(sAll, [], 2);
         sdSall = std(sdS);
         meanLine(1:length(tplotBP)) = meanSall;
         sdSline(1:length(tplotBP)) = sdSall;
-        for ii = 1:size(Sall,1)
-            mx = max(Sall(ii,:));
-            mn = min(Sall(ii,:));
-            if mx >= (meanSall + stdAbove*sdSline) || mn <= (meanSall -stdAbove*sdSLine)
+        for ii = 1:size(sAll,1)
+            mx = max(sAll(ii,:));
+            mn = min(sAll(ii,:));
+            if mx >= (meanSall + stdAbove*sdSall) || mn <= (meanSall -stdAbove*sdSall)
                 flaggedTrials(idxFl) = ii; 
                 flaggedChannel{idxFl} = channelName{cc}; 
-                flaggedTrialType{idxFl} = 1;
+                flaggedTrialType{idxFl} = 1; %place holder. will be emotion or identity
                 idxFl = idxFl + 1;
                 figure
+                sgtitle(['trial', num2str(ii), ' ', channelName{cc}, 'emotion task'])                
                 subplot(2,1,1)
                 imagesc(tplotSp, ff, normalize(emotionTaskLFP.byemotion.(channelName{cc}).image.specD{jj}(:,:,ii),2)); axis xy; colorbar;
                 subplot(2,1,2)
-
-                subplot(8,2,ii)
-                title(['trial', num2str(ii)])
                 plot(tplotBP, meanLine)
                 hold on
                 plot(tplotBP, meanS(ii) + stdAbove*sdSline)
                 plot(tplotBP, meanS(ii) - stdAbove*sdSline)
-                plot(tplotBP, Sall(ii, :))
+                plot(tplotBP, sAll(ii, :))
             end
         end
         if plotNoiseCheck
-            [subN1, subN2] = plt.subplotSize(size(Sall,1));
+            [subN1, subN2] = plt.subplotSize(size(sAll,1));
             figure
-            for ii = 1:size(Sall(1,:))
-                subplot(subN1,subN2,ii)
-                title(['trial', num2str(ii)])
+            for kk = 1:size(sAll,1)
+                sgtitle([channelName{cc}, ' ', 'emotion task', ' ', 'mean LFP across trials'])
+                subplot(subN1,subN2,kk)
                 plot(tplotBP, meanLine)
                 hold on
-                plot(tplotBP, meanS(ii) + stdAbove*sdSline)
-                plot(tplotBP, meanS(ii) - stdAbove*sdSline)
-                plot(tplotBP, Sall(ii, :))
+                plot(tplotBP, meanS(kk) + stdAbove*sdSline)
+                plot(tplotBP, meanS(kk) - stdAbove*sdSline)
+                plot(tplotBP, sAll(kk, :))
+                title(['trial', num2str(kk)])
             end
         end
     end
 end
 
-%plot the periodogram for the mean of all trials across all channels
-if plotNoiseCheck
-   [subN1, subN2] = plt.subplotSize(length(channelName));
-    figure
-    for jj=1:2:length(channelName) %do all of the channels, go by 2 to get the spikes then the bands
-        subplot(subN1, subN2, jj);
-        title(channelName{jj})
-        periodogram(allChannelMean(jj),[],size(allChannelMean(jj),1), fs);
-    end
-end
+

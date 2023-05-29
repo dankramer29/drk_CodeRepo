@@ -341,6 +341,24 @@ else %NOT USING THE BELOW PART
         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% NOISE TEST
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName);
+TNoise = Temot;
+
+
+%plot the periodogram for the mean of all trials across all channels
+if plotNoiseCheck
+   [subN1, subN2] = plt.subplotSize(length(channelName));
+    figure
+    for cc=1:length(channelName) %do all of the channels, go by 2 to get the spikes then the bands
+        subplot(subN1, subN2, jj);
+        title(channelName{jj})
+        periodogram(allChannelMean(cc),[],size(allChannelMean(cc),1), fs);
+    end
+end
+
 
 %% figure out which trial started first
 %1 means it was the second trial, 0 means it was the first.

@@ -4,9 +4,18 @@ function [T, meanSacrosstrials] = noiseTestEmuNBack(dataLFP, channelName, vararg
 
 [varargin, stdAbove] = util.argkeyval('stdAbove',varargin, 10); %number of STDs above the mean something needs to be to flag the system
 [varargin, plotNoiseCheckAll] = util.argkeyval('plotNoiseCheckAll',varargin, false); %plot the noise check or not
-[varargin, flaggedplotNoiseCheck] = util.argkeyval('flaggedplotNoiseCheck',varargin, false); %plot the noise check or not
-[varargin, taskName] = util.argkeyval('taskName',varargin, 'EmotionTask'); %what is the type of task you are looking at
+[varargin, flaggedplotNoiseCheck] = util.argkeyval('flaggedplotNoiseCheck',varargin, true); %plot the noise check or not
+[varargin, taskNameSel] = util.argkeyval('taskNameSel',varargin, 1); %what is the type of task you are looking at. 1 is emotion task, 2 is identity task.
 
+task = fieldnames(dataLFP);
+
+if taskNameSel == 1
+    taskType = 2;
+    taskName = 'EmotionTask';
+else
+    taskType = 1;
+    taskName = 'IdentityTask';
+end
 
 flaggedTrials = []; 
 flaggedVariant = [];
@@ -19,7 +28,7 @@ ff = dataLFP.freq;
 idxFl = 1;
 for cc = 1:length(channelName)
     for jj = 1:3                
-        sAll = dataLFP.byemotion.(channelName{cc}).image.bandPassed.filter1to200{jj};
+        sAll = dataLFP.(task{taskType}).(channelName{cc}).image.bandPassed.filter1to200{jj};
         meanS = mean(sAll,2);        
         if jj == 1
             meanSacrosstrials(cc,:) = mean(sAll,1);
@@ -73,7 +82,7 @@ for cc = 1:length(channelName)
                             idxT = idxT +1;
                         elseif ismember(rw, evenN) && idxT2 <= size(sAll,1)%spectrogram
                             subplot(subN1d,subN2,kk)
-                            imagesc(tplotSp, ff, normalize(dataLFP.byemotion.(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
+                            imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
                             idxT2 = idxT2 +1;
                         end
                     end
@@ -94,7 +103,7 @@ for cc = 1:length(channelName)
                 idx = idx + 1;
             end
             F = figure;
-            F.WindowState = 'fullscreen';
+            F.WindowState = 'maximize';
             sgtitle([channelName{cc}, ' ', 'variant', num2str(jj), ...
                 ' ', taskName, ' ', 'mean LFP across trials'])
             idxT = 1;
@@ -116,7 +125,7 @@ for cc = 1:length(channelName)
                     idxT = idxT +1;
                 elseif ismember(rw, evenN) && idxT2 <= size(sAll,1)%spectrogram
                     subplot(subN1d,subN2,kk)
-                    imagesc(tplotSp, ff, normalize(dataLFP.byemotion.(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy; 
+                    imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy; 
                     idxT2 = idxT2 +1;
                 end
             end

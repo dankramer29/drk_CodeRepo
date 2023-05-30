@@ -21,9 +21,13 @@ end
 
 
 %% set up names for the struct
-for ff=1:length(chInterest)
-    ch = num2str(chInterest(ff));
-    chName{ff} = ['ch' ch];
+if ismatrix(chInterest)
+    for ff=1:length(chInterest)
+        ch = num2str(chInterest(ff));
+        chName{ff} = ['ch' ch];
+    end
+elseif iscell(chInterest)
+    chName = chInterest;
 end
 
 for ff=1:numIDs

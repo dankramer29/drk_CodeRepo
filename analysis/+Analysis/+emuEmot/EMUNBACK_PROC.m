@@ -344,26 +344,38 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % NOISE TEST
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%can turn on plotting for these, but it makes a lot of plots. Definitely
-%worth looking at once.
-[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskName', 'EmotionTask');
+%can turn on plotting for these, because it makes a lot of plots. However,
+%hard to visualize, so easiest to create the plots and have a look.
+%NOTE: right now the SD of 10 above seems to be about right, but also seems
+%to 
+[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskName', 1);
+removeTrials = [1, 3, 4]; %put the names of the trials and channels you want to remove here.
+emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrials);
 TNoise = Temot;
-[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskName', 'IdentityTask');
-TNoise = [TNoise, Tident];
+allChannelMean = allChannelMeanTemp;
+[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskName', 2);
+TNoise = vertcat(TNoise, Tident);
 
+%allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
 
-
-%plot the periodogram for the mean of all trials across all channels
+%plot the periodogram for the mean of all trials across all channels to
+%look for bad channels.
+plotNoiseCheck = 1;
 if plotNoiseCheck
    [subN1, subN2] = plt.subplotSize(length(channelName));
     figure
     for cc=1:length(channelName) %do all of the channels, go by 2 to get the spikes then the bands
-        subplot(subN1, subN2, jj);
-        title(channelName{jj})
-        periodogram(allChannelMean(cc),[],size(allChannelMean(cc),1), fs);
+        subplot(subN1, subN2, cc);        
+        periodogram(allChannelMean(cc,:),[],size(allChannelMean,2), fs);
+        title(channelName{cc})
     end
 end
-
+%turns out easiest way to eliminate a channel is to just ignore it.
+removeChannel = [];
+channelNameFinal = channelName;
+for ii = 1:length(removeChannel)
+    channelNameFinal(removeChannel(ii)) = [];
+end
 
 %% figure out which trial started first
 %1 means it was the second trial, 0 means it was the first.
@@ -376,18 +388,6 @@ else
 end
 
 
-% %% create iti
-% trialLength = preTime + postTime;
-% %stritch the iti trials together
-% for ii= 1:length(channelName)
-%     S1 = itiDataFiltIdentity.iti.(channelName{ii}).specD;
-% 
-%     [itiDataStitch.IdentityTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
-%         size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
-%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
-%         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-% end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compare the tasks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -395,9 +395,9 @@ end
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', chInterest, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 
 
 %% plotting

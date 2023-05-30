@@ -2,7 +2,15 @@
 
 %% this is all scratch pad stuff for now.
 
-%%plotting
+
+%% noise
+
+Tkeep = TNoise(removeTrialsChannels,:);
+task = fieldnames(dataLFP);
+
+
+
+%% plotting
 xx=SdiffID{2};
 
 S2 = nback.ch23.id3.identityTaskmean;

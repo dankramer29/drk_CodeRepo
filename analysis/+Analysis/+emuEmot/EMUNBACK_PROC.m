@@ -336,9 +336,9 @@ if preSpectrogramData
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 else %NOT USING THE BELOW PART
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
-        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
-        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
+%     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
+%         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
+%         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -349,11 +349,15 @@ end
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
 %to 
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskName', 1);
-removeTrials = [1, 3, 4]; %put the names of the trials and channels you want to remove here.
-emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrials);
+pause
+removeTrials = []; %put the row of the ones you actually want to remove here.
+emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrials, 'trialType', 2);
 TNoise = Temot;
 allChannelMean = allChannelMeanTemp;
 [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskName', 2);
+pause
+removeTrials = []; %put the names of the trials and channels you want to remove here.
+emotionTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Temot, removeTrials, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
 %allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.

@@ -9,10 +9,10 @@ function [nback, itiFiltered] = nwbLFPchProc(data, PresentedEmotionIdx, Presente
 
 [varargin, fs] = util.argkeyval('fs',varargin, 500); %sampling rate, default is 500
 
-[varargin, preTime] = util.argkeyval('preTime',varargin, 0.5); %time before image presentation
-[varargin, preTimeRes] = util.argkeyval('preTimeRes',varargin, 1); %time before response 
-[varargin, postTime] = util.argkeyval('preTime',varargin, 2); %time after image presentation
-[varargin, postTimeRes] = util.argkeyval('postTimeRes',varargin, 0.5); %time after response
+[varargin, ImagepreTime] = util.argkeyval('ImagepreTime',varargin, 0.5); %time before image presentation
+[varargin, ResponsepreTime] = util.argkeyval('ResponsepreTime',varargin, 1); %time before response 
+[varargin, ImagepostTime] = util.argkeyval('ImagepostTime',varargin, 2); %time after image presentation
+[varargin, ResponsepostTime] = util.argkeyval('ResponsepostTime',varargin, 0.5); %time after response
 [varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, CorrectTrials] = util.argkeyval('CorrectTrials',varargin, 1); %Input correct or incorrect trials, if you don't enter, it will just place a 1 and will be meaningless
@@ -65,10 +65,10 @@ filterNames = fieldnames(data.iti.(chName{1}).bandPassed);
 
 %% this is breaking the data up by session, and can filter this way, or break up band passed data
 %% pre and post time conversion
-preTimeC = round(preTime * fs);
-postTimeC = round(postTime * fs);
-preTimeResC = round(preTimeRes * fs);
-postTimeResC = round(postTimeRes * fs);
+preTimeC = round(ImagepreTime * fs);
+postTimeC = round(ImagepostTime * fs);
+preTimeResC = round(ResponsepreTime * fs);
+postTimeResC = round(ResponsepostTime * fs);
 
 
 %break up into data epochs centered on image presentation
@@ -118,6 +118,14 @@ for ii = 1:length(timeStampsImage)
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
             end
+            for fn = 1:length(filterNames)
+                nback.byemotion.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
+                    = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                if ii >1
+                    nback.byemotion.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
+                        = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                end
+            end
             
             
             if filterByTrial
@@ -153,7 +161,6 @@ end
 
 %% filter the data
 %break up prefiltered spectrogram data
-nback = struct;
 if filterAllData
     %pull the time from the filt data
     timeStampsFiltData = data.time;
@@ -181,10 +188,10 @@ if filterAllData
         [behavioralIndexResponse, closestValueResponse] = Analysis.emuEmot.timeStampConversion(timeStampsResponseSeconds, timeStampsFiltData);
         
         %convert postTime to units of spectral data
-        preTimeC = round(preTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
-        postTimeC = round(postTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
-        preTimeCRes = round(preTimeRes/(timeStampsFiltData(2)-timeStampsFiltData(1)));
-        postTimeCRes = round(postTimeRes/(timeStampsFiltData(2)-timeStampsFiltData(1)));
+        preTimeC = round(ImagepreTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
+        postTimeC = round(ImagepostTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
+        preTimeCRes = round(ResponsepreTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
+        postTimeCRes = round(ResponsepostTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
         itiEpochC = round(itiEpoch/(timeStampsFiltData(2)-timeStampsFiltData(1)));
         itiEpochCplus = round(2.5/(timeStampsFiltData(2)-timeStampsFiltData(1)));
 
@@ -252,21 +259,23 @@ if filterAllData
 end
 
 if filterByTrial 
-    timePlot = filtDataTemp.dataSpec.tplot-preTime;
-    nback.time = timePlot;
+    timePlot = filtDataTemp.dataSpec.tplot-ImagepreTime;
+    nback.tPlot = timePlot;
     nback.freq = filtDataTemp.dataSpec.f;
 elseif filterAllData 
     timeInterval = timeStampsFiltData(1);
-    timePlotImage = -preTime:timeInterval:((preTimeC+postTimeC)*timeInterval-preTime);
-    timePlotResponse = -preTimeRes:timeInterval:((preTimeResC+postTimeResC)*timeInterval-preTimeRes);
+    timePlotImage = -ImagepreTime:timeInterval:((preTimeC+postTimeC)*timeInterval-ImagepreTime);
+    timePlotResponse = -ResponsepreTime:timeInterval:ResponsepostTime+timeInterval;
     timePlotImage = timePlotImage + windowCenter; %this adjusts the time window for plotting.
     timePlotResponse = timePlotResponse + windowCenter; %this adjusts the time window for plotting.
-    nback.timeImage = timePlotImage;
-    nback.timeResponse = timePlotResponse;
+    nback.tPlotImage = timePlotImage;
+    nback.tPlotResponse = timePlotResponse;
+    nback.freq = data.freq;
+
 end
 
-nback.timeImageBandPass = -preTime:1/fs:postTime;
-nback.timeResponseBandPass = -preTimeRes:1/fs:postTimeRes;
+nback.tPlotImageBandPass = -ImagepreTime:1/fs:ImagepostTime;
+nback.tPlotResponseBandPass = -ResponsepreTime:1/fs:ResponsepostTime;
 
 end
 

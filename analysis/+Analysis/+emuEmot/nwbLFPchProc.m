@@ -118,11 +118,11 @@ for ii = 1:length(timeStampsImage)
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
             end
-            for fn = 1:length(filterNames)
-                nback.byemotion.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxID,:)...
+            for fn = 1:length(filterNames) %%
+                nback.byemotion.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
                     = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                 if ii >1
-                    nback.byemotion.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxID,:)...
+                    nback.byemotion.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
             end

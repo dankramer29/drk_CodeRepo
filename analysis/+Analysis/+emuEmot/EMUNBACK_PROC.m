@@ -188,9 +188,9 @@ CorrectTrialsEm = CorrectResponse == Response;
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
-[behavioralIndexTTL, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS); %finds the ttl
-[behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjEm, ma_timestampsDS); %finds the image onset which is more accurate
-[behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjEm, ma_timestampsDS); %finds the response time
+[behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS); %finds the ttl
+[behavioralIndexImageOnEm, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjEm, ma_timestampsDS); %finds the image onset which is more accurate
+[behavioralIndexResponseEm, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjEm, ma_timestampsDS); %finds the response time
 
 trialStartTimeEm = testfile.session_start_time;
 
@@ -207,36 +207,20 @@ if alreadyFilteredData == 0
     [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
+PresentedEmotionIdxEm = PresentedEmotionIdx;
+PresentedIdentityIdxEm = PresentedIdentityIdx;
+
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 %the final filtered data (1to200) is broad so it can be inserted into PAC
 %as desired
-if preSpectrogramData
-   [emotionTaskLFP, itiDataReal.EmotionTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdx,...
-       PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
-       'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
-       'ImpreTime', preTime, 'ImpostTime', postTime, 'RespreTime', preTimeRes, 'RespostTime', postTimeRes, 'multiTaperWindow',...
-       multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
-else %NOT USING THE BELOW PART
-    [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
-        PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
-        'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
-end
 
-%% create and iti NO LONGER USING
-% itiDataStitch = struct;
-% trialLength = preTime + postTime;
-% %stritch the iti trials together
-% for ii= 1:length(channelName)
-%     S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
-%     
-%     [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
-%         size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
-%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
-%         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
-% end
-
+[emotionTaskLFP, itiDataReal.EmotionTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdxEm,...
+    PresentedIdentityIdxEm, behavioralIndexImageOnEm, behavioralIndexResponseEm, ...
+    'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
+    'ImpreTime', preTime, 'ImpostTime', postTime, 'RespreTime', preTimeRes, 'RespostTime', postTimeRes, 'multiTaperWindow',...
+    multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
@@ -308,9 +292,9 @@ trialStartTimeId = testfile.session_start_time;
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
-[behavioralIndexTTL, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
-[behavioralIndexImageOn, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjId, ma_timestampsDS);
-[behavioralIndexResponse, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDS);
+[behavioralIndexTTLId, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDS);
+[behavioralIndexImageOnId, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjId, ma_timestampsDS);
+[behavioralIndexResponseId, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDS);
 
 %% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
 taskTimeSt = closestValue(1);
@@ -323,23 +307,22 @@ if alreadyFilteredData == 0
     [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
+%preserve the variables so you can rerun the making of identityTaskLFP
+PresentedEmotionIdxId = PresentedEmotionIdx;
+PresentedIdentityIdxId = PresentedIdentityIdx;
+
 
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 %the final filtered data (1to200) is broad so it can be inserted into PAC
 %as desired
-if preSpectrogramData
-   [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdx,...
-       PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse, ...
+   [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdxId,...
+       PresentedIdentityIdx, behavioralIndexImageOnId, behavioralIndexResponseId, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeIdentity,...
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
-else %NOT USING THE BELOW PART
-%     [emotionTaskLFP] = Analysis.emuEmot.nwbLFPchProc(dataFemotion, PresentedEmotionIdx,...
-%         PresentedIdentityIdx, behavioralIndexImageOn, behavioralIndexResponse,'timeStamps', behavioralIndex, 'fs', fs, 'chNum', chInterest,...
-%         'preTime', preTime, 'postTime', postTime, 'multiTaperWindow', multiTaperWindow);
-end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % NOISE TEST
@@ -348,16 +331,16 @@ end
 %hard to visualize, so easiest to create the plots and have a look.
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
 %to 
-[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskName', 1);
+[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskNameSel', 1);
 pause
-removeTrials = []; %put the row of the ones you actually want to remove here.
-emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrials, 'trialType', 2);
+removeTrialsEmot = [1,2,4:11]; %put the row of the ones you actually want to remove here.
+emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
 TNoise = Temot;
 allChannelMean = allChannelMeanTemp;
-[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskName', 2);
-pause
-removeTrials = []; %put the names of the trials and channels you want to remove here.
-emotionTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Temot, removeTrials, 'trialType', 1);
+[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskNameSel', 2);
+pause 
+removeTrialsId = [1]; %put the names of the trials and channels you want to remove here.
+identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
 %allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
@@ -380,7 +363,7 @@ channelNameFinal = channelName;
 for ii = 1:length(removeChannel)
     channelNameFinal(removeChannel(ii)) = [];
 end
-
+%%
 %% figure out which trial started first
 %1 means it was the second trial, 0 means it was the first.
 if trialStartTimeId > trialStartTimeEm
@@ -416,6 +399,14 @@ if DoPlot
     plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, 'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 end
 
+%% create a table to that can be combined for all patients regarding statistically significant clusters.
+%timeMinMax and freqMinMax are to capture only significant epochs in those
+%frequency bands during that period of time (so like 50 to 150 hz
+%significant epochs that are between 100 and 900 ms). 
+[AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
+    emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
+    'chName', chLocationName, 'patientName', subjName);
+
 
 %% save plots
 hh =  findobj('type','figure'); 
@@ -427,25 +418,32 @@ if savePlot
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
 end
 
+%% for saving. probably easier to do by hand
+% So save these variables with these names
+% MW13_itiDataFiltEmotion
+% MW13_itiDataFiltIdentity
+% MW13_emotionTaskLFP
+% MW13_identityTaskLFP
+% MW13_itiDataReal
+% MW13_nbackCompareImageOn
+% MW13_nbackCompareResponse
+% MW13_AllPatientsSigClusterSummStats
+ 
+itiDataFiltEmotion;
+itiDataFiltIdentity;
+emotionTaskLFP;
+identityTaskLFP;
+itiDataReal;
+nbackCompareImageOn;
+nbackCompareResponse;
+AllPatientsSigClusterSummStats;
 
-%% create a table to that can be combined for all patients regarding statistically significant clusters.
-%timeMinMax and freqMinMax are to capture only significant epochs in those
-%frequency bands during that period of time (so like 50 to 150 hz
-%significant epochs that are between 100 and 900 ms). 
-[AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
-    emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
-    'chName', chLocationName, 'patientName', subjName);
 
 %% summary stats per patient across all trials
-%% compare response times between tasks
-%% response times
-ResponseTimesDiffEmotion(1) = [];
-ResponseTimesDiffIdentity(1) = [];
-%convert to seconds (was in micro seconds to adjust with neural clock)
-ResponseTimesDiffEmotionSec = ResponseTimesDiffEmotion/1e6;
-ResponseTimesDiffIdentitySec = ResponseTimesDiffIdentity/1e6;
+%% compare response times between tasks (for all trials, not just he positive ones)
 
-%remove the nan from first trial
+
+
 
 [pos, ReactionTimespValueOfComparisonBetweenTasks, ci, stats] = ttest(ResponseTimesDiffEmotionSec, ResponseTimesDiffIdentitySec);
 

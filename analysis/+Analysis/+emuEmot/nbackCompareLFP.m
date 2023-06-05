@@ -21,7 +21,7 @@ end
 
 
 %% set up names for the struct
-if ismatrix(chInterest)
+if ~iscell(chInterest)
     for ff=1:length(chInterest)
         ch = num2str(chInterest(ff));
         chName{ff} = ['ch' ch];

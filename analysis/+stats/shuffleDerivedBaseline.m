@@ -3,6 +3,18 @@ function [trialData] = shuffleDerivedBaseline(data,varargin)
 %histogram of clusters to compare. IN THEORY, ONLY NEED TO DO THIS ONCE
 %   inputs
 %   dataLFP = input the voltage, will cut and run spectrogram from here
+% Example
+% itiDataStitch = struct;
+% trialLength = preTime + postTime;
+% %stritch the iti trials together
+% for ii= 1:length(channelName)
+%     S1 = itiDataFiltEmotion.iti.(channelName{ii}).specD;
+%     
+%     [itiDataStitch.EmotionTask.(channelName{ii})] = stats.shuffleDerivedBaseline(S1, 'fs',...
+%         size(emotionTaskLFP.byemotion.(channelName{ii}).image.specD{1}, 2)/trialLength, ...
+%         'shuffleLength', shuffleLength, 'trials', stitchTrialNum, 'stitchSmooth',...
+%         true, 'TimeFreqData', true, 'smoothingWindow', smoothingWindow);
+% end
 %  THIS WORKS, HOWEVER IF BEING USED FOR SPECTRAL ANALYSIS AND USING A STITCH METHOD A LOT MORE WORK
 %  NEEDS TO GO INTO IT TO MAKE IT EVEN. WILL NEED TO ADJUST THE BASELINES
 %  AND SMOOTH THE TRANSITIONS, BUT WITH SOMETHING BESIDES A SMOOTH

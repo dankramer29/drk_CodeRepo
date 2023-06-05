@@ -3,10 +3,52 @@
 %% this is all scratch pad stuff for now.
 
 
-%% noise
+%% splotches
 
-Tkeep = TNoise(removeTrialsChannels,:);
-task = fieldnames(dataLFP);
+sss = sData;
+ssS = normalize(sss,2);
+figure
+sDataTemp = ssS(:,:,jj);
+imagesc(sData(:,:,jj)); axis xy; colorbar;
+mask = sData(:,:,jj)>1;
+figure
+imagesc(mask); axis xy; colorbar;
+
+clustP=bwconncomp(mask,8);
+clRPos=regionprops(clustP, 'all'); %get the region properties
+cl_aRPos=[clRPos.Area];
+bb = [clRPos.BoundingBox];
+cl_keepPos=find(cl_aRPos>100);
+
+for ii=1:length(cl_keepPos)
+    centr = clRPos(cl_keepPos(ii)).Centroid;
+    centr(1) = tt(round(centr(1))); centr(2) = ff(round(centr(2)));
+
+    if centr(2)>=freqMinMax(1) && centr(2)<=freqMinMax(2) && centr(1) >= timeMinMax(1) && centr(1) <= timeMinMax(2)
+        centKeep(ii,:) = centr;
+        arKeep(ii,:) = sum(sDataTemp(cl_keepPos(ii)));
+        BB(ii,:) = clRPos(cl_keepPos(ii)).BoundingBox;
+
+    end
+end
+
+
+m = sDataTemp(clustP.PixelIdxList{cl_keepPos(kk)})
+figure
+imagesc(tt,ff,nback.(chNum{cc}).(conditionName{nn}).(resultName{3})); axis xy;
+imagesc(tt,ff,normS1); axis xy;
+imagesc(tt,ff,M); axis xy;
+figure
+hold on
+imagesc(tt,ff,sDataTemp); axis xy;
+hold on
+plot(centr(1),centr(2), 'r*')
+plot(BB(1,3),BB(1,4), 'm*')
+
+M = false(size(sDataTemp));
+M(clustP.PixelIdxList{cl_keepPos(3)}) = true;
+figure
+imagesc(M); axis xy;
 
 
 

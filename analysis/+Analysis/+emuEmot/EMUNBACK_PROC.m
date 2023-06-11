@@ -41,7 +41,6 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
-
 sessionName = '5_29_2022session';
 subjName = 'MW13';
 
@@ -66,7 +65,7 @@ multiTaperWindow = .2; % in seconds, what window you are doing on this run for m
 xshuffles = 100; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
 DoPlot = 1; %toggle plotting on or off
 savePlot = 0; %toggle on if you want to save the plots up front, probably better to look at them individually first
-
+saveSelectFile = 0; %toggle on if you want to save all the files. probably best to do by hand
 %NO LONGER USING THE BELOW
 % shuffleLength = .05; %in seconds, the length of the stitched shuffles
 % stitchTrialNum = 100; %number of trials to make the stitching out of.
@@ -84,9 +83,9 @@ folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName
 %Set up if you are saving and then loading the filtered data
 rawData = false; %PREVIOUSLY COULD DO RAWDATA, STILL CAN BUT I REMOVED IT TO REDUCE CLUTTER
 
-if alreadyFilteredData
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTaskCh17_25_45_61_75_83_97.mat');
-   load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTaskCh17_25_45_61_75_83_97.mat'); 
+if alreadyFilteredData    
+        load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Identity\allDataFiltered_IdentityTaskCh17_25_45_61_75_83_97.mat');
+        load('C:\Users\kramdani\Documents\Data\EMU_nBack\5_29_2022session\Emotion\allDataFiltered_EmotionTaskCh17_25_45_61_75_83_97.mat');
 else
     itiDataFiltEmotion = [];
     itiDataFiltIdentity = [];
@@ -122,7 +121,7 @@ TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBA
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-chInterest = [1, 9, 29, 45, 59, 67, 81, 139 ]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
+chInterest = [2, 10, 30, 46, 60, 68, 82, 119, 120, 140 ]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
 %chInterest = [17,25,45,61,75,83,97];
 
 %setup for accessing channels
@@ -332,14 +331,13 @@ PresentedIdentityIdxId = PresentedIdentityIdx;
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
 %to 
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskNameSel', 1);
-pause
-removeTrialsEmot = [1,2,4:11]; %put the row of the ones you actually want to remove here.
+removeTrialsEmot = input('which lines from Temot do you want to remove '); %put the lines of the table Temot that you wan to remove in the commandline
+%put the row of the ones you actually want to remove here.
 emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
 TNoise = Temot;
 allChannelMean = allChannelMeanTemp;
 [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskNameSel', 2);
-pause 
-removeTrialsId = [1]; %put the names of the trials and channels you want to remove here.
+removeTrialsEmot = input('which lines from Tident do you want to remove '); %put the lines of the table Tident that you wan to remove in the commandline
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
@@ -393,29 +391,34 @@ ff = itiDataFiltIdentity.freq;
 ttResponse = identityTaskLFP.tPlotResponse;
 
 if DoPlot
+    close all %need to close all other figures so the figures 
     comparisonName = 'Image On';
-    plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, 'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+    plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, ...
+        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
     comparisonName = 'Response';
-    plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, 'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+    plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, ...
+        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 end
 
 %% create a table to that can be combined for all patients regarding statistically significant clusters.
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
-[AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, identityTaskLFP,...
-    emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
+[AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
+    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
     'chName', chLocationName, 'patientName', subjName);
 
 
 %% save plots
-hh =  findobj('type','figure'); 
-nh = length(hh);
+
 %savePlot = 0; %toggle on if you want to save the plots up front, probably
 %better to look at them individually first THE TOGGLE IS REPEATED HERE FOR
 %EASE OF TOGGLING ON IF YOU WANT.
 if savePlot
-    plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, 'versionNum', 'v1');
+    hh =  findobj('type','figure'); 
+    nh = length(hh);
+    plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1');
 end
 
 %% for saving. probably easier to do by hand
@@ -428,22 +431,27 @@ end
 % MW13_nbackCompareImageOn
 % MW13_nbackCompareResponse
 % MW13_AllPatientsSigClusterSummStats
- 
-itiDataFiltEmotion;
-itiDataFiltIdentity;
-emotionTaskLFP;
-identityTaskLFP;
-itiDataReal;
-nbackCompareImageOn;
-nbackCompareResponse;
-AllPatientsSigClusterSummStats;
+if saveSelectFile
+    folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
+    folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
+    if ~isfolder(folder_name)
+        %make the directory folder
+        mkdir (folder_name)
+    end
+    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
+    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'AllPatientsSigClusterSummStats', '.mat'];    save(fileName);
+end
 
 
 %% summary stats per patient across all trials
-%% compare response times between tasks (for all trials, not just he positive ones)
 
 
 
 
-[pos, ReactionTimespValueOfComparisonBetweenTasks, ci, stats] = ttest(ResponseTimesDiffEmotionSec, ResponseTimesDiffIdentitySec);
 

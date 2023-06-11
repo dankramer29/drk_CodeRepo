@@ -51,11 +51,13 @@ for cc = 1:length(chNum)
 %     CorrectResponseEm = [];
 %     ResponseTimeId = [];
 %     ResponseTimeEm = [];
-    SecondTrial = [];
     idx2 = 1;   
     for nn = 1:3  %runs through each id      
         T1 = [];        
         pkIndex = [];
+        bData = [];
+       
+        PatientName =[];
         ChannelNumber = [];        
         TrialType = [];
         TrialNumber = [];        
@@ -64,11 +66,16 @@ for cc = 1:length(chNum)
         ImageType = [];
         MaxValue = [];
         TimeofMax = [];
+        TimeMinMax = [];
+        FreqMinMax = [];
         SecondTrial = [];
         CorrectResponse = [];
         ResponseTime = [];
         RecordingLocation = [];
-        bData = [];
+        ByTrialCentroid = [];
+        ByTrialArea =[];
+        ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -153,10 +160,10 @@ for cc = 1:length(chNum)
                         ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
                         ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
                     elseif trTrue == 0
-                        ByTrialCentroid(jj,:) = [0 0];
-                        ByTrialArea(jj,:) = [0];
-                        ByTrialBoundingBoxTimeRange(jj,:) = [0 0];
-                        ByTrialBoundingBoxFreqRange(jj,:) = [0 0];
+                        ByTrialCentroid(jj,:) = [NaN NaN];
+                        ByTrialArea(jj,:) = [NaN];
+                        ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                        ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
                     end
                     RecordingLocation{jj,1} = chName{cc};
                     ChannelNumber{jj,1} = chNum{cc};
@@ -297,21 +304,28 @@ for cc = 1:length(chNum)
     %         T2 = [T2; T1];
     %         idx2 = idx2+1;
     for nn = 5:7  %runs through each id
-        T1 = [];
+        T1 = [];        
         pkIndex = [];
-        ChannelNumber = [];
+        bData = [];
+        PatientName =[];
+        ChannelNumber = [];        
         TrialType = [];
-        TrialNumber = [];
+        TrialNumber = [];        
         ClusterCenter = [];
         TstatCluster = [];
         ImageType = [];
         MaxValue = [];
         TimeofMax = [];
+        TimeMinMax = [];
+        FreqMinMax = [];
         SecondTrial = [];
         CorrectResponse = [];
         ResponseTime = [];
         RecordingLocation = [];
-        bData = [];
+        ByTrialCentroid = [];
+        ByTrialArea =[];
+        ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -396,10 +410,10 @@ for cc = 1:length(chNum)
                         ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
                         ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
                     elseif trTrue == 0
-                        ByTrialCentroid(jj,:) = [0 0];
-                        ByTrialArea(jj,:) = [0];
-                        ByTrialBoundingBoxTimeRange(jj,:) = [0 0];
-                        ByTrialBoundingBoxFreqRange(jj,:) = [0 0];
+                        ByTrialCentroid(jj,:) = [NaN NaN];
+                        ByTrialArea(jj,:) = [NaN];
+                        ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                        ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
                     end
                     RecordingLocation{jj,1} = chName{cc};
                     ChannelNumber{jj,1} = chNum{cc};

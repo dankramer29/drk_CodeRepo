@@ -21,9 +21,9 @@ if ~isempty(subjName)
     folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
     %make the directory folder
-    if ~isfolder(folder_name)
-        mkdir (folder_name)
-    end
+
+    mkdir(folder_name)
+    
     for ii=1:length(figs)
         h=figure(figs(ii));
         %saveas(h, get(h,'Name'), 'jpg')

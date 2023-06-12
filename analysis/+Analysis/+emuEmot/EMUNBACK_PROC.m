@@ -372,6 +372,45 @@ else
     emotionTaskLFP.secondTrial = 1;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% create a table for the stats for all trials
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for ii =1:(length(CorrectTrialsEm))
+    PatientName{ii,1} = subjName;
+    TrialType{ii,1} = 'emotionTask';
+    SecondTrial(ii,1) = emotionTaskLFP.secondTrial;
+    TrialNumber(ii,1) = ii;
+    ImageTypeEmotion(ii,1) = PresentedEmotionIdxEm(ii);
+    ImageTypeIdentity(ii,1) = PresentedIdentityIdxEm(ii);
+    CorrectResponse(ii,1) = CorrectTrialsEm(ii);
+    ResponseTime(ii,1) = ResponseTimesDiffEmotion(ii)/1e6;
+end
+statsAllTrialsEm = table(PatientName, TrialType, SecondTrial,...
+    TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
+    CorrectResponse, ResponseTime);
+
+clear PatientName TrialType SecondTrial...
+    TrialNumber ImageTypeEmotion ImageTypeIdentity...
+    CorrectResponse ResponseTime
+
+for ii =1:(length(CorrectTrialsId))
+    PatientName{ii,1} = subjName;
+    TrialType{ii,1} = 'identityTask';
+    SecondTrial(ii,1) = identityTaskLFP.secondTrial;
+    TrialNumber(ii,1) = ii;
+    ImageTypeEmotion(ii,1) = PresentedEmotionIdxId(ii);
+    ImageTypeIdentity(ii,1) = PresentedIdentityIdxId(ii);
+    CorrectResponse(ii,1) = CorrectTrialsId(ii);
+    ResponseTime(ii,1) = ResponseTimesDiffIdentity(ii)/1e6;
+end
+statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
+    TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
+    CorrectResponse, ResponseTime);
+
+
+MW13.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compare the tasks
@@ -404,7 +443,7 @@ end
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
-[AllPatientsSigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
+[MW13.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
     'chName', chLocationName, 'patientName', subjName);
 
@@ -445,12 +484,14 @@ if saveSelectFile
     fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'AllPatientsSigClusterSummStats', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName);
+
+    
 end
 
 
 %% summary stats per patient across all trials
-
+%use EMUNBACK_COMPAREACROSSPATIENTS
 
 
 

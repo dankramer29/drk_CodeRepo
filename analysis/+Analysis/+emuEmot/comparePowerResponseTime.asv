@@ -1,4 +1,4 @@
-function [summaryStats] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
+function [summaryStatsSigTrials, summary] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 %   ALSO WANT TO LOOK AT THE TIMING OF THE PEAKS FOR WHEN TASK RELEVANT AND
@@ -13,9 +13,9 @@ function [summaryStats] = comparePowerResponseTime(nback, identityTaskLFP, emoti
 
 
 
-summaryStats = struct;
-summaryStats.timeMinMax = timeMinMax;
-summaryStats.freqMinMax = freqMinMax;
+summaryStatsSigTrials = struct;
+summaryStatsSigTrials.timeMinMax = timeMinMax;
+summaryStatsSigTrials.freqMinMax = freqMinMax;
 
 %grab fields
 chNum = fieldnames(nback);
@@ -56,11 +56,7 @@ for cc = 1:length(chNum)
         T1 = [];        
         pkIndex = [];
         bData = [];
-        if nn >1
-        clear(PatientName, RecordingLocation, ChannelNumber, TrialType, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
-                    TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
-                    CorrectResponse, ResponseTime, SecondTrial);
-        end
+       
         PatientName =[];
         ChannelNumber = [];        
         TrialType = [];
@@ -79,6 +75,7 @@ for cc = 1:length(chNum)
         ByTrialCentroid = [];
         ByTrialArea =[];
         ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -163,10 +160,10 @@ for cc = 1:length(chNum)
                         ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
                         ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
                     elseif trTrue == 0
-                        ByTrialCentroid(jj,:) = [0 0];
-                        ByTrialArea(jj,:) = [0];
-                        ByTrialBoundingBoxTimeRange(jj,:) = [0 0];
-                        ByTrialBoundingBoxFreqRange(jj,:) = [0 0];
+                        ByTrialCentroid(jj,:) = [NaN NaN];
+                        ByTrialArea(jj,:) = [NaN];
+                        ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                        ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
                     end
                     RecordingLocation{jj,1} = chName{cc};
                     ChannelNumber{jj,1} = chNum{cc};
@@ -310,25 +307,25 @@ for cc = 1:length(chNum)
         T1 = [];        
         pkIndex = [];
         bData = [];
-
-        clear(PatientName, RecordingLocation, ChannelNumber, TrialType, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
-                    TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
-                    CorrectResponse, ResponseTime, SecondTrial);
-%         T1 = [];
-%         pkIndex = [];
-%         ChannelNumber = [];
-%         TrialType = [];
-%         TrialNumber = [];
-%         ClusterCenter = [];
-%         TstatCluster = [];
-%         ImageType = [];
-%         MaxValue = [];
-%         TimeofMax = [];
-%         SecondTrial = [];
-%         CorrectResponse = [];
-%         ResponseTime = [];
-%         RecordingLocation = [];
-%         bData = [];
+        PatientName =[];
+        ChannelNumber = [];        
+        TrialType = [];
+        TrialNumber = [];        
+        ClusterCenter = [];
+        TstatCluster = [];
+        ImageType = [];
+        MaxValue = [];
+        TimeofMax = [];
+        TimeMinMax = [];
+        FreqMinMax = [];
+        SecondTrial = [];
+        CorrectResponse = [];
+        ResponseTime = [];
+        RecordingLocation = [];
+        ByTrialCentroid = [];
+        ByTrialArea =[];
+        ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -413,10 +410,10 @@ for cc = 1:length(chNum)
                         ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
                         ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
                     elseif trTrue == 0
-                        ByTrialCentroid(jj,:) = [0 0];
-                        ByTrialArea(jj,:) = [0];
-                        ByTrialBoundingBoxTimeRange(jj,:) = [0 0];
-                        ByTrialBoundingBoxFreqRange(jj,:) = [0 0];
+                        ByTrialCentroid(jj,:) = [NaN NaN];
+                        ByTrialArea(jj,:) = [NaN];
+                        ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                        ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
                     end
                     RecordingLocation{jj,1} = chName{cc};
                     ChannelNumber{jj,1} = chNum{cc};
@@ -450,7 +447,7 @@ for cc = 1:length(chNum)
 
 end
 
-summaryStats = T2;
+summaryStatsSigTrials = T2;
 
 
 end

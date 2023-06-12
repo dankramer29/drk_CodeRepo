@@ -1,4 +1,4 @@
-function [summaryStats] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
+function [summaryStatsSigTrials] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 %   ALSO WANT TO LOOK AT THE TIMING OF THE PEAKS FOR WHEN TASK RELEVANT AND
@@ -13,9 +13,7 @@ function [summaryStats] = comparePowerResponseTime(nback, identityTaskLFP, emoti
 
 
 
-summaryStats = struct;
-summaryStats.timeMinMax = timeMinMax;
-summaryStats.freqMinMax = freqMinMax;
+summaryStatsSigTrials = [];
 
 %grab fields
 chNum = fieldnames(nback);
@@ -188,7 +186,7 @@ for cc = 1:length(chNum)
                 T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
                     TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
                     CorrectResponse, ResponseTime, SecondTrial);
-            end
+            end        
         end
         %add each trial necessary
         T2 = [T2; T1];
@@ -447,7 +445,7 @@ for cc = 1:length(chNum)
 
 end
 
-summaryStats = T2;
+summaryStatsSigTrials = T2;
 
 
 end

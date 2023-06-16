@@ -1,3 +1,6 @@
+%THIS IS BOTH NOISE TEST AND COMPARE WITHIN PATIENTS, I SPLIT IT UP, NO
+%NEED FOR THIS ANYMORE 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % NOISE TEST
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

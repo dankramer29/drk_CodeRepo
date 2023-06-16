@@ -75,15 +75,6 @@ if DoPlot
         'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 end
 
-%% create a table to that can be combined for all patients regarding statistically significant clusters.
-%timeMinMax and freqMinMax are to capture only significant epochs in those
-%frequency bands during that period of time (so like 50 to 150 hz
-%significant epochs that are between 100 and 900 ms). 
-[MW13.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
-    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
-    'chName', chLocationName, 'patientName', subjName);
-
-
 %% save plots
 
 %savePlot = 0; %toggle on if you want to save the plots up front, probably
@@ -95,6 +86,17 @@ if savePlot
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
 end
+
+%% create a table to that can be combined for all patients regarding statistically significant clusters.
+%timeMinMax and freqMinMax are to capture only significant epochs in those
+%frequency bands during that period of time (so like 50 to 150 hz
+%significant epochs that are between 100 and 900 ms). 
+[MW13.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
+    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
+    'chName', chLocationName, 'patientName', subjName);
+
+
+
 
 %% for saving. probably easier to do by hand
 % So save these variables with these names

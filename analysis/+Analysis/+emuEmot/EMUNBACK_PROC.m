@@ -356,14 +356,16 @@ if saveSelectFile
         %make the directory folder
         mkdir (folder_name)
     end
-    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
+    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName, '-v7.3');
+
+    
+    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName, '-v7.3');
 
     
 end

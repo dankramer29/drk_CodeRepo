@@ -32,15 +32,19 @@
 
 % MW13_Session_9_filter.nwb — NBack_IDENTITY_2022_5_29…
 % MW13_Session_10_filter.nwb — NBack_EMOTION_2022_5_29…
-
-
 %run the script to pull in the data from nwb if needed
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% change the details for each patient
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %MW13
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
+
 sessionName = '5_29_2022session';
 subjName = 'MW13';
 
@@ -62,7 +66,7 @@ postTimeRes = 0.5;
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
 multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms (mtspectrogramc, also option to do pspectrum, but haven't used it)
-xshuffles = 100; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
+xshuffles = 1000; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
 DoPlot = 1; %toggle plotting on or off
 savePlot = 0; %toggle on if you want to save the plots up front, probably better to look at them individually first
 saveSelectFile = 0; %toggle on if you want to save all the files. probably best to do by hand
@@ -115,14 +119,32 @@ macro_location = location(macroROWS);
 wireID = testfile.general_extracellular_ephys_electrodes.vectordata.get('wireID').data.load();  
 shortBAn = testfile.general_extracellular_ephys_electrodes.vectordata.get('shortBAn').data.load(); 
 
-TableChannel = table(location, hemis, macroROWS, label, channID, wireID, shortBAn);
+%number the channels on an electrode for easier assessment of which ones to
+%pull
+idx = 2;
+channelNumber(1) = 1;
+for ii = 2:length(wireID)   
+    if wireID(ii,1)==wireID(ii-1,1)
+        channelNumber(ii,1) = idx;
+        idx = idx + 1;
+    elseif wireID(ii,1) ~= wireID(ii-1,1)        
+        idx = 1;
+        channelNumber(ii,1) = idx;
+        idx = idx + 1;
+    end
+end
+
+TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, shortBAn, wireID);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
-
-chInterest = [2, 10, 30, 46, 60, 68, 82, 119, 120, 140 ]; %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
+chInterest = [17,18,26,69,77,78,79,59,60,83,89,90,91,126,127,129,130,93,94,95];
+%chInterest = [1 9 29 45 59 67 81 139];
+%chInterest = [7, 8, 15 16, 27, 28];  %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
+%[2, 10, 30, 46, 60, 68, 82, 119, 120, 140 ];
 %chInterest = [17,25,45,61,75,83,97];
+
 
 %setup for accessing channels
 %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
@@ -322,154 +344,11 @@ PresentedIdentityIdxId = PresentedIdentityIdx;
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% NOISE TEST
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%can turn on plotting for these, because it makes a lot of plots. However,
-%hard to visualize, so easiest to create the plots and have a look.
-%NOTE: right now the SD of 10 above seems to be about right, but also seems
-%to 
-[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, channelName, 'taskNameSel', 1);
-removeTrialsEmot = input('which lines from Temot do you want to remove '); %put the lines of the table Temot that you wan to remove in the commandline
-%put the row of the ones you actually want to remove here.
-emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
-TNoise = Temot;
-allChannelMean = allChannelMeanTemp;
-[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, channelName, 'taskNameSel', 2);
-removeTrialsEmot = input('which lines from Tident do you want to remove '); %put the lines of the table Tident that you wan to remove in the commandline
-identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
-TNoise = vertcat(TNoise, Tident);
-
-%allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
-
-%plot the periodogram for the mean of all trials across all channels to
-%look for bad channels.
-plotNoiseCheck = 1;
-if plotNoiseCheck
-   [subN1, subN2] = plt.subplotSize(length(channelName));
-    figure
-    for cc=1:length(channelName) %do all of the channels, go by 2 to get the spikes then the bands
-        subplot(subN1, subN2, cc);        
-        periodogram(allChannelMean(cc,:),[],size(allChannelMean,2), fs);
-        title(channelName{cc})
-    end
-end
-%turns out easiest way to eliminate a channel is to just ignore it.
-removeChannel = [];
-channelNameFinal = channelName;
-for ii = 1:length(removeChannel)
-    channelNameFinal(removeChannel(ii)) = [];
-end
-%%
-%% figure out which trial started first
-%1 means it was the second trial, 0 means it was the first.
-if trialStartTimeId > trialStartTimeEm
-    identityTaskLFP.secondTrial = 1;
-    emotionTaskLFP.secondTrial = 0;
-else
-    identityTaskLFP.secondTrial = 0;
-    emotionTaskLFP.secondTrial = 1;
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% create a table for the stats for all trials
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for ii =1:(length(CorrectTrialsEm))
-    PatientName{ii,1} = subjName;
-    TrialType{ii,1} = 'emotionTask';
-    SecondTrial(ii,1) = emotionTaskLFP.secondTrial;
-    TrialNumber(ii,1) = ii;
-    ImageTypeEmotion(ii,1) = PresentedEmotionIdxEm(ii);
-    ImageTypeIdentity(ii,1) = PresentedIdentityIdxEm(ii);
-    CorrectResponse(ii,1) = CorrectTrialsEm(ii);
-    ResponseTime(ii,1) = ResponseTimesDiffEmotion(ii)/1e6;
-end
-statsAllTrialsEm = table(PatientName, TrialType, SecondTrial,...
-    TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
-    CorrectResponse, ResponseTime);
-
-clear PatientName TrialType SecondTrial...
-    TrialNumber ImageTypeEmotion ImageTypeIdentity...
-    CorrectResponse ResponseTime
-
-for ii =1:(length(CorrectTrialsId))
-    PatientName{ii,1} = subjName;
-    TrialType{ii,1} = 'identityTask';
-    SecondTrial(ii,1) = identityTaskLFP.secondTrial;
-    TrialNumber(ii,1) = ii;
-    ImageTypeEmotion(ii,1) = PresentedEmotionIdxId(ii);
-    ImageTypeIdentity(ii,1) = PresentedIdentityIdxId(ii);
-    CorrectResponse(ii,1) = CorrectTrialsId(ii);
-    ResponseTime(ii,1) = ResponseTimesDiffIdentity(ii)/1e6;
-end
-statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
-    TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
-    CorrectResponse, ResponseTime);
+%% for saving any variables
+%THE NEXT STEP IS NOISE REMOVAL SO PROBABLY SAVE THE
+%IDENTITY/EMOTIONTASKLFP AFTER THAT STEP
 
 
-MW13.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% compare the tasks
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%  allEmotions and allIdentities are the same since it's just all images
-%  shown
-[nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
-[nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
-
-
-%% plotting
-ttImage = identityTaskLFP.tPlotImage;
-ff = itiDataFiltIdentity.freq;
-ttResponse = identityTaskLFP.tPlotResponse;
-
-if DoPlot
-    close all %need to close all other figures so the figures 
-    comparisonName = 'Image On';
-    plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, ...
-        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
-    comparisonName = 'Response';
-    plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, ...
-        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
-end
-
-%% create a table to that can be combined for all patients regarding statistically significant clusters.
-%timeMinMax and freqMinMax are to capture only significant epochs in those
-%frequency bands during that period of time (so like 50 to 150 hz
-%significant epochs that are between 100 and 900 ms). 
-[MW13.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
-    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
-    'chName', chLocationName, 'patientName', subjName);
-
-
-%% save plots
-
-%savePlot = 0; %toggle on if you want to save the plots up front, probably
-%better to look at them individually first THE TOGGLE IS REPEATED HERE FOR
-%EASE OF TOGGLING ON IF YOU WANT.
-if savePlot
-    hh =  findobj('type','figure'); 
-    nh = length(hh);
-    plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
-end
-
-%% for saving. probably easier to do by hand
-% So save these variables with these names
-% MW13_itiDataFiltEmotion
-% MW13_itiDataFiltIdentity
-% MW13_emotionTaskLFP
-% MW13_identityTaskLFP
-% MW13_itiDataReal
-% MW13_nbackCompareImageOn
-% MW13_nbackCompareResponse
-% MW13_AllPatientsSigClusterSummStats
 if saveSelectFile
     folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
@@ -489,10 +368,5 @@ if saveSelectFile
     
 end
 
-
-%% summary stats per patient across all trials
-%use EMUNBACK_COMPAREACROSSPATIENTS
-
-
-
-
+%% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK_COMPARE
+% 

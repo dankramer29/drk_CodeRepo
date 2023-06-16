@@ -26,7 +26,12 @@ CorrectResponseT = TtotalAllTrials.CorrectResponse;
 ResponseTimeT = TtotalAllTrials.ResponseTime;
 SecondTrialST = TtotalAllTrials.SecondTrial;
 
+%Response time x correct v incorrect
 [p, h, ci] = ranksum(ResponseTimeT(CorrectResponse==1,1), ResponseTimeT(CorrectResponseT==0,1));
+meanRTc = mean(ResponseTimeT(CorrectResponse==1,1));
+meanRTic = mean(ResponseTimeT(CorrectResponseT==0,1));
+stdRTc = std(ResponseTimeT(CorrectResponse==1,1));
+stdRTic = std(ResponseTimeT(CorrectResponseT==0,1));
 
 
 %% run stats on sig clusters

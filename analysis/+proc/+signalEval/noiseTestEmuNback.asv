@@ -70,7 +70,7 @@ for cc = 1:length(channelName)
                     matN(idx,:) = multip+mm;
                     idx = idx + 1;
                 end
-               
+                figure('Name', figtitle{1}
                 F = figure;
                 F.WindowState = 'fullscreen';
                 F.Name = ([channelName{cc}, ' ', 'variant', num2str(jj), ...
@@ -104,13 +104,9 @@ for cc = 1:length(channelName)
                     if ~isempty(sessionName)
                         hh =  findobj('type','figure');
                         nh = length(hh);
-                        if taskNameSel == 1;
-                            plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-                                'versionNum', 'v1_NoisecheckEmotionTask');
-                        elseif taskNameSel ==2;
-                            plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-                                'versionNum', 'v1_NoisecheckIdentityTask');
-                        end
+                        
+                        plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+                            'versionNum', 'v1_Noisecheck');
                         close
                     else
                         saveas(F, 'jpg')

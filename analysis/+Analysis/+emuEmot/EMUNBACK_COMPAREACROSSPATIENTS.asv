@@ -11,13 +11,24 @@ TtotalSigClust = [AllPatientsSigClusterSummStats]; %add the tables together.
 % (IF NOT NO NEED TO LOOK WITHIN THE EMOTIONS/IDS) WITH CHI2. REPORT SUMMARY ON EACH PATIENT CORRECT VS
 % INCORRECT AND MEAN RESPONSE TIMES BUT NO NEED TO RUN STATS.
 
+%THEN RUN RANKSUM ON CENTROID, RANGE OF FREQ, RANGE OF
+%TIME FOR CLUSTER (MEANING WIDTH AND HEIGHT OF THE BOUNDING BOX AROUND THE CLUSTER FOR
+%EACH TRIAL ON SPECTROGRAM) BASED ON BRAIN AREA. BASED ON CORRECT
+%INCORRECT. AND BASED ON RESPONSE TIME.
+
+% Then i think i'll do figures of the centroids and bounding boxes by brain
+% areas, by response time, and by correct vs incorrect trials. If none are
+% interesting, probably still do it anyway? Probably makes sense to do a
+% histogram for each area involved. Oh and do each separately by task type.
+
 %% run stats on all trials
 CorrectResponseT = TtotalAllTrials.CorrectResponse;
 ResponseTimeT = TtotalAllTrials.ResponseTime;
 SecondTrialST = TtotalAllTrials.SecondTrial;
 
+%Response time x correct v incorrect
 [p, h, ci] = ranksum(ResponseTimeT(CorrectResponse==1,1), ResponseTimeT(CorrectResponseT==0,1));
-
+meanRT = mean()
 
 %% run stats on sig clusters
 CorrectResponseST = TtotalSigClust.CorrectResponse;

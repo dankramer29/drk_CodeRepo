@@ -5,7 +5,13 @@
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
+if trialEm == true
+    testfile = testfileEm;
+elseif trialEm == false
+    testfile = testfileId;
+end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
+
 
 % You can use these values to search the timestamp data from the ephys
 % To check the actual time conversion

@@ -64,6 +64,7 @@ filterNames = fieldnames(data.iti.(chName{1}).bandPassed);
 
 
 %% this is breaking the data up by session, and can filter this way, or break up band passed data
+% currently AM using this as it does the bandpassed data.
 %% pre and post time conversion
 preTimeC = round(ImagepreTime * fs);
 postTimeC = round(ImagepostTime * fs);

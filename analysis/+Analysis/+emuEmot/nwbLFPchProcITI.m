@@ -36,7 +36,7 @@ for cc = 1:length(chNum) %channels
             'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow,...
             'DoBandFilterBroad', true, 'filterClassBand', filterClassicBand,...
             'Spectrogram', true); 
-        Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
+        %Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
         Filtered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
         Filtered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;
         Filtered.iti.(chName{cc}).bandPassed.filter1to200 = data(:,cc); %this has already been made by broad bandpassing

@@ -1,4 +1,7 @@
 %% figure out which trial started first
+
+%THINGS TO DO. NOT 100% SURE IT'S CAPTURING SIGNIFICANT AREAS FOR
+%INDIVIDUAL EMOTIONS/IDS. 
 %1 means it was the second trial, 0 means it was the first.
 if trialStartTimeId > trialStartTimeEm
     identityTaskLFP.secondTrial = 1;
@@ -45,7 +48,7 @@ statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
 
 
 MW13.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
-
+MW13.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

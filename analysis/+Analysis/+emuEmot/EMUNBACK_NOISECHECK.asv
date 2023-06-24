@@ -42,4 +42,3 @@ for ii = 1:length(removeChannel)
     channelNameFinal(removeChannel(ii)) = [];
 end
 %%
-% next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M

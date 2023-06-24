@@ -1,5 +1,6 @@
 %% EMUNBACK COMPARE ACROSS PATIENTS
 
+C=linspecer(100); %sets up plotting colors
 
 % COMBINE THE TABLES
 TtotalAllTrials = [statsAllTrialsId];
@@ -22,16 +23,70 @@ TtotalSigClust = [AllPatientsSigClusterSummStats]; %add the tables together.
 % histogram for each area involved. Oh and do each separately by task type.
 
 %% run stats on all trials
-CorrectResponseT = TtotalAllTrials.CorrectResponse;
-ResponseTimeT = TtotalAllTrials.ResponseTime;
-SecondTrialST = TtotalAllTrials.SecondTrial;
+%% first run overall stats
+% THIS IS FAR EASIER TO JUST SET UP XX IN EXCEL THEN CHANGE THE NAME BELOW
+% AND INSERT THE XXS BY CUT AND PASTE
+%Response Time Emotion Task v Identity Task
+%Response Time Correct v Incorrect
+%Response Time First trial v Second trial
+TstTemp = [];
+nameTable = {'Response Time Emotion Task v Identity Task'};
+testDone = {'ranksum'};
+[pvalue, h, ci] = ranksum(xx(:,1), xx(:,2));
+zval = ci.zval;
+ranksumNumerical = ci.ranksum;
+meanXX = mean(xx(:,1));
+meanYY = mean(xx(:,2));
+stdXX = std(xx(:,1));
+stdYY = std(xx(:,2));
+TstTemp = table(nameTable, meanXX, stdXX, meanYY, stdYY, pvalue, h, zval, ranksumNumerical, testDone);
+
+[Ax, L] = violin(xx, 'xlabel', {'Emotion Task', 'Identity Task'}, 'facealpha', 1, 'facecolor', [1 0.549 0; 0.12 0.85 0.98],  'mc', 'b', 'medc', '');
+Ax.LineWidth = 2;
+Ax.EdgeColor = 'k';
+Gc = gca;
+Gc.FontSize = 22;
+L.FontSize = 22;
+L.LineWidth = 4;
+
+
+%% kruskall wallis for individual emotion identity types
+TstTemp = [];
+nameTable = {'Response Time By Each Emotion'};
+testDone = {'Kruskall Wallis'};
+[pvalue, tbl, stats] = kruskalwallis(xx, [], 'off');
+multC = multcompare(stats);
+meanXX = mean(xx(:,1));
+meanYY = mean(xx(:,2));
+meanZZ = mean(xx(:,3));
+stdXX = std(xx(:,1));
+stdYY = std(xx(:,2));
+stdZZ = std(xx(:,3));
+colorTemp = [C(1,:); C(7,:); C(13,:)];
+TstTemp = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Emotion A", "Emotion B", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+[Ax, L] = violin(xx, 'xlabel', {'Emotion One', 'Emotion Two', 'Emotion Three'}, 'facealpha', 1, 'facecolor', colorTemp,  'mc',  'k', 'medc', '', 'LineWidth', 2);
+%Ax.LineWidth = ;
+Ax.LineWidth
+Ax.EdgeColor =  'k';
+Gc = gca;
+Gc.FontSize = 22;
+L.FontSize = 22;
+L.LineWidth = 4;
+
+
+
+%% chi squared for categorical
+
+
+
 
 %Response time x correct v incorrect
-[p, h, ci] = ranksum(ResponseTimeT(CorrectResponse==1,1), ResponseTimeT(CorrectResponseT==0,1));
-meanRTc = mean(ResponseTimeT(CorrectResponse==1,1));
-meanRTic = mean(ResponseTimeT(CorrectResponseT==0,1));
-stdRTc = std(ResponseTimeT(CorrectResponse==1,1));
-stdRTic = std(ResponseTimeT(CorrectResponseT==0,1));
+[p, h, ci] = ranksum(xx, yy);
+meanRTc = mean(xx);
+meanRTic = mean(yy);
+stdRTc = std(xx);
+stdRTic = std(yy);
 
 
 %% run stats on sig clusters

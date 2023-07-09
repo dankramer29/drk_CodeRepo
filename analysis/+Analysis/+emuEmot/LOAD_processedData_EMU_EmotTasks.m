@@ -5,13 +5,22 @@
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
-if trialEm == true
+if oneFile == true
+    testfile = testfileEmId;
+elseif trialEm == true
     testfile = testfileEm;
 elseif trialEm == false
     testfile = testfileId;
 end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
-
+if oneFile == true
+    cellVar = testfile.acquisition.get('events').data.load;
+    trimCellVar = cellVar(contains(cellVar(:),'TTL'));
+    for ii = 2:size(cellVar,1)
+        hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
+    end
+    hexNum = hex2dec(hexStr);    
+end
 
 % You can use these values to search the timestamp data from the ephys
 % To check the actual time conversion
@@ -36,7 +45,7 @@ beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 %these two are for .filtered file
 if rawData == 0
 macrowires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load;
-microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
+%microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 end
 
 
@@ -53,11 +62,14 @@ end
 
 % Microwire
 % NLX time [microseconds] 
-mi_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').timestamps.load;
+%mi_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').timestamps.load;
 
 % Macrowire
 % NLX time [microseconds] 
 ma_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').timestamps.load;
 
+%downsamle the timestamps 
+
+ma_timestampsDS=downsample(ma_timestamps, 8);
 
 

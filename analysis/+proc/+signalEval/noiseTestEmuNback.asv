@@ -30,7 +30,6 @@ tplotBP = dataLFP.tPlotImageBandPass;
 tplotSp = dataLFP.tPlotImage;
 ff = dataLFP.freq;
 idxFl = 1;
-idxNoise = 1;
 for cc = 1:length(channelName)
     for jj = 1:3                
         sAll = dataLFP.(task{taskType}).(channelName{cc}).image.bandPassed.filter1to200{jj};
@@ -90,8 +89,8 @@ for cc = 1:length(channelName)
                         plot(tplotBP, meanLine(idxT) - stdAbove*sdSline)
                         plot(tplotBP, sAll(idxT, :))
                         if ismember(idxT, tempFltrials)
-                            title(['* trial', num2str(idxT), ' line', num2str(idxFl-1)], 'FontSize', 14)
-                            
+                            title(['* trial', num2str(idxT), ' line', num2str(idxFl-1)]. 'fontsiz')
+
                         else
                             title(['\color{magenta}trial', num2str(idxT)])
                         end
@@ -150,8 +149,7 @@ for cc = 1:length(channelName)
                     plot(tplotBP, meanS(idxT) - stdAbove*sdSline)
                     plot(tplotBP, sAll(idxT, :))                    
                     if ismember(idxT, flaggedTrials)
-                        title(['* trial', num2str(idxNoise)])
-                        idxNoise = idxNoise + 1;
+                        title(['* trial', num2str(idxT)])
                     else
                         title(['\color{magenta}trial', num2str(idxT)])
                     end

@@ -5,7 +5,23 @@
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
+if oneFile == true
+    testfile = testfileEmId;
+elseif trialEm == true
+    testfile = testfileEm;
+elseif trialEm == false
+    testfile = testfileId;
+end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
+if oneFile == true
+    cellVar = testfile.acquisition.get('events').data.load;
+    trimCellVar = cellVar(contains(cellVar(:),'TTL'));
+    for ii = 2:size(cellVar,1)
+        hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
+    end
+    hexNum = hex2dec(hexStr);
+    beh_timestamps(hexNum ~= 255) = [];
+end
 
 % You can use these values to search the timestamp data from the ephys
 % To check the actual time conversion
@@ -30,9 +46,9 @@ beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 %these two are for .filtered file
 if rawData == 0
 macrowires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').data.load;
+%microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 end
 
-microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 
 %this is for .raw file
 if rawData == 1
@@ -40,8 +56,6 @@ macroData = testfile.acquisition.get('MacroWireSeries').data.load();
 macroDataD = downsample(macroData', 8); %raw dara is 4000 and want 500 so downsample by 8
 macroDataD = macroDataD';
 macrowires = macroDataD;
-
-
 end
 
 
@@ -49,11 +63,18 @@ end
 
 % Microwire
 % NLX time [microseconds] 
-mi_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').timestamps.load;
+%mi_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').timestamps.load;
 
 % Macrowire
 % NLX time [microseconds] 
 ma_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').timestamps.load;
 
+%downsamle the timestamps 
+ma_timestampsDS=downsample(ma_timestamps, 8);
 
+if oneFile
+    [behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDSEm); %finds the ttl
+
+    macrowires(:,1:beh_timestamps(1)-(fs*5)) = []; %remove all but 5 seconds worth of the macrowire data
+end
 

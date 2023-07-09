@@ -17,7 +17,7 @@ allChannelMean = allChannelMeanTemp;
 [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
     channelName, 'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
-removeTrialsId = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
+removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
@@ -36,7 +36,7 @@ if plotNoiseCheck
     end
 end
 %turns out easiest way to eliminate a channel is to just ignore it.
-removeChannel = [];
+removeChannel = input('which channels from the trial do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
 channelNameFinal = channelName;
 for ii = 1:length(removeChannel)
     channelNameFinal(removeChannel(ii)) = [];

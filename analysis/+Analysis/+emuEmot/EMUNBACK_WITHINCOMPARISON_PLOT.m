@@ -2,6 +2,8 @@
 
 %THINGS TO DO. NOT 100% SURE IT'S CAPTURING SIGNIFICANT AREAS FOR
 %INDIVIDUAL EMOTIONS/IDS. 
+
+
 %1 means it was the second trial, 0 means it was the first.
 if trialStartTimeId > trialStartTimeEm
     identityTaskLFP.secondTrial = 1;
@@ -47,8 +49,8 @@ statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
     CorrectResponse, ResponseTime);
 
 
-MW13.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
-MW13.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
+MW9.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
+MW9.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,7 +96,7 @@ end
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
-[MW13.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
+[MW9.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
     'chName', chLocationName, 'patientName', subjName);
 
@@ -118,17 +120,16 @@ if saveSelectFile
         %make the directory folder
         mkdir (folder_name)
     end
-    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW9_itiDataFiltIdentity', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW9_itiDataFiltEmotion', '.mat'];    save(fileName);    
+    fileName = [folder_name, '\', 'MW9_emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW9_identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW9_itiDataReal', '.mat'];    save(fileName);
 
     
-    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName, '-v7.3');
-
+    fileName = [folder_name, '\', 'MW9_nbackCompareImageOn', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW9_nbackCompareResponse', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW9', '.mat'];    save(fileName);
     
 end
 

@@ -2,7 +2,8 @@
 %%
 % EMUNBACK_PROC
 
-
+%MW13 9 is identity, 10 is emotion
+%MW9
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
 % after that, but then image off, fixation on, then image 3 and decision
@@ -16,7 +17,7 @@
 %Short version: ma_timestamps and beh_timestamps are on the neural clock
 %(see below for conversion). 1.6xxxe15. 
 %rest are on the now command psychtoolbox clock and are in microseconds
-%(see below) an
+%(see below) 
 
 % There are two clocks, the first clock from the psychtoolbox is
 %from the "now" command (stores that output) at each timestamp (e.g.
@@ -73,21 +74,26 @@
 %% change the details for each patient
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+% NWB contains beh_timestamps and ma_timestamps and macrowires data and on
+% the neural clock. Rest are on now clock
 addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
+oneFile = true; %if the nwb file is a single file and not split into two. Starts around patient MW_16
+sessionName = 'MW_16';
+subjName = 'MW_16';
 
-sessionName = 'MW_09';
-subjName = 'MW09';
+MW16 = struct;
 
-MW09 = struct;
-
-matNameEm = 'NBack_EMOTION_2022_1_7.17_29_54'; %place this in an Emotion folder
-matNameId = 'NBack_IDENTITY_2022_1_7.16_56_59'; %place this in an Identity folder
-emotionFilter = 'MW_9_Session_13_filter.nwb'; %does NOT need to be placed in a folder
-identityFilter = 'MW_9_Session_12_filter.nwb';
-
+matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; %place this in an "Emotion" folder
+matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; %place this in an "Identity" folder
+if oneFile == 0
+    emotionFilter = 'MW_9_Session_13_filter.nwb'; %does NOT need to be placed in a folder
+    identityFilter = 'MW_9_Session_12_filter.nwb';
+elseif oneFile == 1
+    emotionidentityFilter = 'MW_16_S2_Session_1_filter.nwb'; %if they are one file
+end
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 
@@ -140,8 +146,13 @@ end
 
 %% Load NWB
 % Emotion
-testfileEm = nwbRead(emotionFilter);
-testfileId = nwbRead(identityFilter);
+if oneFile == false
+    testfileEm = nwbRead(emotionFilter);
+    testfileId = nwbRead(identityFilter);
+elseif oneFile == true
+    testfileEmId = nwbRead(emotionidentityFilter);
+end
+
 
 
 %double check to compare the NWB for ID and EM are correct. ID is always
@@ -200,7 +211,7 @@ TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, 
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %MW9 channels:
-chInterest = [75, 76, 117, 118];
+chInterest = [1, 2, 17, 18, 75, 76, 107, 108, 114, 115, 117, 118, 123, 124, 125, 126];
 %MW13 channels:
 % chInterest = [17,18,26,69,77,78,79,59,60,83,89,90,91,126,127,129,130,93,94,95];
 %chInterest = [1 9 29 45 59 67 81 139];
@@ -220,8 +231,24 @@ for ff=1:length(chInterest)
     chLocationName{ff,1} = strcat(hemis(channID == chInterest(ff)), {' '}, strout);
 end
 
+%% find the behavioral timestamps
+if oneFile == true
+    beh_timestampsEm = beh_timestamps(hexNum == 255);
+    beh_timestampsId = beh_timestamps(hexNum == 256); %NEED TO CHANGE THIS BASED ON WHAT IT REALLY IS.
+    [behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsEm, ma_timestampsDS); %finds the ttl
+    [behavioralIndexTTLId, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsId, ma_timestampsDS); %finds the ttl
+    macrowiresEm = macrowires(:,1:behavioralIndexTTLEm(1)-(fs*5)); %remove all but 5 seconds worth of the macrowire data
+    macrowiresId = macrowires(:,1:behavioralIndexTTLId(1)-(fs*5));
+    ma_timestampsDSEm = ma_timeSTampsDs(:,1:behavioralIndexTTLEm(1)-(fs*5)); %remove all but 5 seconds worth of the macrowire data
+    ma_timestampsDSId = ma_timeSTampsDs(:,1:behavioralIndexTTLId(1)-(fs*5)); %remove all but 5 seconds worth of the macrowire data
+elseif oneFile == false
+    macrowiresEm = macrowires;
+    macrowires = [];
+    beh_timestampsEm = beh_timestamps;
+end
+
 %% common average rerefernce
-macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
+macrowiresCAREm = double(macrowiresEm) - repmat(nanmean(macrowiresEm,1), size(macrowiresEm,1),1);
 
 %% low pass the data (nyquist 250)
 lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
@@ -229,16 +256,15 @@ lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
 'SampleRate',500);
 
 %cut data to channels of interest
-data = double(macrowiresCAR(chInterest, :));
+data = double(macrowiresCAREm(chInterest, :));
 
 %lowpass filter
 dataFemotion = filtfilt(lpFilt,data');
 
-%% find the behavioral timestamps
-%downsamle the timestamps (ma_timestamps comes from the nwb as well)
-ma_timestampsDSEm=downsample(ma_timestamps, 8);
+clear data; clear macrowiresCAREm; 
+
+
 %convert the timestamps so you can go back to earlier steps
-beh_timestampsEm = beh_timestamps;
 TTLTimesEm = TTLTimes;
 CorrectResponseEm = CorrectResponse;
 ResponseEm = Response;
@@ -298,10 +324,10 @@ taskTimeSt = closestValue(1);
 taskTimeEnd = closestValue(end);
 
 %% Filter all the data
-preStartData = dataFemotion; %can adjust if want to exclude part of the data
+%preStartData = dataFemotion; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+    [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(dataFemotion, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 PresentedEmotionIdxEm = PresentedEmotionIdx;
@@ -342,30 +368,37 @@ folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName
 
 %identityFilter = 'MW_9_Session_12_filter.nwb'; %this is done as an earlier
 %step but is here for ease of checking different nwbs
+if oneFile == false
+    trialEm = false;
+    run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
+    %% common average rerefernce
+    
+    macrowiresId = macrowires;
+    macrowires = [];
+    
+    % convert to individual so they are saved and can go back to earlier steps
+    beh_timestampsId = beh_timestamps;
+    ma_timestampsDSId = ma_timestampsDs; %downsamle the timestamps
 
-trialEm = false;
-run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
-load(folderName)
-nbackData.task = matchStr;
+end
 
-
-%% common average rerefernce
-macrowiresCAR = double(macrowires) - repmat(nanmean(macrowires,1), size(macrowires,1),1);
+macrowiresCARId = double(macrowiresId) - repmat(nanmean(macrowiresId,1), size(macrowiresId,1),1);
 
 %% low pass the data (nyquist 250)
 lpFiltlow = designfilt('lowpassiir','FilterOrder',8, ...
-'PassbandFrequency',200,'PassbandRipple',0.2, ...
-'SampleRate',fs);
+    'PassbandFrequency',200,'PassbandRipple',0.2, ...
+    'SampleRate',fs);
 
 %cut data to channels of interest
-data = double(macrowiresCAR(chInterest, :));
-
+data = double(macrowiresCARId(chInterest, :));
 %lowpass filter
 dataFidentity = filtfilt(lpFiltlow,data');
 
-% convert to individual so they are saved and can go back to earlier steps
-ma_timestampsDSId=downsample(ma_timestamps, 8); %downsamle the timestamps
-beh_timestampsId = beh_timestamps;
+clear data; clear macrowiresCARId;
+
+
+load(folderName)
+nbackData.task = matchStr;
 TTLTimesId = TTLTimes;
 CorrectResponseId = CorrectResponse;
 ResponseId = Response;
@@ -391,7 +424,7 @@ end
 % find the timestamp conversion of the phys data and the psychtoolbox data
 ttl_beh = beh_timestampsId(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
 
-ImageTimesDiffCheck = (ImageTimesId-TTLTimesId)*24*60*60 %in seconds to ensure that the TTLs and Imagetimes are as expected, close
+ImageTimesDiffCheck = (ImageTimesId-TTLTimesId)*24*60*60; %in seconds to ensure that the TTLs and Imagetimes are as expected, close
 ImageTimesDiff = ImageTimesDiffCheck*1e6; %convert to microseconds
 ImageTimesAdjId = ttl_beh+ImageTimesDiff; %moves the time into neural time scale
 
@@ -419,7 +452,9 @@ CorrectTrialsId = CorrectResponseId == ResponseNanRemoved;
 %finds the index in the data of the behavioral indices
 %behavioralIndex now points to the row in data that is closest to the
 %behavioral time stamps. 
-[behavioralIndexTTLId, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsId, ma_timestampsDSId);
+if oneFile == false
+    [behavioralIndexTTLId, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsId, ma_timestampsDSId);
+end
 [behavioralIndexImageOnId, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjId, ma_timestampsDSId);
 [behavioralIndexResponseId, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDSId);
 
@@ -428,10 +463,10 @@ taskTimeSt = closestValue(1);
 taskTimeEnd = closestValue(end);
 
 %% Filter all the data
-preStartData = dataFidentity; %can adjust if want to exclude part of the data
+%preStartData = dataFidentity; %can adjust if want to exclude part of the data
 %filters the entire trial.
 if alreadyFilteredData == 0
-    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(preStartData, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
+    [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
 %preserve the variables so you can rerun the making of identityTaskLFP
@@ -462,16 +497,16 @@ if saveSelectFile
         %make the directory folder
         mkdir (folder_name)
     end
-    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
+    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
 
 
-    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW13', '.mat'];    save(fileName);
 
     
 end

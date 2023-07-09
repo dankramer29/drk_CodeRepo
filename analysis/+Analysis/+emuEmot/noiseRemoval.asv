@@ -2,10 +2,10 @@ function [dataLFPout] = noiseRemoval(dataLFP, Tch, removeTrials, varargin)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
-[varargin, chRemove] = util.argkeyval('chRemove',varargin, []); %if you need to remove a whole channel
 [varargin, trialType] = util.argkeyval('trialType',varargin, 1); %1 if identity task and 2 if emotion task
 
-
+temp(:,1) = 1:height(Tch);
+temp(removeTrials) = [];
 Tremove = Tch(removeTrials, :);
 
 task = fieldnames(dataLFP);
@@ -28,12 +28,6 @@ for ii = 1:size(Tch,1)
     end
 end
 
-if ~isempty(chRemove)
-   for ii = 1:size(chRemove)
-       dataLFP = rmfield(dataLFP.byemotion.ch1);
-       dataLFP.(task{2}).(chRemove{ii}) = [];
-   end
-end
 
 dataLFPout = dataLFP;
 

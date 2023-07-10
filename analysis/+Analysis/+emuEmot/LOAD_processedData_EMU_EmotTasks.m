@@ -15,9 +15,12 @@ end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 if oneFile == true
     cellVar = testfile.acquisition.get('events').data.load;
-    trimCellVar = cellVar(contains(cellVar(:),'TTL'));
-    for ii = 2:size(cellVar,1)
-        hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
+    for ii = 1:size(cellVar,1)
+        if contains(cellVar(ii,:), 'TTL')
+            hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
+        else
+            hexStr(ii,:) = {'0x0000'};
+        end
     end
     hexNum = hex2dec(hexStr);    
 end

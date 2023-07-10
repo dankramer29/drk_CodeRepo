@@ -19,6 +19,10 @@
 %rest are on the now command psychtoolbox clock and are in microseconds
 %(see below) 
 
+%this is mostly relevant for MW16 and MW18 when the hex system wasn't
+%labeled correctly. For nback 167 TTLS for emotion and 167 for identity
+%(but might be doubled?).
+
 % There are two clocks, the first clock from the psychtoolbox is
 %from the "now" command (stores that output) at each timestamp (e.g.
 %ImageTimes). the second is date time, but is in microseconds
@@ -232,6 +236,8 @@ for ff=1:length(chInterest)
 end
 
 %% find the behavioral timestamps
+%TO FIGURE OUT THE START TIME, TRY TO MATCH UP THE "NOW" TIME AND THE
+%NEURAL CLOCK TIME FOR WHERE YOU THINK IT WOULD START. 
 if oneFile == true
     beh_timestampsEm = beh_timestamps(hexNum == 255);
     beh_timestampsId = beh_timestamps(hexNum == 256); %NEED TO CHANGE THIS BASED ON WHAT IT REALLY IS.

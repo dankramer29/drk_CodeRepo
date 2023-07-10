@@ -15,12 +15,13 @@ end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 if oneFile == true
     cellVar = testfile.acquisition.get('events').data.load;
-    trimCellVar = cellVar(contains(cellVar(:),'TTL'));
-    for ii = 2:size(cellVar,1)
+    for ii = 1:size(cellVar,1)
+    if contains(cellvar(1,:), 'TTL')
+        trimCellVar = cellVar(contains(cellVar,'TTL'));
+    
         hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
     end
-    hexNum = hex2dec(hexStr);
-    beh_timestamps(hexNum ~= 255) = [];
+    hexNum = hex2dec(hexStr);    
 end
 
 % You can use these values to search the timestamp data from the ephys
@@ -70,11 +71,7 @@ end
 ma_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MacroWireSeries').timestamps.load;
 
 %downsamle the timestamps 
+
 ma_timestampsDS=downsample(ma_timestamps, 8);
 
-if oneFile
-    [behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestamps, ma_timestampsDSEm); %finds the ttl
-
-    macrowires(:,1:beh_timestamps(1)-(fs*5)) = []; %remove all but 5 seconds worth of the macrowire data
-end
 

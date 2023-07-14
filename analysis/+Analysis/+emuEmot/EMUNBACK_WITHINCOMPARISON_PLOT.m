@@ -3,6 +3,7 @@
 %THINGS TO DO. NOT 100% SURE IT'S CAPTURING SIGNIFICANT AREAS FOR
 %INDIVIDUAL EMOTIONS/IDS. 
 
+MWX = struct; %CHANGE BELOW BEFORE SAVING.
 
 %1 means it was the second trial, 0 means it was the first.
 if trialStartTimeId > trialStartTimeEm
@@ -49,8 +50,8 @@ statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
     CorrectResponse, ResponseTime);
 
 
-MW9.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
-MW9.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
+MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
+MWX.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,7 +97,7 @@ end
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
-[MW9.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
+[MWX.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
     'chName', chLocationName, 'patientName', subjName);
 
@@ -113,6 +114,10 @@ end
 % MW13_nbackCompareImageOn
 % MW13_nbackCompareResponse
 % MW13_AllPatientsSigClusterSummStats
+
+%%%%
+MW5 = MWX;
+%%%%
 if saveSelectFile
     folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  

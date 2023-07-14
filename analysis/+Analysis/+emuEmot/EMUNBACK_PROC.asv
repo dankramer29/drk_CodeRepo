@@ -4,6 +4,8 @@
 
 %MW13 9 is identity, 10 is emotion
 %MW9
+%MW21 10 is identity, 12 is emo
+
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
 % after that, but then image off, fixation on, then image 3 and decision
@@ -12,6 +14,7 @@
 % off. CorrectResponse is the right answer and Response is if the images matched
 % (1) or didn't match (0) (i.e. if they are correct CorrectResponse ==
 % Response)
+%
 
 %Timestamps: 
 %Short version: ma_timestamps and beh_timestamps are on the neural clock
@@ -22,6 +25,8 @@
 %this is mostly relevant for MW16 and MW18 when the hex system wasn't
 %labeled correctly. For nback 167 TTLS for emotion and 167 for identity
 %(but might be doubled?).
+
+%identity task is always run before emotion task
 
 % There are two clocks, the first clock from the psychtoolbox is
 %from the "now" command (stores that output) at each timestamp (e.g.
@@ -72,7 +77,17 @@
 % MW13_Session_10_filter.nwb — NBack_EMOTION_2022_5_29…
 %run the script to pull in the data from nwb if needed
 
+%%%%%%%%%%%%
+%% test the files to see if right number of ttls, which should be 54 if a single session
+%%%%%%%%%%%%
+% YOU DO NOT NEED TO DO THIS, JUST IF YOU DON'T KNOW WHICH ONE IS NBACK
+addpath(genpath('Z:\JM_Emotion\SubjectData\'));
 
+% fileLoc = 'Z:\JM_Emotion\SubjectData\MW18\NWB_Data';
+% testNWB = 'JM_MW18_Session_4_filter.nwb';
+% oneFile = true; trialEm = true; rawData = false;
+% testfileEmId = nwbRead(testNWB);
+% run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% change the details for each patient
@@ -84,19 +99,19 @@ addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
-oneFile = true; %if the nwb file is a single file and not split into two. Starts around patient MW_16
-sessionName = 'MW_16';
-subjName = 'MW_16';
+oneFile = false; %if the nwb file is a single file and not split into two. Starts around patient MW_16
+%USE _0X IF SINGLE DIGITS
+sessionName = 'MW_21';
+subjName = 'MW_21';
+%MWX - remember to change the name in the within subject processing
 
-MW16 = struct;
-
-matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; %place this in an "Emotion" folder
-matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; %place this in an "Identity" folder
+matNameEm = 'NBack_EMOTION_2023_02_20.13_43_16'; %place this in an "Emotion" folder
+matNameId = 'NBack_IDENTITY_2023_02_20.13_33_51'; %place this in an "Identity" folder
 if oneFile == 0
-    emotionFilter = 'MW_9_Session_13_filter.nwb'; %does NOT need to be placed in a folder
-    identityFilter = 'MW_9_Session_12_filter.nwb';
+    emotionFilter = 'JM_MW21_Session_12_filter.nwb'; %does NOT need to be placed in a folder
+    identityFilter = 'JM_MW21_Session_10_filter.nwb';
 elseif oneFile == 1
-    emotionidentityFilter = 'MW_16_S2_Session_1_filter.nwb'; %if they are one file
+    emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
@@ -158,25 +173,12 @@ elseif oneFile == true
 end
 
 
-
-%double check to compare the NWB for ID and EM are correct. ID is always
-%run first so this just checks that the start time for the NWB is before
-%the EM.
-
-trialStartTimeEm = testfileEm.session_start_time;
-trialStartTimeId = testfileId.session_start_time;
-if trialStartTimeId < trialStartTimeEm
-    NWBsCorrectOrder = true;
-else
-    NWBsCorrectOrder = false;
-    warning('NWB presumed ID starts after NWB presumed EM. The NWB numbers are supposed to be in order and ID task is always first, but need to verify')
-end
-
 %% Load the behavioral data
 trialEm = true;
+%runs nwb
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
+%loads behavioral
 load(folderName)
-nbackData.task = matchStr;
 
 
 %% pull in wire ids
@@ -214,8 +216,13 @@ TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
+%MW5 channels:
+open TableChannel
+dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
+%%
+chInterest = [1, 2, 49, 50, 57, 58];
 %MW9 channels:
-chInterest = [1, 2, 17, 18, 75, 76, 107, 108, 114, 115, 117, 118, 123, 124, 125, 126];
+%chInterest = [1, 2, 17, 18, 75, 76, 107, 108, 114, 115, 117, 118, 123, 124, 125, 126];
 %MW13 channels:
 % chInterest = [17,18,26,69,77,78,79,59,60,83,89,90,91,126,127,129,130,93,94,95];
 %chInterest = [1 9 29 45 59 67 81 139];
@@ -251,6 +258,9 @@ elseif oneFile == false
     macrowiresEm = macrowires;
     macrowires = [];
     beh_timestampsEm = beh_timestamps;
+    if ~isempty(cellVar)
+        hexNumEm = hexNum;
+    end
 end
 
 %% common average rerefernce
@@ -280,14 +290,25 @@ ImageTimesEm = ImageTimes;
 %% 
 % set up the behavioral timestamps to ensure they are the presentation of
 % the image
+%Hex code 19 task start; 29 image on; 39 fixation on; response 49; 
+%finds the image on time. realize this is variable but about 2 
+if isempty(cellVar)
 idx1 = 1; idx2 = 1;
 for ii=2:length(beh_timestampsEm)
     timeStampDiff(idx1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);    
     if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
-        imageOn(idx2) = ii-1; %record the relevant image onsets, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
+        imageOn(idx2) = ii-1; %record the relevant image onsets indices, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
         idx2 = idx2 + 1;
     end
     idx1 = idx1 +1;
+end
+elseif ~isempty(cellVar)
+    imageOn = find(hexNumEm == 29);
+    idx1 = 1;
+    for ii = 2:length(imageOn)   
+        timeStampDiff(idx1,1) = beh_timestampsEm(imageOn(ii))-beh_timestampsEm(imageOn(ii-1));        
+        idx1 = idx1+1;
+    end
 end
 
 % find the timestamp conversion of the phys data and the psychtoolbox data
@@ -384,7 +405,7 @@ if oneFile == false
     
     % convert to individual so they are saved and can go back to earlier steps
     beh_timestampsId = beh_timestamps;
-    ma_timestampsDSId = ma_timestampsDs; %downsamle the timestamps
+    ma_timestampsDSId = ma_timestampsDS; %downsamle the timestamps
 
 end
 
@@ -404,7 +425,6 @@ clear data; clear macrowiresCARId;
 
 
 load(folderName)
-nbackData.task = matchStr;
 TTLTimesId = TTLTimes;
 CorrectResponseId = CorrectResponse;
 ResponseId = Response;

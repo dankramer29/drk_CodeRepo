@@ -13,8 +13,9 @@ elseif trialEm == false
     testfile = testfileId;
 end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
-if oneFile == true
-    cellVar = testfile.acquisition.get('events').data.load;
+cellVar = [];
+cellVar = testfile.acquisition.get('events').data.load;
+if ~isempty(cellVar)
     for ii = 1:size(cellVar,1)
         if contains(cellVar(ii,:), 'TTL')
             hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
@@ -22,8 +23,9 @@ if oneFile == true
             hexStr(ii,:) = {'0x0000'};
         end
     end
-    hexNum = hex2dec(hexStr);    
+    hexNum = hex2dec(hexStr);  
 end
+
 
 % You can use these values to search the timestamp data from the ephys
 % To check the actual time conversion

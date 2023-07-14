@@ -2,7 +2,7 @@
 
 %% this is all scratch pad stuff for now.
 
-
+%testing
 %%time issues
 
 datetime(ImageTimesAdjId(1)/1000000,...

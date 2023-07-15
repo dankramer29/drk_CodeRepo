@@ -95,7 +95,7 @@ addpath(genpath('Z:\JM_Emotion\SubjectData\'));
 %
 % NWB contains beh_timestamps and ma_timestamps and macrowires data and on
 % the neural clock. Rest are on now clock
-addpath(genpath('C:\Users\kramdani\Documents\Data\EMU_nBack'));
+addpath(genpath('Z:\KramerEmotionID_2023\Data\EMU_nBack'));
 
 preSpectrogramData = true; %either chop the data as already multitapered and then cut it up (true) or as raw voltage, cut it up, then process it by multitaper (false)
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
@@ -146,7 +146,7 @@ ImageTimes = [];
 %% START OF EMOTION PROCESSING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 taskName = 'Emotion';
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameEm);
+folderName=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', matNameEm);
 
 %%
 % set to 0 if running this with a new data set for the first time, set to
@@ -391,7 +391,7 @@ ImageTimes = [];
 
 taskName = 'Identity';
 
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', taskName, '\', matNameId);
+folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', matNameId);
 
 %identityFilter = 'MW_9_Session_12_filter.nwb'; %this is done as an earlier
 %step but is here for ease of checking different nwbs

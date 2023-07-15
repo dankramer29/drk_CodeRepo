@@ -5,14 +5,6 @@
 
 MWX = struct; %CHANGE BELOW BEFORE SAVING.
 
-%1 means it was the second trial, 0 means it was the first.
-if trialStartTimeId > trialStartTimeEm
-    identityTaskLFP.secondTrial = 1;
-    emotionTaskLFP.secondTrial = 0;
-else
-    identityTaskLFP.secondTrial = 0;
-    emotionTaskLFP.secondTrial = 1;
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% create a table for the stats for all trials
@@ -20,14 +12,13 @@ end
 for ii =1:(length(CorrectTrialsEm))
     PatientName{ii,1} = subjName;
     TrialType{ii,1} = 'emotionTask';
-    SecondTrial(ii,1) = emotionTaskLFP.secondTrial;
     TrialNumber(ii,1) = ii;
     ImageTypeEmotion(ii,1) = PresentedEmotionIdxEm(ii);
     ImageTypeIdentity(ii,1) = PresentedIdentityIdxEm(ii);
     CorrectResponse(ii,1) = CorrectTrialsEm(ii);
     ResponseTime(ii,1) = ResponseTimesDiffEmotion(ii)/1e6;
 end
-statsAllTrialsEm = table(PatientName, TrialType, SecondTrial,...
+statsAllTrialsEm = table(PatientName, TrialType, ...
     TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
     CorrectResponse, ResponseTime);
 
@@ -38,20 +29,18 @@ clear PatientName TrialType SecondTrial...
 for ii =1:(length(CorrectTrialsId))
     PatientName{ii,1} = subjName;
     TrialType{ii,1} = 'identityTask';
-    SecondTrial(ii,1) = identityTaskLFP.secondTrial;
     TrialNumber(ii,1) = ii;
     ImageTypeEmotion(ii,1) = PresentedEmotionIdxId(ii);
     ImageTypeIdentity(ii,1) = PresentedIdentityIdxId(ii);
     CorrectResponse(ii,1) = CorrectTrialsId(ii);
     ResponseTime(ii,1) = ResponseTimesDiffIdentity(ii)/1e6;
 end
-statsAllTrialsId = table(PatientName, TrialType, SecondTrial,...
+statsAllTrialsId = table(PatientName, TrialType, ...
     TrialNumber, ImageTypeEmotion, ImageTypeIdentity,...
     CorrectResponse, ResponseTime);
 
 
 MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
-MWX.NWBsCorrectOrder = NWBsCorrectOrder; %record that all the NWBs were correctly associated with the behavioral data.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,7 +105,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW5 = MWX;
+MW21 = MWX;
 %%%%
 if saveSelectFile
     folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    

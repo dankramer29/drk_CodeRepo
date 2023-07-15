@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % NOISE TEST
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %can turn on plotting for these, because it makes a lot of plots. However,
 %hard to visualize, so easiest to create the plots and have a look.
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
@@ -43,3 +44,4 @@ for ii = 1:length(removeChannel)
 end
 %%
 % next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
+edit EMUNBACK_WITHINCOMPARISON_PLOT.M

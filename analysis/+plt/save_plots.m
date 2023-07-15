@@ -18,7 +18,7 @@ function save_plots( figs, varargin )
 
 
 if ~isempty(subjName)
-    folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
+    folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
     %make the directory folder
 

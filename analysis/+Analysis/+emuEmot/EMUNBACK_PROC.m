@@ -137,6 +137,10 @@ Response = [];
 TTLTimes = [];
 CorrectResponse = [];
 ImageTimes = [];
+ma_timestampsDSEm = [];
+ma_timestampsDSId = [];
+PresentedEmotionIdx = [];
+PresentedIdentityIdx = [];
 
 %NO LONGER USING THE BELOW
 % shuffleLength = .05; %in seconds, the length of the stitched shuffles
@@ -258,6 +262,7 @@ elseif oneFile == false
     macrowiresEm = macrowires;
     macrowires = [];
     beh_timestampsEm = beh_timestamps;
+    ma_timestampsDSEm = ma_timestampsDS;
     if ~isempty(cellVar)
         hexNumEm = hexNum;
     end
@@ -279,40 +284,58 @@ dataFemotion = filtfilt(lpFilt,data');
 
 clear data; clear macrowiresCAREm; 
 
-
-%convert the timestamps so you can go back to earlier steps
-TTLTimesEm = TTLTimes;
-CorrectResponseEm = CorrectResponse;
-ResponseEm = Response;
-ResponseTimesEm  = ResponseTimes;
-ImageTimesEm = ImageTimes;
-
 %% 
 % set up the behavioral timestamps to ensure they are the presentation of
 % the image
 %Hex code 19 task start; 29 image on; 39 fixation on; response 49; 
 %finds the image on time. realize this is variable but about 2 seconds.
 if isempty(cellVar)
-idx1 = 1; idx2 = 1;
-for ii=2:length(beh_timestampsEm)
-    timeStampDiff(idx1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);    
-    if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
-        imageOn(idx2) = ii-1; %record the relevant image onsets indices, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
-        idx2 = idx2 + 1;
+    idx1 = 1; idx2 = 1;
+    for ii=2:length(beh_timestampsEm)
+        timeStampDiff(idx1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
+        if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
+            imageOn(idx2) = ii-1; %record the relevant image onsets indices, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
+            idx2 = idx2 + 1;
+        end
+        idx1 = idx1 +1;
     end
-    idx1 = idx1 +1;
-end
 elseif ~isempty(cellVar)
     imageOn = find(hexNumEm == 29);
     idx1 = 1;
-    for ii = 2:length(imageOn)   
-        timeStampDiff(idx1,1) = beh_timestampsEm(imageOn(ii))-beh_timestampsEm(imageOn(ii-1));        
+    for ii = 2:length(imageOn)
+        timeStampDiff(idx1,1) = beh_timestampsEm(imageOn(ii))-beh_timestampsEm(imageOn(ii-1));
         idx1 = idx1+1;
     end
 end
 
 % find the timestamp conversion of the phys data and the psychtoolbox data
 ttl_beh = beh_timestampsEm(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
+
+
+%% get behavioral stamps
+%convert the timestamps so you can go back to earlier steps
+%Response is whether it is a match (1) or not match (0). CorrectResponse is the right answer. So to see if they gave the correct response you'd do (Response == CorrectResponse)
+if isempty(TTLTimes) %shenanigans for different outputs as we collected this data
+    TTLTimesEm = Events.Times.Image_Shown; %does not appear to be a true ttl time so it's now just the same as image time
+    CorrectResponseEm = Stimuli.Correct_Responses;
+    ResponseEm = Stimuli.Subject_Responses;
+    ResponseTimesEm  = Events.Times.Response_Made;
+    ImageTimesEm = Events.Times.Image_Shown;
+else
+    TTLTimesEm = TTLTimes;
+    CorrectResponseEm = CorrectResponse;
+    ResponseEm = Response;
+    ResponseTimesEm  = ResponseTimes;
+    ImageTimesEm = ImageTimes;
+end
+
+if isempty(PresentedEmotionIdx)
+    PresentedEmotionIdxEm = Stimuli.Presented_EmotionsIdx;
+    PresentedIdentityIdxEm = Stimuli.Presented_IdentitiesIdx;
+else
+    PresentedEmotionIdxEm = PresentedEmotionIdx;
+    PresentedIdentityIdxEm = PresentedIdentityIdx;
+end
 
 ImageTimesDiffCheck = (ImageTimesEm-TTLTimesEm)*24*60*60; %in seconds to ensure that the TTLs and Imagetimes are as expected, close
 ImageTimesDiff = ImageTimesDiffCheck*1e6; %convert to microseconds
@@ -357,8 +380,7 @@ if alreadyFilteredData == 0
     [itiDataFiltEmotion] = Analysis.emuEmot.nwbLFPchProcITI(dataFemotion, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
-PresentedEmotionIdxEm = PresentedEmotionIdx;
-PresentedIdentityIdxEm = PresentedIdentityIdx;
+
 
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
@@ -377,21 +399,35 @@ PresentedIdentityIdxEm = PresentedIdentityIdx;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %Identity run
-beh_timestamps = [];
-ma_timestamps = [];
-ResponseTimes = [];
-Response = [];
-TTLTimes = [];
-CorrectResponse = [];
-ImageTimes = [];
-
-
+if ~oneFile %need to fix this for the one file situations because you will have already pulled much of this info.
+    beh_timestamps = [];
+    ma_timestamps = [];
+    cellVar = [];
+    ImageOn = [];
+    ResponseTimes = [];
+    Response = [];
+    TTLTimes = [];
+    CorrectResponse = [];
+    ImageTimes = [];
+    ma_timestampsDSEm = [];
+    ma_timestampsDSId = [];
+    PresentedEmotionIdx = [];
+    PresentedIdentityIdx = [];
+else
+    ResponseTimes = [];
+    Response = [];
+    TTLTimes = [];
+    CorrectResponse = [];
+    ImageTimes = [];
+    PresentedEmotionIdx = [];
+    PresentedIdentityIdx = [];
+end
 
 %% load the behavioral data
 
 taskName = 'Identity';
 
-folderName=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName, '\', matNameId);
+folderName=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', matNameId);
 
 %identityFilter = 'MW_9_Session_12_filter.nwb'; %this is done as an earlier
 %step but is here for ease of checking different nwbs
@@ -406,6 +442,9 @@ if oneFile == false
     % convert to individual so they are saved and can go back to earlier steps
     beh_timestampsId = beh_timestamps;
     ma_timestampsDSId = ma_timestampsDS; %downsamle the timestamps
+    if ~isempty(cellVar)
+        hexNumEm = hexNum;
+    end
 
 end
 
@@ -423,15 +462,54 @@ dataFidentity = filtfilt(lpFiltlow,data');
 
 clear data; clear macrowiresCARId;
 
-
+%%
 load(folderName)
-TTLTimesId = TTLTimes;
-CorrectResponseId = CorrectResponse;
-ResponseId = Response;
-ResponseTimesId  = ResponseTimes;
-ImageTimesId = ImageTimes;
+
+% set up the behavioral timestamps to ensure they are the presentation of
+% the image
+%Hex code 19 task start; 29 image on; 39 fixation on; response 49; 
+%finds the image on time. realize this is variable but about 2 seconds.
+if isempty(cellVar)
+    idx1 = 1; idx2 = 1;
+    for ii=2:length(beh_timestampsId)
+        timeStampDiff(idx1) = beh_timestampsId(ii)-beh_timestampsId(ii-1);
+        if timeStampDiff(idx1) >= 499001 && timeStampDiff(idx1) <= 500999 %50000/500 = 1000ms
+            imageOn(idx2) = ii-1; %record the relevant image onsets indices, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
+            idx2 = idx2 + 1;
+        end
+        idx1 = idx1 +1;
+    end
+elseif ~isempty(cellVar)
+    imageOn = find(hexNumEm == 29);
+    idx1 = 1;
+    for ii = 2:length(imageOn)
+        timeStampDiff(idx1,1) = beh_timestampsId(imageOn(ii))-beh_timestampsId(imageOn(ii-1));
+        idx1 = idx1+1;
+    end
+end
 
 
+if isempty(TTLTimes) %shenanigans for different outputs as we collected this data
+    TTLTimesId = Events.Times.Image_Shown; %does not appear to be a true ttl time so it's now just the same as image time
+    CorrectResponseId = Stimuli.Correct_Responses;
+    ResponseId = Stimuli.Subject_Responses;
+    ResponseTimesId  = Events.Times.Response_Made;
+    ImageTimesId = Events.Times.Image_Shown;
+else
+    TTLTimesId = TTLTimes;
+    CorrectResponseId = CorrectResponse;
+    ResponseId = Response;
+    ResponseTimesId  = ResponseTimes;
+    ImageTimesId = ImageTimes;
+end
+
+if isempty(PresentedEmotionIdx)
+    PresentedEmotionIdxId = Stimuli.Presented_EmotionsIdx;
+    PresentedIdentityIdxId = Stimuli.Presented_IdentitiesIdx;
+else
+    PresentedEmotionIdxId = PresentedEmotionIdx;
+    PresentedIdentityIdxId = PresentedIdentityIdx;
+end
 
 %% find the behavioral timestamps
 %% 
@@ -495,10 +573,6 @@ if alreadyFilteredData == 0
     [itiDataFiltIdentity] = Analysis.emuEmot.nwbLFPchProcITI(dataFidentity, 'chNum', chInterest, 'multiTaperWindow', multiTaperWindow);
 end
 
-%preserve the variables so you can rerun the making of identityTaskLFP
-PresentedEmotionIdxId = PresentedEmotionIdx;
-PresentedIdentityIdxId = PresentedIdentityIdx;
-
 
 %% process data with main proc function (see above to set this)
 %this will break up the data. Can adjust the spectrogram window center
@@ -506,7 +580,7 @@ PresentedIdentityIdxId = PresentedIdentityIdx;
 %the final filtered data (1to200) is broad so it can be inserted into PAC
 %as desired
    [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdxId,...
-       PresentedIdentityIdx, behavioralIndexImageOnId, behavioralIndexResponseId, ...
+       PresentedIdentityIdxId, behavioralIndexImageOnId, behavioralIndexResponseId, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeIdentity,...
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
@@ -537,9 +611,9 @@ if saveSelectFile
     
 end
 
-%% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK_COMPARE.M
+%% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK.M
 % then Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
 % then Analysis.emuEmot.emuEmot.EMUNBACK_COMPAREACROSSPATIENTS.M (BUT, that
 % one is mostly by hand and to be placed into excel file)
 
-
+edit EMUNBACK_NOISECHECK.M

@@ -74,6 +74,7 @@ for cc = 1:length(chNum)
         ByTrialArea =[];
         ByTrialBoundingBoxTimeRange = [];
         ByTrialBoundingBoxFreqRange =[];
+        AllImagesSignificant=[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -182,13 +183,18 @@ for cc = 1:length(chNum)
                     ImageType{jj,1} = (conditionName{nn});
                     [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand).^2);
                     TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
-                    SecondTrial(jj,1) = identityTaskLFP.secondTrial;
-                    CorrectResponse(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}(jj);
-                    ResponseTime(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                    if length(identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}) < jj
+                        CorrectResponse(jj,1) = 0;
+                        ResponseTime(jj,1) = mean(identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2});
+
+                    else
+                        CorrectResponse(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}(jj);
+                        ResponseTime(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                    end                  
                 end
                 T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificant, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
                     TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
-                    CorrectResponse, ResponseTime, SecondTrial);
+                    CorrectResponse, ResponseTime);
             end        
         end
         %add each trial necessary
@@ -224,6 +230,7 @@ for cc = 1:length(chNum)
         ByTrialArea =[];
         ByTrialBoundingBoxTimeRange = [];
         ByTrialBoundingBoxFreqRange =[];
+        
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
@@ -255,8 +262,8 @@ for cc = 1:length(chNum)
                     %positive deflection, then go trial by trial to get trial
                     %specific statistics.
                     if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
-                        bData = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{5}){idx2};
-                        sData = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
+                        bData = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{5}){idx2};
+                        sData = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
                         sData = normalize(sData,2);
                         allVsingle = 1;
 
@@ -332,13 +339,18 @@ for cc = 1:length(chNum)
                     ImageType{jj,1} = (conditionName{nn});
                     [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand).^2);
                     TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
-                    SecondTrial(jj,1) = emotionTaskLFP.secondTrial;
-                    CorrectResponse(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}(jj);
-                    ResponseTime(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                    if length(emotionTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}) < jj
+                        CorrectResponse(jj,1) = 0;
+                        ResponseTime(jj,1) = mean(emotionTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2});
+                    else
+                        CorrectResponse(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}(jj);
+                        ResponseTime(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2}(jj);
+
+                    end
                 end
                   T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificant, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
                     TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
-                    CorrectResponse, ResponseTime, SecondTrial);
+                    CorrectResponse, ResponseTime);
             end
         end
         %add each trial necessary

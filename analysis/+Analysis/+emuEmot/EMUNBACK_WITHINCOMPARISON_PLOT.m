@@ -50,7 +50,7 @@ MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1, 'gpuOn', false);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 
@@ -63,11 +63,12 @@ ttResponse = identityTaskLFP.tPlotResponse;
 if DoPlot
     close all %need to close all other figures so the figures 
     comparisonName = 'Image On';
-    plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, ...
-        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+    figIdx = 1;
+    [figIdxNow] = plt.nbackPlotSpectrogram(nbackCompareImageOn,'timePlot', ttImage, 'frequencyRange', ff, ...
+        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName, 'figIdx', figIdx); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
     comparisonName = 'Response';
     plt.nbackPlotSpectrogram(nbackCompareResponse,'timePlot', ttResponse, 'frequencyRange', ff, ...
-        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
+        'chName', chLocationName, 'comparison', 1, 'figTitleName', comparisonName, 'figIdx', figIdxNow); %comparison 1 is emot task compared to id task, 2 is half set up to just show one subtracted from the other
 end
 
 %% save plots
@@ -80,6 +81,13 @@ if savePlot
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
+end
+
+savePlotSpecificMat = false;
+if savePlotSpecificMat
+    nS = [13,14,28];
+    plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1', 'plotType', 'm');
 end
 
 %% create a table to that can be combined for all patients regarding statistically significant clusters.
@@ -108,22 +116,22 @@ end
 MW21 = MWX;
 %%%%
 if saveSelectFile
-    folder_create=strcat('C:\Users\kramdani\Documents\Data\EMU_nBack', '\', sessionName);    
+    folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
     if ~isfolder(folder_name)
         %make the directory folder
-        mkdir (folder_name)
+        mkdir(folder_name)
     end
-    fileName = [folder_name, '\', 'MW9_itiDataFiltIdentity', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW9_itiDataFiltEmotion', '.mat'];    save(fileName);    
-    fileName = [folder_name, '\', 'MW9_emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW9_identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW9_itiDataReal', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_itiDataFiltIdentity', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_itiDataFiltEmotion', '.mat'];    save(fileName);    
+    fileName = [folder_name, '\', 'MW21_emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_itiDataReal', '.mat'];    save(fileName);
 
     
-    fileName = [folder_name, '\', 'MW9_nbackCompareImageOn', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW9_nbackCompareResponse', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW9', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_nbackCompareImageOn', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21_nbackCompareResponse', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW21', '.mat'];    save(fileName);
     
 end
 

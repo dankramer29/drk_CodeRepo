@@ -38,8 +38,10 @@ alphaHistoHalf = alphaHistoAdj+(alphaHisto/2); %two tailed split
 
 %preallocate
 if gpuOn
-    tstat_res=zeros(size(data1,1), size(data1,2), xshuffles, 'single', 'gpuArray');
-    tstat_max=zeros(xshuffles,1, 'single', 'gpuArray');
+    tstat_res=zeros(size(data1,1), size(data1,2), xshuffles, 'single');
+    tstat_max=zeros(xshuffles,1, 'single');
+    tstat_res = gpuArray(tstat_res);
+    tstat_max = gpuArray(tstat_max);
 else
     tstat_res=zeros(size(data1,1), size(data1,2), xshuffles, 'single');
     tstat_max=zeros(xshuffles,1, 'single');

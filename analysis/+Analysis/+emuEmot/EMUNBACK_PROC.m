@@ -5,6 +5,7 @@
 %MW13 9 is identity, 10 is emotion
 %MW9
 %MW21 10 is identity, 12 is emo
+%MW22 Session 6 - 331 TTL - NBack IDEN Session 7 - 331 TTL - NBack EMO
 
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
@@ -101,17 +102,17 @@ preSpectrogramData = true; %either chop the data as already multitapered and the
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
 oneFile = false; %if the nwb file is a single file and not split into two. Starts around patient MW_16
 %USE _0X IF SINGLE DIGITS
-sessionName = 'MW_21';
-subjName = 'MW_21';
+sessionName = 'MW_22';
+subjName = 'MW_22';
 %MWX - remember to change the name in the within subject processing
 
-matNameEm = 'NBack_EMOTION_2023_02_20.13_43_16'; %place this in an "Emotion" folder
-matNameId = 'NBack_IDENTITY_2023_02_20.13_33_51'; %place this in an "Identity" folder
+matNameEm = 'NBack_EMOTION_2023_04_10.16_04_57'; %place this in an "Emotion" folder
+matNameId = 'NBack_IDENTITY_2023_04_10.15_56_32'; %place this in an "Identity" folder
 if oneFile == 0
-    emotionFilter = 'JM_MW21_Session_12_filter.nwb'; %does NOT need to be placed in a folder
-    identityFilter = 'JM_MW21_Session_10_filter.nwb';
+    identityFilter = 'JM_MW22_Session_6_filter.nwb'; %does NOT need to be placed in a folder
+    emotionFilter = 'JM_MW22_Session_7_filter.nwb';
 elseif oneFile == 1
-    emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
+    %emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
@@ -124,10 +125,10 @@ postTimeRes = 0.5;
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
 multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms (mtspectrogramc, also option to do pspectrum, but haven't used it)
-xshuffles = 10; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
+xshuffles = 1000; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
 DoPlot = 1; %toggle plotting on or off
-savePlot = 0; %toggle on if you want to save the plots up front, probably better to look at them individually first
-saveSelectFile = 0; %toggle on if you want to save all the files. probably best to do by hand
+savePlot = 1; %toggle on if you want to save the plots up front, doesn't close them so ok to save them. saves as jpg. in that script you can save them as individual mat files for the paper.
+saveSelectFile = 0; %toggle on if you want to save select files as mat
 
 
 beh_timestamps = [];
@@ -224,8 +225,11 @@ TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, 
 open TableChannel
 dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
 %%
-chInterest = [1, 2, 49, 50, 57, 58];
-%MW9 channels:
+%MW22 channels:
+chInterest = [2,3,4,5,13,14,19,20,21,22,30,31,32,33,34,45,46,47,56,57,73,74,75,88,89,90,121,122,123,139,140,141,142,143,172,173,174,181,182,183,184,192,193,194,196,197,198];
+%MW21 channels:
+%chInterest = [2,3,34,35,38,39,49,50,54,56,63,64,77,88,89,134,135];
+%MW9 channels (not confirmed):
 %chInterest = [1, 2, 17, 18, 75, 76, 107, 108, 114, 115, 117, 118, 123, 124, 125, 126];
 %MW13 channels:
 % chInterest = [17,18,26,69,77,78,79,59,60,83,89,90,91,126,127,129,130,93,94,95];
@@ -616,4 +620,4 @@ end
 % then Analysis.emuEmot.emuEmot.EMUNBACK_COMPAREACROSSPATIENTS.M (BUT, that
 % one is mostly by hand and to be placed into excel file)
 
-edit EMUNBACK_NOISECHECK.M
+edit EMUNBACK_NOISECHECK

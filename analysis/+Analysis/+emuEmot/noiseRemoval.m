@@ -21,6 +21,10 @@ trial = Tremove.flaggedTrials;
 for ii = 1:size(Tremove,1)
     dataLFP.(task{trialType}).(ch{ii}).image.specD{variant(ii)}(:,:,trial(ii)) = [];
     dataLFP.(task{trialType}).(ch{ii}).response.specD{variant(ii)}(:,:,trial(ii)) = []; %remove the response too, since both will be unusable
+    %actually no reason to remove this since the noise could be a single
+    %channel and not the others.
+    % dataLFP.(task{trialType}).(ch{ii}).correctTrial{variant(ii)}(trial(ii)) = []; %remove the patient response
+    % dataLFP.(task{trialType}).(ch{ii}).responseTimesInSec{variant(ii)}(trial(ii)) = []; %remove the response time.
     for jj = 1:size(bandNames)
         dataLFP.(task{trialType}).(ch{ii}).image.bandPassed.(bandNames{jj}){variant(ii)}(trial(ii),:) = [];
         dataLFP.(task{trialType}).(ch{ii}).response.bandPassed.(bandNames{jj}){variant(ii)}(trial(ii),:) = [];

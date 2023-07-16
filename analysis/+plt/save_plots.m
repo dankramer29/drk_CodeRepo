@@ -15,7 +15,13 @@ function save_plots( figs, varargin )
 %make it be a cell array
 [varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
 [varargin, versionNum, ~, found]=util.argkeyval('versionNum', varargin, '_'); %if you want to do multiple versions of the same file
+[varargin, plotType, ~, found]=util.argkeyval('plotType', varargin, 'jpg'); %if you want to do multiple versions of the same file
 
+if ~isstring(plotType)
+    plotTypeT = convertCharsToStrings(plotType);
+else
+    plotTypeT = plotType;
+end
 
 if ~isempty(subjName)
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
@@ -27,27 +33,10 @@ if ~isempty(subjName)
     for ii=1:length(figs)
         h=figure(figs(ii));
         %saveas(h, get(h,'Name'), 'jpg')
-        saveas(h, [fullfile(folder_name),'\', get(h,'Name')], 'jpg');
+        saveas(h, [fullfile(folder_name),'\', get(h,'Name')], plotTypeT);
     end
-% %THIS NEEDS FIXING BELOW TO MATCH WITH ABOVE    
-% elseif isempty(sessionName)
-%     if ~isempty(subjName)
-%         name = strcat(subjName, date);
-%         folder_create=strcat('C:\Users\Daniel\Documents\DATA\', name);
-%         folder_name=strcat(folder_create, '\', sessionName, '\', subjName);
-%         %make the directory filder
-%         mkdir (folder_create,   subjName)
-%         for ii=1:length(figs)
-%             h=figure(figs(ii));
-%             saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
-%         end
-%     else
-%         for ii=1:length(figs)
-%             h=figure(figs(ii));
-%             saveas(h, get(h,'Name'), 'jpg');
-%         end
-%     end
 end
+
 
 
 

@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = nbackPlotSpectrogram(nbackCompare, varargin)
+function [figIdxNow] = nbackPlotSpectrogram(nbackCompare, varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -10,6 +10,7 @@ function [outputArg1,outputArg2] = nbackPlotSpectrogram(nbackCompare, varargin)
 [varargin, adjustedColorMap]=util.argkeyval('adjustedColorMap', varargin, false); %this will adjust a colormap to prevent outliers from making the map too dull
 [varargin, flatColorMap]=util.argkeyval('flatColorMap', varargin, true); %this just sets it at 3 SD (can adjust below to a different set). if both of these are off the heatmaps will set their own colormaps
 [varargin, doMask]=util.argkeyval('doMask', varargin, true); %set a mask for only the significant portions
+[varargin, figIdx]=util.argkeyval('figIdx', varargin, 1); %set the numbering so it's easier to find the right figures
 
 maskPerc = .75;
 
@@ -96,7 +97,8 @@ for ii = 1:length(chNum)
     %plot the identities for both tasks
     if comparison == 1
         %% identities for both tasks
-        figtitle = strcat('LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));    
+        figtitle = strcat('Fig', num2str(figIdx), '  LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));    
+        figIdx = figIdx +1;
         figtitleSplit = strcat('LFP Power during ', {' '}, figTitleName, '\n', ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii})); 
         figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         sgtitle(compose(figtitleSplit)); %gives a supertitle
@@ -169,7 +171,8 @@ for ii = 1:length(chNum)
           
         end
         %% emotions for both tasks
-        figtitle = strcat('LFP Power during ', {' '}, figTitleName, newline, ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
+        figtitle = strcat('Fig', num2str(figIdx), '  LFP Power during ', {' '}, figTitleName, newline, ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));        
+        figIdx = figIdx +1;
         figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
         figtitleSplit = strcat('LFP Power during ', {' '}, figTitleName, '\n', ' Emotions for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));
         sgtitle(compose(figtitleSplit)); %gives a supertitle
@@ -494,7 +497,7 @@ for ii = 1:length(chNum)
 
 end
 
-
+figIdxNow = figIdx;
 
 
 

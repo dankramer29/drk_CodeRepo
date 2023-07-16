@@ -10,6 +10,7 @@
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
+dbstop
 removeTrialsEmot = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
 %put the row of the ones you actually want to remove here.
 emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
@@ -18,10 +19,14 @@ allChannelMean = allChannelMeanTemp;
 [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
     channelName, 'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
+dbstop
 removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
+MWX.TNoise = TNoise;
+MWX.RemovedEm = removeTrialsEmot;
+MWX.RemovedId = removeTrialsId;
 %allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
 
 %plot the periodogram for the mean of all trials across all channels to

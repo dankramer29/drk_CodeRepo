@@ -22,7 +22,7 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, rlab ] = cluster_
 %0.00024 is 0.05/(64*3+20) the number of electrodes for the real touch
 [varargin, alph]=util.argkeyval('alph', varargin, 0.05); %sets the alpha for the shuffle (NOT THE HISTOGRAM)
 [varargin, alphaHisto]=util.argkeyval('alphaHisto', varargin, 0.05); %sets the alpha for histogram (i.e. the real alpha)
-[varargin, gpuOn]=util.argkeyval('gpuOn', varargin, false); %turn on gpu or not
+[varargin, gpuOn]=util.argkeyval('gpuOn', varargin, true); %turn on gpu or not. appears to be faster as of 2023
 [varargin, tt]=util.argkeyval('tt', varargin, []); %include a tplot if you want to plot
 [varargin, ff]=util.argkeyval('ff', varargin, []); %include a freq if you want to plot
 [varargin, splitPosNeg]=util.argkeyval('splitPosNeg', varargin, 1); %if you want to split positive and negative deflections into own one tailed ttest. 0 is no and will do one tailed ttest on abs of data
@@ -36,8 +36,9 @@ alphaHistoHalf = alphaHistoAdj+(alphaHisto/2); %two tailed split
 %calculate the size of the samples you want to take, default is just over
 %half
 
+
 %preallocate
-if gpuOn
+if gpuOn %last check on gpu was 34 without and 8 with. bwconncomp doesn't work with gpu...
     tstat_res=zeros(size(data1,1), size(data1,2), xshuffles, 'single');
     tstat_max=zeros(xshuffles,1, 'single');
     tstat_res = gpuArray(tstat_res);
@@ -72,6 +73,11 @@ end
 
 L1 = size(data1, 3);
 L2 = size(data2, 3);
+
+if gpuOn
+    data1 = gpuArray(data1);
+    data2_temp = gpuArray(data2_temp);
+end
 
 profile on
 %%
@@ -108,6 +114,7 @@ for ii=1:xshuffles
         thresh_binaryd=gather(thresh_binary);%there is a gpu version that is not as fast or as good.
         thresh_binarydP=gather(thresh_binaryP);
         thresh_binarydN=gather(thresh_binaryN);
+       
         
         if splitPosNeg
             %cluster positive deflections separately

@@ -6,7 +6,7 @@
 %hard to visualize, so easiest to create the plots and have a look.
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
 %to 
-
+%remove bad trials on emotion task
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
@@ -16,6 +16,7 @@ removeTrialsEmot = input('which lines from Temot do you want to remove. if no wo
 emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
 TNoise = Temot;
 allChannelMean = allChannelMeanTemp;
+%remove bad trials on identity
 [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
     channelName, 'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
@@ -23,6 +24,17 @@ dbstop
 removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
+
+TchannelCheckEm = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask, ...
+    channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1');
+dbstop
+%remove the iti trials you don't want
+emITIremove = [];
+itiDataReal.EmotionTask.(channelName{})
+
+
+
 
 MWX.TNoise = TNoise;
 MWX.RemovedEm = removeTrialsEmot;
@@ -44,9 +56,11 @@ end
 %turns out easiest way to eliminate a channel is to just ignore it.
 removeChannel = input('which channels from the trial do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
 channelNameFinal = channelName;
-for ii = 1:length(removeChannel)
-    channelNameFinal(removeChannel(ii)) = [];
-end
+%as you remove channels, you need to adjust, for now, just enter them in
+%and delete, and should work.
+%for ii = 1:length(removeChannel)
+    channelNameFinal(42:47) = [];
+%end
 %%
 % next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
 edit EMUNBACK_WITHINCOMPARISON_PLOT.M

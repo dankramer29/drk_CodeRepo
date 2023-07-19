@@ -22,7 +22,7 @@ for ii = 1:size(Tremove,1)
     if ii > 1
         %need to adjust the trial count back one every time you remove one
         %from that channel and variant
-        if strcmp(ch{ii}, ch{ii-1}) && variant(ii) == variant(ii-1)
+        if ch{ii} == ch{ii-1} && variant(ii) == variant(ii-1)
             trial(ii) = trial(ii)-trialAdj; 
             trialAdj = trialAdj + 1;
         else

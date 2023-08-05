@@ -7,6 +7,10 @@
 %NOTE: right now the SD of 10 above seems to be about right, but also seems
 %to 
 %remove bad trials on emotion task
+
+%save a copy of the tasks before the noise is removed
+emotionTaskLFP_noNoiseRemoval = emotionTaskLFP;
+identityTaskLFP_noNoiseRemoval = identityTaskLFP;
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
@@ -25,18 +29,20 @@ removeTrialsId = input('which lines from Tident do you want to remove. if no wor
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
-TchannelCheckEm = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask, ...
+[TchannelCheckEm, itiDataReal.EmotionTask] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
-dbstop
-%remove the iti trials you don't want
-emITIremove = [];
-itiDataReal.EmotionTask.(channelName{})
+[TchannelCheckId, itiDataReal.IdentityTask] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.IdentityTask, ...
+    channelName, 'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1');
+
 
 
 
 
 MWX.TNoise = TNoise;
+MWX.TNoiseITIEm=TchannelCheckEm;
+MWX.TNoiseITIId=TchannelCheckId;
 MWX.RemovedEm = removeTrialsEmot;
 MWX.RemovedId = removeTrialsId;
 %allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
@@ -58,9 +64,9 @@ removeChannel = input('which channels from the trial do you want to remove. if n
 channelNameFinal = channelName;
 %as you remove channels, you need to adjust, for now, just enter them in
 %and delete, and should work.
-%for ii = 1:length(removeChannel)
-    channelNameFinal(42:47) = [];
-%end
+for ii = 1:length(removeChannel)
+%    channelNameFinal(42:47) = [];
+end
 %%
 % next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
 edit EMUNBACK_WITHINCOMPARISON_PLOT.M

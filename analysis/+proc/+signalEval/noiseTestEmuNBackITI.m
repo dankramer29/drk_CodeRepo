@@ -1,4 +1,4 @@
-function [T] = noiseTestEmuNBackITI(dataLFP, varargin)
+function [T, dataLFP] = noiseTestEmuNBackITI(dataLFP, varargin)
 %takes in the emotionLFP or identityLFP input and noise tests.
 
 
@@ -142,74 +142,73 @@ for ii = 1:length(channelToCheck)
 end
 
 %%
-% for cc = 1:length(channelIdx)
-%     F = figure;
-%     F.WindowState = 'fullscreen';
-%     F.Name = (['1', taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}]);
-%     sgtitle(['1', taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}]);
-%     idxTrial = 1;
-%     for kk = 1:36 %just put it on a 5x5 to look at them. should cover the rest
-%         sTr = dataLFP.(channelName{channelIdx(cc)}).specD(:,:,idxTrial);%grab each trial
-%         meanS = normalize(sTr,2);
-%         subplot(6,6,kk)
-%         imagesc(tplotSp, ff, meanS); axis xy; colorbar;
-%         title('Trial ', num2str(idxTrial))
-%         idxTrial = idxTrial + 1;
-% 
-%     end
-%     if savePlot
-%         if ~isempty(sessionName)
-%             hh =  findobj('type','figure');
-%             nh = length(hh);
-%             if taskNameSel == 1;
-%                 plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-%                     'versionNum', 'v1_NoisecheckEmotionTask');
-%             elseif taskNameSel ==2;
-%                 plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-%                     'versionNum', 'v1_NoisecheckIdentityTask');
-%             end
-%             close 
-%         else
-%             saveas(F, 'jpg')
-%             close
-%         end
-%     end
-%     F = figure;
-%     F.WindowState = 'fullscreen';
-%     F.Name = (['2', taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}]);
-%     sgtitle(['2', taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}]);
-% 
-%     for kk = 1:36 %just put it on a 5x5 to look at them. should cover the rest
-%         if idxTrial > size(dataLFP.(channelName{channelIdx(cc)}).specD,3)
-%             break
-%         else
-%             sTr = dataLFP.(channelName{channelIdx(cc)}).specD(:,:,idxTrial);%grab each trial
-%             meanS = normalize(sTr,2);
-%             subplot(6,6,kk)
-%             imagesc(tplotSp, ff, meanS); axis xy; colorbar;
-%             title('Trial ', num2str(idxTrial))
-%             idxTrial = idxTrial + 1;
-%         end
-%     end
-%     if savePlot
-%         if ~isempty(sessionName)
-%             hh =  findobj('type','figure');
-%             nh = length(hh);
-%             if taskNameSel == 1;
-%                 plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-%                     'versionNum', 'v1_NoisecheckEmotionTask');
-%             elseif taskNameSel ==2;
-%                 plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-%                     'versionNum', 'v1_NoisecheckIdentityTask');
-%             end
-%             close 
-%         else
-%             saveas(F, 'jpg')
-%             close
-%         end
-%     end
-% 
-% end
+for cc = 1:length(channelIdx)
+    F = figure;
+    F.WindowState = 'fullscreen';
+    F.Name = ([taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}, ' 1']);
+    sgtitle([taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}, ' 1']);
+    idxTrial = 1;
+    for kk = 1:36 %just put it on a 5x5 to look at them. should cover the rest
+        sTr = dataLFP.(channelName{channelIdx(cc)}).specD(:,:,idxTrial);%grab each trial
+        meanS = normalize(sTr,2);
+        subplot(6,6,kk)
+        imagesc(tplotSp, ff, meanS); axis xy; colorbar;
+        title('Trial ', num2str(idxTrial))
+        idxTrial = idxTrial + 1;
+
+    end
+    if savePlot
+        if ~isempty(sessionName)
+            hh =  findobj('type','figure');
+            nh = length(hh);
+            if taskNameSel == 1;
+                plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+                    'versionNum', 'v1_NoisecheckEmotionTask');
+            elseif taskNameSel ==2;
+                plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+                    'versionNum', 'v1_NoisecheckIdentityTask');
+            end
+            close 
+        else
+            saveas(F, 'jpg')
+            close
+        end
+    end
+    F = figure;
+    F.WindowState = 'fullscreen';
+    F.Name = ([taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}, ' 2']);
+    sgtitle([taskName, ' ', 'LFP by trial for ', channelName{channelIdx(cc)}, ' 2']);
+
+    for kk = 1:36 %just put it on a 5x5 to look at them. should cover the rest
+        if idxTrial > size(dataLFP.(channelName{channelIdx(cc)}).specD,3)
+            break
+        else
+            sTr = dataLFP.(channelName{channelIdx(cc)}).specD(:,:,idxTrial);%grab each trial
+            meanS = normalize(sTr,2);
+            subplot(6,6,kk)
+            imagesc(tplotSp, ff, meanS); axis xy; colorbar;
+            title('Trial ', num2str(idxTrial))
+            idxTrial = idxTrial + 1;
+        end
+    end
+    if savePlot
+        if ~isempty(sessionName)
+            hh =  findobj('type','figure');
+            nh = length(hh);
+            if taskNameSel == 1;
+                plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+                    'versionNum', 'v1_NoisecheckEmotionTask');
+            elseif taskNameSel ==2;
+                plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
+                    'versionNum', 'v1_NoisecheckIdentityTask');
+            end
+            close 
+        else
+            saveas(F, 'jpg')
+            close
+        end
+    end
+end
 
 removeTrialsTable = zeros(length(channelIdx),size(dataLFP.(channelName{1}).specD,3));
 
@@ -239,6 +238,9 @@ F.Name = ([taskName, ' ', 'mean LFP across all ITI Noise Removed']);
 sgtitle([taskName, ' ', 'mean LFP across all ITI Noise Removed'])
 
 for kk = 1:25 %just put it on a 6x6 to look at them.
+    if idxCh > length(channelIdx)
+        break
+    else
     sAll = dataLFP.(channelName{channelIdx(idxCh)}).specD;
     meanS = mean(sAll,3);
     meanS = normalize(meanS,2);
@@ -246,6 +248,7 @@ for kk = 1:25 %just put it on a 6x6 to look at them.
     imagesc(tplotSp, ff, meanS); axis xy; colorbar;
     title(channelName{channelIdx(idxCh)})
     idxCh = idxCh +1;
+    end
 end
 if savePlot
     if ~isempty(sessionName)

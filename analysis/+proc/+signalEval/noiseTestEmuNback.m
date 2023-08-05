@@ -31,6 +31,7 @@ tplotSp = dataLFP.tPlotImage;
 ff = dataLFP.freq;
 idxFl = 1;
 idxNoise = 1;
+idxFPlot = 1;
 for cc = 1:length(channelName)
     for jj = 1:3                
         sAll = dataLFP.(task{taskType}).(channelName{cc}).image.bandPassed.filter1to200{jj};
@@ -56,6 +57,7 @@ for cc = 1:length(channelName)
                 tempFltrials(idxTemp) = ii;
                 idxTemp = idxTemp +1;
                 idxFl = idxFl + 1;
+                idxFPlot = idxFPlot + 1;
             end
         end
         if flaggedplotNoiseCheck
@@ -80,6 +82,7 @@ for cc = 1:length(channelName)
                     ' ', taskName, ' ', 'mean LFP across trials'])
                 idxT = 1;
                 idxT2 = 1;
+                flTrNum = length(tempFltrials); %for some goofy math to count correctly
                 for kk = 1:subN1d*subN2
                     [rw, cl] = find(matN==kk);
                     if ismember(rw, oddN) && idxT <= size(sAll,1)
@@ -90,8 +93,8 @@ for cc = 1:length(channelName)
                         plot(tplotBP, meanLine(idxT) - stdAbove*sdSline)
                         plot(tplotBP, sAll(idxT, :))
                         if ismember(idxT, tempFltrials)
-                            title(['* trial', num2str(idxT), ' line', num2str(idxFl-1)], 'FontSize', 14)
-                            
+                            title(['* trial', num2str(idxT), ' line', num2str(idxFPlot-1-flTrNum+1)], 'FontSize', 14) %ignore the goofy math here, it's so if there are 3 in this session, and idxFl is at 11, you subtract 1 to bold this trial at 10 (where it's at) and then remove the number in this session (e.g. 3, but 10-3 is 7 so add one back to be 8) then subtract 1 from the idx so it's now subtracting 2 (+1 back) so the next is 9, and the final one will flag 10. i hope i never read this again. 
+                            flTrNum = flTrNum - 1;
                         else
                             title(['\color{magenta}trial', num2str(idxT)])
                         end

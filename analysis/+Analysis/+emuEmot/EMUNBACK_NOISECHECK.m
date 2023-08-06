@@ -16,6 +16,15 @@ identityTaskLFP_noNoiseRemoval = identityTaskLFP;
         'versionNum', 'v1');
 dbstop
 removeTrialsEmot = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
+for ii = 2:length(removeTrialsEmot) %check none were entered wrong
+    if ii == length(removeTrialsEmot)
+        if removeTrialsEmot(ii) < removeTrialsEmot(ii-1)
+                    warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+        end
+    elseif removeTrialsEmot(ii) < removeTrialsEmot(ii-1) || removeTrialsEmot(ii) > removeTrialsEmot(ii+1)
+        warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+    end
+end
 %put the row of the ones you actually want to remove here.
 emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTrialsEmot, 'trialType', 2);
 TNoise = Temot;
@@ -26,6 +35,15 @@ allChannelMean = allChannelMeanTemp;
         'versionNum', 'v1');
 dbstop
 removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
+for ii = 2:length(removeTrialsId) %check none were entered wrong
+    if ii == length(removeTrialsId)
+        if removeTrialsId(ii) < removeTrialsId(ii-1)
+                    warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+        end
+    elseif removeTrialsId(ii) < removeTrialsId(ii-1) || removeTrialsId(ii) > removeTrialsId(ii+1)
+        warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+    end
+end
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 

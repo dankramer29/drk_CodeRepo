@@ -88,7 +88,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [13,14,28];
+    nS = [7,8,17,18,19,20,41,42,43,44,65,66,67,68,91,92,93,94];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -116,7 +116,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW22 = MWX;
+MW19 = MWX;
 %%%%
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
@@ -125,16 +125,16 @@ if saveSelectFile
         %make the directory folder
         mkdir(folder_name)
     end
-    fileName = [folder_name, '\', 'MW22_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW22_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
-    fileName = [folder_name, '\', 'MW22_emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW22_identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW22_itiDataReal', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW19_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW19_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
+    fileName = [folder_name, '\', 'MW19_emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW19_identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW19_itiDataReal', '.mat'];    save(fileName);
 
     
-    fileName = [folder_name, '\', 'MW22_nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW22_nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW22', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW19_nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW19_nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW19', '.mat'];    save(fileName);
     
 end
 

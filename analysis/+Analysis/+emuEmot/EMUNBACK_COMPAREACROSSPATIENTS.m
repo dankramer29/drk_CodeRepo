@@ -103,17 +103,13 @@ L.LineWidth = 4;
 
 
 
-%% chi squared for categorical
+%% Sig Cluster stats
+%Group stats
+%Run:
+%     size of cluster 
+%     centroid
 
 
-
-
-%Response time x correct v incorrect
-[p, h, ci] = ranksum(xx, yy);
-meanRTc = mean(xx);
-meanRTic = mean(yy);
-stdRTc = std(xx);
-stdRTic = std(yy);
 
 
 %% run stats on sig clusters
@@ -128,24 +124,4 @@ CentTest(:,2) = TtotalSigClust.ByTrialCentroid(55:108,2);
 
 violin(CentTest, 'xlabel', {'Amygdala', 'Hippocampus'}, 'facecolor', [1 0.549 0; 0.12 0.85 0.98], 'mc', 'b', 'medc', '');
 
-%% compare response times between tasks (for all trials, not just he positive ones)
-[G] = groupsummary(TtotalSigClust, "CorrectResponse", "ResponseTime");
-[GG]  = groupsummary(TtotalSigClust, "CorrectResponse", @(x,y) ranksum(x), {["ResponseTime", "ByTrialCentroid", "ByTrialArea"]});
-Gf = findgroups(TtotalSigClust.CorrectResponse);
-[GG] = splitapply(@ranksum, TtotalSigClust.ResponseTime, Gf)
-[GGG]  = groupsummary(TtotalSigClust, "CorrectResponse", "mean", {["ResponseTime", "ByTrialCentroid", "ByTrialArea"]});
 
-
-
-xx = CentTest(CentTest(:,3)==1,2);
-xx(xx==0) = nan;
-yy(yy==0) = nan;
-yy = CentTest(CentTest(:,3)==0,2);
-[h, p, ci] = ttest2(CentTest(CentTest(:,2)==1),CentTest(CentTest(:,2)==0));
-[h, p, ci, stats] = ttest2(xx, yy)
-x = nanmean(xx)
-xs = nanstd(xx)
-yx = nanstd(yy)
-y = nanmean(yy)
-
-[pos, ReactionTimespValueOfComparisonBetweenTasks, ci, stats] = ttest(TtotalSigClust.ResponeTime, ResponseTimesDiffIdentitySec);

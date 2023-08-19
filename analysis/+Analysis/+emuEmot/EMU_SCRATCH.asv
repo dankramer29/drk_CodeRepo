@@ -2,14 +2,22 @@
 
 %% this is all scratch pad stuff for now.
 
-
+%testing
 %%time issues
-TTLTimesEm(2)-TTLTimesEm(1)
+
 datetime(ImageTimesAdjId(1)/1000000,...
 'ConvertFrom','posixtime','TimeZone','America/Denver')
 
 datetime(ma_timestampsDSId(end)/1000000,...
 'ConvertFrom','posixtime','TimeZone','America/Denver')
+
+
+%%
+bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{5}){idx2};
+                        sData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
+                        sData{idxCl} = normalize(sData,2);
+
+                                                idxSigClusterSingleCriteria(idxCl) = ii;
 
 
 %% splotches

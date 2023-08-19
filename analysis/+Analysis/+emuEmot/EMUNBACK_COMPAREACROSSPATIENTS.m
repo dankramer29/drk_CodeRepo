@@ -49,7 +49,7 @@ meanYY = nanmean(yy);
 stdXX = nanstd(xx);
 stdYY = nanstd(yy);
 TstTemp = table(nameTable, nameXX, nameYY, meanXX, stdXX, meanYY, stdYY, pvalue, h, zval, ranksumNumerical, testDone);
-AllTrialStats = vertcat(AllTrialStats, TstTemp);
+%REMEMBER TO PLACE THESE INTO AN EXCEL
 %% organize the data for plotting.
 xxx = xx;
 xxx(1:length(yy),2) = yy;
@@ -73,7 +73,7 @@ c = linspace(1,10,length(x));
 scatter(x,y,sz,c,'filled')
 
 %% kruskall wallis for individual emotion identity types
-TstTemp = [];
+TstTempKW = [];
 xx(xx==0) = NaN;
 nameTable = {'Response Time By Each Emotion'};
 testDone = {'Kruskall Wallis'};
@@ -89,7 +89,7 @@ stdXX = nanstd(xx(:,1));
 stdYY = nanstd(xx(:,2));
 stdZZ = nanstd(xx(:,3));
 colorTemp = [C(1,:); C(7,:); C(13,:)];
-TstTemp = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
 tbleTemp = array2table(multC, "VariableNames", ["Emotion A", "Emotion B", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
 figure
 [Ax, L] = violin(xx, 'xlabel', {'Emotion One', 'Emotion Two', 'Emotion Three'}, 'facealpha', 1, 'facecolor', colorTemp,  'mc',  'k', 'medc', '', 'LineWidth', 2);
@@ -106,22 +106,116 @@ L.LineWidth = 4;
 %% Sig Cluster stats
 %Group stats
 %Run:
-%     size of cluster 
+%   First look at ones when you are looking at the all trial summary stats
+%       centroid by time
+%       centroid by frequency
+%       bounding box by time (plot this? maybe take the length and height?)
+%       bounding box by frequency(plot this?)
+%   Second look at the by trial summary stats
+%   by structure
+%     centroid by time
+%     cluster centroid by frequency
 %     centroid
 
+TstTemp = [];
+nameTable = {'Cluster Centroid By Time'};
+testDone = {'Kruskall Wallis'};
+
+xx = []; %load with stats of whatever category (say Amygdala centroid time)
+yy = []; %load with stats of whatever is the second category (say Hippo)
+zz = []; %load with stats of the third category
+%HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
+for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
+for ii = 1:length(yy); nameYY{ii,1} = 'Hippocampus'; end
+for ii = 1:length(zz); nameZZ{ii,1} = 'Insula'; end
+colorTemp = [C(3,:); C(28,:); C(80,:)];
+
+%no inputs needed from here below (unless more variables needed, add
+%accordingly)
+xxx= vertcat(xx,yy,zz);
+xxxN = vertcat(nameXX,nameYY, nameZZ);
+[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+multC = multcompare(stats);
+meanXX = nanmean(xx);
+meanYY = nanmean(yy);
+meanZZ = nanmean(zz);
+stdXX = nanstd(xx);
+stdYY = nanstd(yy);
+stdZZ = nanstd(zz);
+TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+figure
+title(nameTable);
+wdth = 1;
+x1 = ones(1,length(xx));
+x2 = 2*wdth*ones(1,length(yy));
+x3 = 3*wdth*ones(1,length(zz));
+swarmchart(x1,xx,5, colorTemp(1,:), 'filled');
+hold on
+swarmchart(x2,yy,5, colorTemp(2,:), 'filled');
+swarmchart(x3,zz,5, colorTemp(3,:), 'filled');
+p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color',C(5,:));
+p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',C(30,:));
+p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:));
+%legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
+ax=gca;
+ax.XTick = [1,2,3];
+ax.YLim = [0:1.5];
+ax.YTick = [0:0.2:1.50];
+ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
+ax.FontSize = 13;
+ax.FontWeight = 'bold';
+ylabel('Time (S)', 'FontSize', 18, 'FontWeight','bold')
 
 
+ %% a repeat for frequency based stuff to make it easier 
+TstTemp = [];
+nameTable = {'Cluster Centroid By Frequency'};
+testDone = {'Kruskall Wallis'};
 
-%% run stats on sig clusters
-CorrectResponseST = TtotalSigClust.CorrectResponse;
-ResponseTimeST = TtotalSigClust.ResponseTime;
-SecondTrialST = TtotalSigClust.SecondTrial;
+xx = []; %load with stats of whatever category (say Amygdala centroid time)
+yy = []; %load with stats of whatever is the second category (say Hippo)
+zz = []; %load with stats of the third category
+%HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
+for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
+for ii = 1:length(yy); nameYY{ii,1} = 'Hippocampus'; end
+for ii = 1:length(zz); nameZZ{ii,1} = 'Insula'; end
+colorTemp = [C(3,:); C(28,:); C(80,:)];
 
-%%
 
-CentTest = TtotalSigClust.ByTrialCentroid(1:54,2);
-CentTest(:,2) = TtotalSigClust.ByTrialCentroid(55:108,2);
-
-violin(CentTest, 'xlabel', {'Amygdala', 'Hippocampus'}, 'facecolor', [1 0.549 0; 0.12 0.85 0.98], 'mc', 'b', 'medc', '');
+xxx= vertcat(xx,yy,zz);
+xxxN = vertcat(nameXX,nameYY, nameZZ);
+[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+multC = multcompare(stats);
+meanXX = nanmean(xx);
+meanYY = nanmean(yy);
+meanZZ = nanmean(zz);
+stdXX = nanstd(xx);
+stdYY = nanstd(yy);
+stdZZ = nanstd(zz);
+TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+figure
+title(nameTable);
+wdth = 1;
+x1 = ones(1,length(xx));
+x2 = 2*wdth*ones(1,length(yy));
+x3 = 3*wdth*ones(1,length(zz));
+swarmchart(x1,xx,5, colorTemp(1,:), 'filled');
+hold on
+swarmchart(x2,yy,5, colorTemp(2,:), 'filled');
+swarmchart(x3,zz,5, colorTemp(3,:), 'filled');
+p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color',C(5,:));
+p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',C(30,:));
+p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:));
+%legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
+ax=gca;
+ax.XTick = [1,2,3];
+ax.YLim = [0:1.5];
+ax.YTick = [0:0.2:1.50];
+ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
+ax.FontSize = 13;
+ax.FontWeight = 'bold';
+ylabel('Time (S)', 'FontSize', 18, 'FontWeight','bold')
 
 

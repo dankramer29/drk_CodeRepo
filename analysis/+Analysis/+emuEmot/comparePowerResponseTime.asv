@@ -1,6 +1,6 @@
 function [summaryStatsSigTrials] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
 %Primary function to pull out cluster descriptors and compare. creates a
-%table of information on clusters
+%table of information on cluster
 %   Detailed explanation goes here
 %   ALSO WANT TO LOOK AT THE TIMING OF THE PEAKS FOR WHEN TASK RELEVANT AND
 %   TASK IRRELEVANT

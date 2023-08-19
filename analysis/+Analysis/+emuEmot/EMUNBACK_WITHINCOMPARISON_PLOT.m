@@ -99,7 +99,7 @@ end
 %significant epochs that are between 100 and 900 ms). 
 [MWX.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
-    'chName', chLocationName, 'patientName', subjName);
+    'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 2);
 
 
 

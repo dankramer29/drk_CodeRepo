@@ -12,6 +12,16 @@ datetime(ma_timestampsDSId(end)/1000000,...
 'ConvertFrom','posixtime','TimeZone','America/Denver')
 
 
+%%
+bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{5}){idx2};
+                        sData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
+                        sData{idxCl} = normalize(sData,2);
+
+                                                idxSigClusterAllCriteria(idxCl) = ii;
+
+                                                idxSigClusterSingleCriteria(idxCl) = ii;
+
+
 %% splotches
 
 sss = sData;

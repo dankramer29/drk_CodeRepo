@@ -139,10 +139,6 @@ end
 %%
 channelToCheck = input('input which channels to check in more detail, put [] if none');
 channelToCheck = channelToCheck';
-if isempty(channelToCheck)
-    T = [];
-    return
-end
 
 for ii = 1:length(channelToCheck)
     channelCheckTemp = ['ch', num2str(channelToCheck(ii))];

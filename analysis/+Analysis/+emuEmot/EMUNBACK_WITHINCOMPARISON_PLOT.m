@@ -88,7 +88,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [7,8,17,18,19,20,41,42,43,44,65,66,67,68,91,92,93,94];
+    nS = [13,14,15,16];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end

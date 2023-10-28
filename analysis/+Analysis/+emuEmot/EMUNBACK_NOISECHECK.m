@@ -87,4 +87,4 @@ for ii = 1:length(removeChannel)
 end
 %%
 % next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
-edit EMUNBACK_WITHINCOMPARISON_PLOT.M
+edit Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT

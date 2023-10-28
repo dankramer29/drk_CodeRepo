@@ -104,15 +104,15 @@ preSpectrogramData = true; %either chop the data as already multitapered and the
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
 oneFile = false; %if the nwb file is a single file and not split into two. Starts around patient MW_16
 %USE _0X IF SINGLE DIGITS
-sessionName = 'MW_19';
-subjName = 'MW_19';
+sessionName = 'MW_13';
+subjName = 'MW_13';
 %MWX - remember to change the name in the within subject processing!!
 
-matNameEm = 'NBack_EMOTION_2022_10_31.16_10_12'; %place this in an "Emotion" folder
-matNameId = 'NBack_IDENTITY_2022_10_31.16_02_28'; %place this in an "Identity" folder
+matNameEm = 'NBack_EMOTION_2022_5_29.18_10_57'; %place this in an "Emotion" folder
+matNameId = 'NBack_IDENTITY_2022_5_29.18_5_50'; %place this in an "Identity" folder
 if oneFile == 0
-    identityFilter = 'JM_MW19_Session_6_filter.nwb'; %does NOT need to be placed in a folder
-    emotionFilter = 'JM_MW19_Session_7_filter.nwb';
+    identityFilter = 'JM_MW13_Session_9_filter.nwb'; %does NOT need to be placed in a folder
+    emotionFilter = 'JM_MW13_Session_10_filter.nwb';
 elseif oneFile == 1
     %emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end
@@ -227,8 +227,10 @@ TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, 
 open TableChannel
 dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
 %%
+%MW13 channels for Middle Frontal:
+chInterest = [49:56];
 %MW19 channels:
-chInterest = [11,12,13,14,19,20,23,24,25,28,29,42,43,47,48,51,52,116,117,118,131,132,133,121,122];
+%chInterest = [11,12,13,14,19,20,23,24,25,28,29,42,43,47,48,51,52,116,117,118,131,132,133,121,122];
 %MW22 channels:
 %chInterest = [2,3,4,5,13,14,19,20,21,22,30,31,32,33,34,...
 %     45,46,47,56,57,73,74,75,88,89,90,121,122,123,139,140,...
@@ -269,12 +271,15 @@ if oneFile == true
     ma_timestampsDSEm = ma_timeSTampsDs(:,1:behavioralIndexTTLEm(1)-(fs*5)); %remove all but 5 seconds worth of the macrowire data
     ma_timestampsDSId = ma_timeSTampsDs(:,1:behavioralIndexTTLId(1)-(fs*5)); %remove all but 5 seconds worth of the macrowire data
 elseif oneFile == false
-    macrowiresEm = macrowires;
-    macrowires = [];
+    macrowiresEm = macrowires;    
     beh_timestampsEm = beh_timestamps;
     ma_timestampsDSEm = ma_timestampsDS;
-    if ~isempty(cellVar)
-        hexNumEm = hexNum;
+    if ~isempty(cellVar) 
+        if max(hexNum) < 2 %sometimes has a hex code that is only 1 or 0
+            cellVar = [];
+        else
+            hexNumEm = hexNum;
+        end
     end
 end
 
@@ -404,11 +409,13 @@ end
     'ImpreTime', preTime, 'ImpostTime', postTime, 'RespreTime', preTimeRes, 'RespostTime', postTimeRes, 'multiTaperWindow',...
     multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% second set of data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %Identity run
+macrowires = [];
 if ~oneFile %need to fix this for the one file situations because you will have already pulled much of this info.
     beh_timestamps = [];
     ma_timestamps = [];
@@ -448,12 +455,16 @@ if oneFile == false
     
     macrowiresId = macrowires;
     macrowires = [];
-    
+
     % convert to individual so they are saved and can go back to earlier steps
     beh_timestampsId = beh_timestamps;
     ma_timestampsDSId = ma_timestampsDS; %downsamle the timestamps
     if ~isempty(cellVar)
-        hexNumEm = hexNum;
+        if max(hexNum) < 2
+            cellVar = [];
+        else
+            hexNumEm = hexNum;
+        end
     end
 
 end
@@ -626,4 +637,4 @@ end
 % then Analysis.emuEmot.emuEmot.EMUNBACK_COMPAREACROSSPATIENTS.M (BUT, that
 % one is mostly by hand and to be placed into excel file)
 
-edit EMUNBACK_NOISECHECK
+edit Analysis.emuEmot.EMUNBACK_NOISECHECK

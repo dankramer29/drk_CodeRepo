@@ -43,6 +43,8 @@ function [summaryStatsSigTrials] = comparePowerResponseTime(nback, identityTaskL
 %gamma bandpassed at current setting
 %   MaxValue - the peak (meaning highest z scored value)
 %   TimeofMax - when the peak occurred
+
+%Behavioral stats
 %   CorrectResponse - got it right or not
 %   ResponseTime - how fast they responded.
 

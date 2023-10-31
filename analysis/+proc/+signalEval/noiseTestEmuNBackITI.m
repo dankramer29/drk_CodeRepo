@@ -53,7 +53,7 @@ if savePlot
         if taskNameSel == 1;
             plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
                 'versionNum', 'v1_NoisecheckEmotionTask');
-        elseif taskNameSel ==2;
+        elseif taskNameSel ==2; %THERE IS AN ERROR HERE THAT HAS TO DO WITH CLOSING THE PREVIOUS FIGURE, BUT DIDN'T HAVE TIME TO SORT THROUGH IT
             plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
                 'versionNum', 'v1_NoisecheckIdentityTask');
         end
@@ -276,5 +276,6 @@ if savePlot
         close
     end
 end
+
 
 end

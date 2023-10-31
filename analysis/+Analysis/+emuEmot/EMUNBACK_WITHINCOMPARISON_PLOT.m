@@ -4,7 +4,7 @@
 %INDIVIDUAL EMOTIONS/IDS. 
 
 %%%%%%%%
-%CHANGE MWx BELOW BEFORE SAVIN!
+%CHANGE MWx BELOW BEFORE SAVING!
 %%%%%
 
 
@@ -88,7 +88,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [13,14,15,16];
+    nS = [21,22,25];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -116,7 +116,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW19 = MWX;
+MW23 = MWX;
 %%%%
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
@@ -125,16 +125,16 @@ if saveSelectFile
         %make the directory folder
         mkdir(folder_name)
     end
-    fileName = [folder_name, '\', 'MW19_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW19_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
-    fileName = [folder_name, '\', 'MW19_emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW19_identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW19_itiDataReal', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW23_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW23_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
+    fileName = [folder_name, '\', 'MW23_emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW23_identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW23_itiDataReal', '.mat'];    save(fileName);
 
     
-    fileName = [folder_name, '\', 'MW19_nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW19_nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW19', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW23_nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW23_nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
+    fileName = [folder_name, '\', 'MW23', '.mat'];    save(fileName);
     
 end
 

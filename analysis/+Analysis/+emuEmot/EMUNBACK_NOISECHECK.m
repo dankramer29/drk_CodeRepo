@@ -47,6 +47,8 @@ end
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
+%THERE IS AN ERROR IN THIS THAT HAS TO DO WITH SAVING AND I CAN'T FIGURE IT
+%OUT
 [TchannelCheckEm, itiDataReal.EmotionTask] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');

@@ -56,6 +56,7 @@ xxx(1:length(yy),2) = yy;
 xxx(xxx(:,2) == 0,2) = NaN;
 
 %% a violin plot option
+%
 [Ax, L] = violin(xxx, 'xlabel', {'Emotion Task', 'Identity Task'}, 'facealpha', 1, 'facecolor', [1 0.549 0; 0.12 0.85 0.98],  'mc', 'b', 'medc', '');
 Ax.LineWidth = 2;
 Ax.EdgeColor = 'k';
@@ -63,46 +64,6 @@ Gc = gca;
 Gc.FontSize = 22;
 L.FontSize = 22;
 L.LineWidth = 4;
-%% a scatter plot option
-%need to work on something for this. like rex perhaps. scatter will work
-%but will need to be spread out by some factor. rex might have a nice
-%program for it. look to documentation of scatter for how it's done.
-figure
-sz = 25;
-c = linspace(1,10,length(x));
-scatter(x,y,sz,c,'filled')
-
-%% kruskall wallis for individual emotion identity types
-TstTempKW = [];
-xx(xx==0) = NaN;
-nameTable = {'Response Time By Each Emotion'};
-testDone = {'Kruskall Wallis'};
-nameXX = {'Emotion 1'};
-nameYY = {'Emotion 2'};
-nameZZ = {'Emotion 3'};
-[pvalue, tbl, stats] = kruskalwallis(xx, [], 'off');
-multC = multcompare(stats);
-meanXX = nanmean(xx(:,1));
-meanYY = nanmean(xx(:,2));
-meanZZ = nanmean(xx(:,3));
-stdXX = nanstd(xx(:,1));
-stdYY = nanstd(xx(:,2));
-stdZZ = nanstd(xx(:,3));
-colorTemp = [C(1,:); C(7,:); C(13,:)];
-TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
-tbleTemp = array2table(multC, "VariableNames", ["Emotion A", "Emotion B", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
-figure
-[Ax, L] = violin(xx, 'xlabel', {'Emotion One', 'Emotion Two', 'Emotion Three'}, 'facealpha', 1, 'facecolor', colorTemp,  'mc',  'k', 'medc', '', 'LineWidth', 2);
-%Ax.LineWidth = ;
-Ax.LineWidth
-Ax.EdgeColor =  'k';
-Gc = gca;
-Gc.FontSize = 22;
-L.FontSize = 22;
-L.LineWidth = 4;
-
-
-
 %% Sig Cluster stats
 %Group stats
 %Run:
@@ -217,5 +178,48 @@ ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
 ax.FontSize = 13;
 ax.FontWeight = 'bold';
 ylabel('Time (S)', 'FontSize', 18, 'FontWeight','bold')
+
+
+
+%% a scatter plot option
+%need to work on something for this. like rex perhaps. scatter will work
+%but will need to be spread out by some factor. rex might have a nice
+%program for it. look to documentation of scatter for how it's done.
+figure
+sz = 25;
+c = linspace(1,10,length(x));
+scatter(x,y,sz,c,'filled')
+
+%% kruskall wallis for individual emotion identity types
+TstTempKW = [];
+xx(xx==0) = NaN;
+nameTable = {'Response Time By Each Emotion'};
+testDone = {'Kruskall Wallis'};
+nameXX = {'Emotion 1'};
+nameYY = {'Emotion 2'};
+nameZZ = {'Emotion 3'};
+[pvalue, tbl, stats] = kruskalwallis(xx, [], 'off');
+multC = multcompare(stats);
+meanXX = nanmean(xx(:,1));
+meanYY = nanmean(xx(:,2));
+meanZZ = nanmean(xx(:,3));
+stdXX = nanstd(xx(:,1));
+stdYY = nanstd(xx(:,2));
+stdZZ = nanstd(xx(:,3));
+colorTemp = [C(1,:); C(7,:); C(13,:)];
+TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Emotion A", "Emotion B", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+figure
+[Ax, L] = violin(xx, 'xlabel', {'Emotion One', 'Emotion Two', 'Emotion Three'}, 'facealpha', 1, 'facecolor', colorTemp,  'mc',  'k', 'medc', '', 'LineWidth', 2);
+%Ax.LineWidth = ;
+Ax.LineWidth
+Ax.EdgeColor =  'k';
+Gc = gca;
+Gc.FontSize = 22;
+L.FontSize = 22;
+L.LineWidth = 4;
+
+
+
 
 

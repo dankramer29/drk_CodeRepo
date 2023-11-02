@@ -29,6 +29,15 @@ C=linspecer(100); %sets up plotting colors
 % WAY TO DO THIS: SORT BY CORRECT VS INCORRECT (OR WHATEVER) THEN CUT THE
 % RESPONSE TIMES OF THE CORRECT, AND THE RESPONSE TIMES OF THE INCORRECT.
 % CHANGE THE VARIABLE NAMES BELOW. DO THE FOLLOWING:
+
+%% Figure 2 bar graph
+%the first number in each column is 
+subj = ['Amygdala Emotion', 'Amygdala Identity', 'Anterior Hippocampus Emotion', 'Anterior Hippocampus Identity', 'Posterior Hippocampus Emotion', 'Posterior Hippocampus Identity'];
+testS = ['Amygdala Emotion', 'Amygdala Identity'];
+totalCounts = [0 0 4; 1 0 3 ];
+hH= bar(totalCounts, 'stacked');
+
+%%
 %Response Time Emotion Task v Identity Task
 %Response Time Correct v Incorrect
 %

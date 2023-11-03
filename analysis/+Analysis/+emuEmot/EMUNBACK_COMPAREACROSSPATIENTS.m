@@ -31,10 +31,11 @@ C=linspecer(100); %sets up plotting colors
 % CHANGE THE VARIABLE NAMES BELOW. DO THE FOLLOWING:
 
 %% Figure 2 bar graph
-%the first number in each column is 
+%IN THEORY THIS WILL WORK, FOUND IT EASIER IN EXCEL
+
 subj = ['Amygdala Emotion', 'Amygdala Identity', 'Anterior Hippocampus Emotion', 'Anterior Hippocampus Identity', 'Posterior Hippocampus Emotion', 'Posterior Hippocampus Identity'];
 testS = ['Amygdala Emotion', 'Amygdala Identity'];
-totalCounts = [0 0 4; 1 0 3 ];
+totalCounts = [11	2	1;	7	3	1;	13	2	1;	14	1	1;	3	6	3;	9	0	3];
 hH= bar(totalCounts, 'stacked');
 
 %%
@@ -140,7 +141,7 @@ ylabel('Time (S)', 'FontSize', 18, 'FontWeight','bold')
 
  %% a repeat for frequency based stuff to make it easier 
 TstTemp = [];
-nameTable = {'Cluster Centroid By Frequency'};
+nameTable = {'Cluster Centroid By Time'};
 testDone = {'Kruskall Wallis'};
 
 xx = []; %load with stats of whatever category (say Amygdala centroid time)
@@ -148,8 +149,8 @@ yy = []; %load with stats of whatever is the second category (say Hippo)
 zz = []; %load with stats of the third category
 %HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
 for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
-for ii = 1:length(yy); nameYY{ii,1} = 'Hippocampus'; end
-for ii = 1:length(zz); nameZZ{ii,1} = 'Insula'; end
+for ii = 1:length(yy); nameYY{ii,1} = 'Anterior Hippocampus'; end
+for ii = 1:length(zz); nameZZ{ii,1} = 'Posterior Hippocampus'; end
 colorTemp = [C(3,:); C(28,:); C(80,:)];
 
 

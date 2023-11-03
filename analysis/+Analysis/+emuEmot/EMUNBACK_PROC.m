@@ -104,15 +104,15 @@ preSpectrogramData = true; %either chop the data as already multitapered and the
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
 oneFile = false; %if the nwb file is a single file and not split into two. Starts around patient MW_16 but not later
 %USE _0X IF SINGLE DIGITS
-sessionName = 'MW_23';
-subjName = 'MW_23';
+sessionName = 'MW_2';
+subjName = 'MW_2';
 %MWX - remember to change the name in the within subject processing!!
 
-matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53'; %place this in an "Emotion" folder
-matNameId = 'NBack_IDENTITY_2023_06_27.13_22_22'; %place this in an "Identity" folder
+matNameEm = 'NBack_2021_03_23.17_32_58_EMOTION'; %place this in an "Emotion" folder
+matNameId = 'NBack_2021_03_23.17_28_41_IDENTITY'; %place this in an "Identity" folder
 if oneFile == 0
-    identityFilter = 'JM_MW23_Session_8_filter.nwb'; %does NOT need to be placed in a folder
-    emotionFilter = 'JM_MW13_Session_10_filter.nwb';
+    identityFilter = 'JM_MW2_Session_7_filter.nwb'; %does NOT need to be placed in a folder
+    emotionFilter = 'JM_MW2_Session_8_filter.nwb';
 elseif oneFile == 1
     %emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end

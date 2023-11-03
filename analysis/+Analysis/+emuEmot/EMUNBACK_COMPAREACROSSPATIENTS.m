@@ -1,6 +1,5 @@
 %% EMUNBACK COMPARE ACROSS PATIENTS
 
-C=linspecer(100); %sets up plotting colors
 
 % COMBINE THE TABLES (doing this in excel, much easier)
 % TtotalAllTrials = [statsAllTrialsId];
@@ -32,13 +31,19 @@ C=linspecer(100); %sets up plotting colors
 
 %% Figure 2 bar graph
 %IN THEORY THIS WILL WORK, FOUND IT EASIER IN EXCEL
-
 subj = ['Amygdala Emotion', 'Amygdala Identity', 'Anterior Hippocampus Emotion', 'Anterior Hippocampus Identity', 'Posterior Hippocampus Emotion', 'Posterior Hippocampus Identity'];
 testS = ['Amygdala Emotion', 'Amygdala Identity'];
 totalCounts = [11	2	1;	7	3	1;	13	2	1;	14	1	1;	3	6	3;	9	0	3];
 hH= bar(totalCounts, 'stacked');
 
 %%
+C=linspecer(100); %sets up plotting colors
+
+%%
+
+
+
+
 %Response Time Emotion Task v Identity Task
 %Response Time Correct v Incorrect
 %
@@ -88,13 +93,28 @@ L.LineWidth = 4;
 %     cluster centroid by frequency
 %     centroid
 
+xx = []; %load with stats of whatever category (say Amygdala centroid time)
+yy = []; %load with stats of whatever is the second category (say Hippo)
+zz = []; %load with stats of the third category
+
+%pull out the areas you want
+idxX = 1; idxY = 1; idxZ = 1;
+for ii = 1:height(MW23.SigClusterSummStats)
+    if (MW23.SigClusterSummStats(ii,:).RecordingLocation{1} == "L Amygdala") && (MW23.SigClusterSummStats(ii,:).AllImagesSignificant == 1) && ...
+    (MW23.SigClusterSummStats(ii,:).TrialType{1} == "identityTask") && (MW23.SigClusterSummStats(ii,:).TrialNumber{1} == 1) 
+        xx(idxX,1) = MW23.SigClusterSummStats(ii,:).TstatCluster;
+        idxX = idxX + 1;
+    elseif (MW23.SigClusterSummStats(ii,:).RecordingLocation{1} == "R Amygdala") && (MW23.SigClusterSummStats(ii,:).AllImagesSignificant == 1) && ...
+    (MW23.SigClusterSummStats(ii,:).TrialType{1} == "identityTask") && (MW23.SigClusterSummStats(ii,:).TrialNumber{1} == 1)
+        yy(ii,1) = MW23.SigClusterSummStats(ii,:).TstatCluster;
+        idxY = idxY + 1;
+    end
+end
+
 TstTemp = [];
 nameTable = {'Cluster Centroid By Time'};
 testDone = {'Kruskall Wallis'};
 
-xx = []; %load with stats of whatever category (say Amygdala centroid time)
-yy = []; %load with stats of whatever is the second category (say Hippo)
-zz = []; %load with stats of the third category
 %HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
 for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
 for ii = 1:length(yy); nameYY{ii,1} = 'Hippocampus'; end

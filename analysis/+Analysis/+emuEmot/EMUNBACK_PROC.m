@@ -112,7 +112,7 @@ matNameEm = 'NBack_2021_03_23.17_32_58_EMOTION'; %place this in an "Emotion" fol
 matNameId = 'NBack_2021_03_23.17_28_41_IDENTITY'; %place this in an "Identity" folder
 if oneFile == 0
     identityFilter = 'JM_MW2_Session_7_filter.nwb'; %does NOT need to be placed in a folder
-    emotionFilter = 'JM_MW2_Session_8_filter.nwb';
+    emotionFilter = 'JM_MW2_Session_7_filter.nwb';
 elseif oneFile == 1
     %emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end

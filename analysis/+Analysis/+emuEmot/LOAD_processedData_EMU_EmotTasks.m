@@ -14,6 +14,7 @@ elseif trialEm == false
 end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 cellVar = [];
+%{
 cellVar = testfile.acquisition.get('events').data.load;
 if ~isempty(cellVar)
     for ii = 1:size(cellVar,1)
@@ -25,7 +26,7 @@ if ~isempty(cellVar)
     end
     hexNum = hex2dec(hexStr);  
 end
-
+%}
 
 % You can use these values to search the timestamp data from the ephys
 % To check the actual time conversion

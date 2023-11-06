@@ -50,8 +50,8 @@
 % image on; 39 fixation on; response 49;
 
 addpath(genpath('Z:\KramerEmotionID_2023\Data\EMU_nBack'));
-sessionName = 'MW_X';
-subjName = 'MW_X';
+sessionName = 'MW_23';
+subjName = 'MW_23';
 hexDecTTL = 0; %this is if the hexidecimal system is in place which occurs from MW_16 on, but can also live 
 rawData = 0; %you can pull in the raw data files, but recommend the filtered
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
@@ -59,12 +59,11 @@ fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 mi
 dwnSampleFactor = round(4000/fs); %can convert this for microwires where original fs is 32khz if desired.
 
 %% add the apprpriate behavioral file
-matNameEm = 'NBack_2021_03_23.17_32_58_EMOTION'; %place this in an "Emotion" folder
+matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53'; %place this in an "Emotion" folder
 
 %% add the appropriate nwb file
 %This is for nback task
-emotionFilter = 'JM_MW2_Session_8_filter.nwb';
-
+emotionFilter = 'JM_MW23_Session_9_filter.nwb';
 
 
 taskName = 'Emotion';

@@ -110,8 +110,6 @@ oneFile = false; %if the nwb file is a single file and not split into two. Start
 sessionName = 'MW_16';
 subjName = 'MW_16';
 %MWX - remember to change the name in the within subject processing!!
-timeCheck = 1; %Toggle on if you need to check the times are the same
-
 
 matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; %place this in an "Emotion" folder
 matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; %place this in an "Identity" folder
@@ -194,14 +192,9 @@ load(folderName)
 
 % in at least the first 2 subjects, finding the time of the actual trials
 % is not straightforward. this will find the actual timestamps of when both
-% started. Also good for MW16 where the timestamps are all 255
-if isempty(ImageTimes)
-    ImageTimes = Events.Times.Image_Shown;
-end
-if timeCheck
-    trialStartRealTime = datetime(ImageTimes(1), 'ConvertFrom', 'datenum','TimeZone','America/Denver')
-    ttlFirstRealTime = datetime(beh_timestamps(1)/1000000,'ConvertFrom','posixtime','TimeZone','America/Denver')
-    
+% started.
+if earlyOneSession
+    trialStartRealTime = datetime(ImageTimes(1), 'ConvertFrom', 'datenum','TimeZone','America/Denver');
     for ii = 1:length(beh_timestamps)
         timeA = datetime(beh_timestamps(ii)/1000000,...
             'ConvertFrom','posixtime','TimeZone','America/Denver');
@@ -290,7 +283,7 @@ end
 %% find the behavioral timestamps
 %TO FIGURE OUT THE START TIME, TRY TO MATCH UP THE "NOW" TIME AND THE
 %NEURAL CLOCK TIME FOR WHERE YOU THINK IT WOULD START. 
-if strcmp(sessionName, ('MW_16')) %unique situation with MW_16 and hex codes are just 255 and 256
+if strcmp(sessionName ('MW_16') %unique situation with MW_16 and hex codes are just 255 and 256
     %WILL NEED TO FIX ALL OF THIS HERE ON DOWN AND GET THE TIME STAMPS INTO
     %EFFECT. THIS SEEMS TO PULL THE RIGHT TIME STAMPS BECAUSE IT SHOULD BE
     %THE HEX CODES BUT WILL THEN HAVE TO MATCH IT UP WITH THE RELEVANT

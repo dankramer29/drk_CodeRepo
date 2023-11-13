@@ -3,7 +3,16 @@
 %% this is all scratch pad stuff for now.
 
 %testing
-%%time issues
+%%time issues, for testing when the session started to compare to ImageOn
+%%times
+emotionFilter = 'JM_MW2_Session_8_filter.nwb';
+testfileEm = nwbRead(emotionFilter);
+trialEm = true;
+%runs nwb
+run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
+timeA = datetime(beh_timestamps(ii)/1000000,...
+    'ConvertFrom','posixtime','TimeZone','America/Denver')
+
 
 datetime(ImageTimesAdjId(1)/1000000,...
 'ConvertFrom','posixtime','TimeZone','America/Denver')

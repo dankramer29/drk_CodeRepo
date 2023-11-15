@@ -52,14 +52,14 @@
 addpath(genpath('Z:\KramerEmotionID_2023\Data\EMU_nBack'));
 sessionName = 'MW_23';
 subjName = 'MW_23';
-hexDecTTL = 0; %this is if the hexidecimal system is in place which occurs from MW_16 on, but can also live 
+hexDecTTL = 0; %toggle this on if the hexidecimal system is in place which occurs from MW_16 on, but can also live 
 rawData = 0; %you can pull in the raw data files, but recommend the filtered
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
 
 dwnSampleFactor = round(4000/fs); %can convert this for microwires where original fs is 32khz if desired.
 
 %% add the apprpriate behavioral file
-matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53'; %place this in an "Emotion" folder
+matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53'; 
 
 %% add the appropriate nwb file
 %This is for nback task
@@ -169,4 +169,8 @@ for ii = 2:length(wireID)
 end
 
 TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, shortBAn, wireID);
-open TableChannel
+
+
+
+
+

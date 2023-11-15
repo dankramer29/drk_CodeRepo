@@ -3,6 +3,8 @@
 % EMUNBACK_PROC
 
 %MW13 9 is identity, 10 is emotion
+%MW16 has hexcode but all hexs are 255. has 167 ttls x2 which is 334, but
+%actually has 332. 
 %MW9
 %MW19 Session 6 - 329 TTL - NBack IDEN Session 7 - 330 TTL - NBack EMO 
 
@@ -107,17 +109,17 @@ preSpectrogramData = true; %either chop the data as already multitapered and the
 alreadyFilteredData = false; %toggle to true if you've run the entire dataset through LFP processing already and saved it.
 oneFile = false; %if the nwb file is a single file and not split into two. Starts around patient MW_16 but not later
 %USE _0X IF SINGLE DIGITS
-sessionName = 'MW_16';
-subjName = 'MW_16';
+sessionName = 'MW_2';
+subjName = 'MW_2';
 %MWX - remember to change the name in the within subject processing!!
 timeCheck = 1; %Toggle on if you need to check the times are the same
 
 
-matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; %place this in an "Emotion" folder
-matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; %place this in an "Identity" folder
+matNameEm = 'NBack_2021_03_23.17_32_58_EMOTION'; %place this in an "Emotion" folder
+matNameId = 'NBack_2021_03_23.17_28_41_IDENTITY'; %place this in an "Identity" folder
 if oneFile == 0
-    identityFilter = 'JM_MW16_Session_1_filter.nwb'; %does NOT need to be placed in a folder
-    emotionFilter = 'JM_MW16_Session_3_filter.nwb';
+    identityFilter = 'JM_MW2_Session_8_filter.nwb'; %does NOT need to be placed in a folder
+    emotionFilter = 'JM_MW2_Session_7_filter.nwb';
 elseif oneFile == 1
     %emotionidentityFilter = 'JM_MW18_Session_16_filter.nwb'; %if they are one file
 end
@@ -200,6 +202,8 @@ if isempty(ImageTimes)
 end
 if timeCheck
     trialStartRealTime = datetime(ImageTimes(1), 'ConvertFrom', 'datenum','TimeZone','America/Denver')
+    % xx= datetime(Events.Times.Fixation_Shown(1), 'ConvertFrom', 'datenum','TimeZone','America/Denver')
+    
     ttlFirstRealTime = datetime(beh_timestamps(1)/1000000,'ConvertFrom','posixtime','TimeZone','America/Denver')
     
     for ii = 1:length(beh_timestamps)
@@ -291,11 +295,8 @@ end
 %TO FIGURE OUT THE START TIME, TRY TO MATCH UP THE "NOW" TIME AND THE
 %NEURAL CLOCK TIME FOR WHERE YOU THINK IT WOULD START. 
 if strcmp(sessionName, ('MW_16')) %unique situation with MW_16 and hex codes are just 255 and 256
-    %WILL NEED TO FIX ALL OF THIS HERE ON DOWN AND GET THE TIME STAMPS INTO
-    %EFFECT. THIS SEEMS TO PULL THE RIGHT TIME STAMPS BECAUSE IT SHOULD BE
-    %THE HEX CODES BUT WILL THEN HAVE TO MATCH IT UP WITH THE RELEVANT
-    %INPUTS FOR FUNCTIONS LATER. I CAN'T TELL WHAT IS ACTUALLY NECESSARY
-    %RIGHT NOW.
+    %Long story short, I believe you want hex code 4:161 for images
+    %and 7:162 for response
     beh_timestampsEm = beh_timestamps(hexNum == 255);
     [behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsEm, ma_timestampsDS); %finds the ttl
 elseif oneFile == true

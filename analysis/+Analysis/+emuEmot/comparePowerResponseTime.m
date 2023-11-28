@@ -178,7 +178,7 @@ for cc = 1:length(chNum)
             if ~isempty(bData)
                 for rr = 1:length(bData)
                     T1 = [];
-                    for jj = 1:size(bData{rr},1)
+                    for jj = 1:size(sData{rr},3)
                         %%check if there is a cluster on each trial and record descriptive info on it
                         sDataTemp = sData{rr}(:,:,jj); %take the normalized data
                         mask = sDataTemp>sdThreshold;
@@ -347,7 +347,7 @@ for cc = 1:length(chNum)
             if ~isempty(bData)
                 for rr = 1:length(bData) %check if more than one cluster 
                     T1 = [];
-                    for jj = 1:size(bData{rr},1)
+                    for jj = 1:size(sData{rr},3)
                         %%check if there is a cluster on each trial and record descriptive info on it
                         sDataTemp = sData{rr}(:,:,jj); %take the normalized data
 

@@ -1,8 +1,3 @@
-%% figure out which trial started first
-
-%THINGS TO DO. NOT 100% SURE IT'S CAPTURING SIGNIFICANT AREAS FOR
-%INDIVIDUAL EMOTIONS/IDS. 
-
 %%%%%%%%
 %CHANGE MWx BELOW BEFORE SAVING!
 %%%%%
@@ -55,7 +50,7 @@ tTot = tic;
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 2);
 toc(tTot)
 
 %% plotting
@@ -116,7 +111,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW23 = MWX;
+MW18 = MWX;
 %%%%
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
@@ -127,15 +122,9 @@ if saveSelectFile
     end
     fileName = [folder_name, '\', 'MW23_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
     fileName = [folder_name, '\', 'MW23_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
-    fileName = [folder_name, '\', 'MW23_emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW23_identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW23_itiDataReal', '.mat'];    save(fileName);
 
-    
-    fileName = [folder_name, '\', 'MW23_nbackCompareImageOn', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW23_nbackCompareResponse', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW23', '.mat'];    save(fileName);
-    
+
+
 end
 
 

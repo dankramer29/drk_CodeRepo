@@ -2,7 +2,7 @@ function [T, meanSacrosstrials] = noiseTestEmuNBack(dataLFP, channelName, vararg
 %takes in the emotionLFP or identityLFP input and noise tests.
 
 
-[varargin, stdAbove] = util.argkeyval('stdAbove',varargin, 5); %number of STDs above the mean something needs to be to flag the system
+[varargin, stdAbove] = util.argkeyval('stdAbove',varargin, 4); %number of STDs above the mean something needs to be to flag the system
 [varargin, plotNoiseCheckAll] = util.argkeyval('plotNoiseCheckAll',varargin, false); %plot the noise check or not
 [varargin, flaggedplotNoiseCheck] = util.argkeyval('flaggedplotNoiseCheck',varargin, true); %plot the noise check or not
 [varargin, taskNameSel] = util.argkeyval('taskNameSel',varargin, 1); %what is the type of task you are looking at. 1 is emotion task, 2 is identity task.
@@ -99,7 +99,7 @@ for cc = 1:length(channelName)
                             title(['\color{magenta}trial', num2str(idxT)])
                         end
                         idxT = idxT +1;
-                    elseif ismember(rw, evenN) && idxT2 <= size(sAll,1)%spectrogram
+                    elseif ismember(rw, evenN) && idxT2 <= size(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj},3)%spectrogram
                         subplot(subN1d,subN2,kk)
                         imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
                         idxT2 = idxT2 +1;

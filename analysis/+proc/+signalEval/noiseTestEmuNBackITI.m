@@ -33,7 +33,6 @@ F = figure;
 F.WindowState = 'fullscreen';
 F.Name = ([taskName, ' ', 'mean LFP across all ITI 1']);
 sgtitle([taskName, ' ', 'mean LFP across all ITI 1'])
-
 for kk = 1:25 %just put it on a 6x6 to look at them.
     if idxCh > length(channelName)
         break
@@ -45,6 +44,7 @@ for kk = 1:25 %just put it on a 6x6 to look at them.
     imagesc(tplotSp, ff, meanS); axis xy; colorbar;
     title(channelName{idxCh})
     idxCh = idxCh +1;
+    end
 end
 if savePlot
     if ~isempty(sessionName)

@@ -11,9 +11,10 @@
 %save a copy of the tasks before the noise is removed
 emotionTaskLFP_noNoiseRemoval = emotionTaskLFP;
 identityTaskLFP_noNoiseRemoval = identityTaskLFP;
+%plots each trial so you can remove noisey ones.
 [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
     channelName, 'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
+        'versionNum', 'v2');
 dbstop
 removeTrialsEmot = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
 for ii = 2:length(removeTrialsEmot) %check none were entered wrong
@@ -54,7 +55,7 @@ TNoise = vertcat(TNoise, Tident);
         'versionNum', 'v1');
 [TchannelCheckId, itiDataReal.IdentityTask] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.IdentityTask, ...
     channelName, 'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
+        'versionNum', 'v2');
 
 
 

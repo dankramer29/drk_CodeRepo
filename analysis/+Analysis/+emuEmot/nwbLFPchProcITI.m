@@ -27,19 +27,21 @@ end
 
 Filtered = struct;
 filterClassicBand = [];
+bandfilter = [];
 for cc = 1:length(chNum) %channels
     for ii = 1:size(data,3) %trials        
         %calls this function for my basic processing stepsdata. does power
         %(signal^2 and spectrogram) and then 10log10. z scored is stored
         %but not used later as better to normalize after shuffle.
-        [filtDataTemp, ~, ~, ~, filterClassicBand] =  Analysis.BasicDataProc.dataPrep(data(:, cc, ii),...
+        [filtDataTemp, ~, ~, bandfilter, filterClassicBand] =  Analysis.BasicDataProc.dataPrep(data(:, cc, ii),...
             'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow,...
-            'DoBandFilterBroad', true, 'filterClassBand', filterClassicBand,...
+            'DoBandFilterBroad', true, 'bandfilter', bandfilter, 'filterClassBand', filterClassicBand,...
             'Spectrogram', true); 
         %Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
         Filtered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
         Filtered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;
         Filtered.iti.(chName{cc}).bandPassed.filter1to200 = data(:,cc); %this has already been made by broad bandpassing
+        Filtered.iti.(chName{cc}).Hilbert = filtDataTemp.Hilbert;
     end
 end
 

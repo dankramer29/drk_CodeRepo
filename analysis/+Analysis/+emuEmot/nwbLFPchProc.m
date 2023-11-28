@@ -112,17 +112,44 @@ for ii = 1:length(timeStampsImage)
             %the
             %by image, second group is responese
             for fn = 1:length(filterNames)
+                if fn == 1
+                    nback.byidentity.(chName{cc}).image.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                        = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                    nback.byidentity.(chName{cc}).image.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                        = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                    %WILL NEED TO FILL THIS IN.
+                    %itiFiltered.(chName{cc}).Power(:,:,idxIti) = filtD(:, behavioralIndexResponse(ii) + itiEpochC: behavioralIndexResponse(ii) + itiEpochCplus);%will take 1 second of iti.
+
+                end
                 nback.byidentity.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedIdentityIdx(idx1)}(idxID,:)...
                     = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                 if ii >1
+                    if fn == 1
+                        nback.byidentity.(chName{cc}).response.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                            = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                        nback.byidentity.(chName{cc}).response.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                            = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                    end
                     nback.byidentity.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedIdentityIdx(idx1)}(idxID,:)...
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
             end
             for fn = 1:length(filterNames) %%
+                if fn == 1
+                    nback.byemotion.(chName{cc}).image.Hilbert.Power{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
+                        = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                    nback.byemotion.(chName{cc}).image.Hilbert.Angle{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
+                        = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                end
                 nback.byemotion.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
                     = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                 if ii >1
+                    if fn == 1
+                        nback.byemotion.(chName{cc}).response.Hilbert.Power{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
+                            = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                        nback.byemotion.(chName{cc}).response.Hilbert.Angle{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
+                            = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                    end
                     nback.byemotion.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedEmotionIdx(idx1)}(idxEmot,:)...
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
@@ -213,7 +240,11 @@ if filterAllData
                     if itiTime(idxIti) < 2.5
                         warning(['iti time is less than 2 seconds for itiTime ' num2str(idxIti)]) %warn if not long enough, but will just spill into the preimage presentation time
                     end
-                    itiFiltered.(chName{cc}).specD(:,:,idxIti) = filtD(:, behavioralIndexResponse(ii) + itiEpochC: behavioralIndexResponse(ii) + itiEpochCplus);%will take 1 second of iti.
+                    if size(filtD,2) < behavioralIndexResponse(ii) + itiEpochCplus
+                        continue
+                    else
+                        itiFiltered.(chName{cc}).specD(:,:,idxIti) = filtD(:, behavioralIndexResponse(ii) + itiEpochC: behavioralIndexResponse(ii) + itiEpochCplus);%will take 1 second of iti.
+                    end
                     idxIti = idxIti +1;
                 end
                 switch PresentedIdentityIdx(idx1)

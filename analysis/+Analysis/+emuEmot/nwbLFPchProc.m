@@ -22,8 +22,9 @@ function [nback, itiFiltered] = nwbLFPchProc(data, PresentedEmotionIdx, Presente
 [varargin, filterAllData] = util.argkeyval('filterAllData',varargin, true); %if true, will  process by filtering all the data then breaking it up.
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %what the window of the spectrogram was to adjust timing
 [varargin, spectrogramWinTimeAdj] = util.argkeyval('spectrogramWinTimeAdj',varargin, 1); %for a window for multitapering, can be at the beginning (1), middle (2) or end of the window(3). Adjust here
-[varargin, itiTime] = util.argkeyval('itiTime',varargin, []); %input the times for the iti windows, which is after the response until the image presentation
-[varargin, itiEpoch] = util.argkeyval('itiTime',varargin, 1.5); %length of the time iti epoch
+[varargin, itiTime] = util.argkeyval('itiTime',varargin, 3); %input the times for the iti windows, which is after the response until the image presentation
+[varargin, itiEpoch] = util.argkeyval('itiTime',varargin, 1.5); %length of the time iti epoch start after the response and goes to the itiEpochPlus, so the iti length will be itiEpochPlus-itiEpoch
+[varargin, itiEpochPlus] = util.argkeyval('itiTime',varargin, 2.5); %length of the time iti epochplus
 
 
 if isempty(chNum)
@@ -36,13 +37,6 @@ if length(ResponseTimesAdj) == length(timeStampsImage)
 end
 if length(CorrectTrials) == length(timeStampsImage)
     CorrectTrials(1) = [];
-end
-
-if isempty(itiTime)
-    itiTime = 3;
-end
-if isempty(itiEpoch)
-    itiEpoch = 1;
 end
 
 switch spectrogramWinTimeAdj
@@ -64,71 +58,85 @@ filterNames = fieldnames(data.iti.(chName{1}).bandPassed);
 
 
 %% this is breaking the data up by session, and can filter this way, or break up band passed data
-% currently AM using this as it does the bandpassed data.
+% CURRENTLY USING BOTH AS IT BREAKS UP THE BANDPASSED OR HILBERT DATA.
+
 %% pre and post time conversion
 preTimeC = round(ImagepreTime * fs);
 postTimeC = round(ImagepostTime * fs);
 preTimeResC = round(ResponsepreTime * fs);
 postTimeResC = round(ResponsepostTime * fs);
+itiEpochBand = round(itiEpoch*fs);
+itiEpochPlusBand = round(itiEpochPlus*fs);
+
 
 
 %break up into data epochs centered on image presentation
 %timestamp 2 = first image, and every other is new image until the last one
 nback = struct;
-idx1 = 1;
-idxID = 1;
-idxEmot = 1;
-idxID1 = 0; idxEmot1 = 0;
-idxID2 = 0; idxEmot2 = 0;
-idxID3 = 0; idxEmot3 = 0;
-for ii = 1:length(timeStampsImage)
-    if timeStampsImage(ii) + postTimeC > length(data.iti.(chName{1}).bandPassed.(filterNames{1}))...
-            || timeStampsResponse(ii) + postTimeC > length(data.iti.(chName{1}).bandPassed.(filterNames{1}))%make sure data not too long
-        break
-    else
-        switch PresentedIdentityIdx(idx1)
-            case 1
-                idxID1 = idxID1 +1;
-                idxID = idxID1;
-            case 2
-                idxID2 = idxID2 +1;
-                idxID = idxID2;
-            case 3
-                idxID3 = idxID3 +1;
-                idxID = idxID3;
-        end
-        switch PresentedEmotionIdx(idx1)
-            case 1
-                idxEmot1 = idxEmot1 +1;
-                idxEmot = idxEmot1;
-            case 2
-                idxEmot2 = idxEmot2 +1;
-                idxEmot = idxEmot2;
-            case 3
-                idxEmot3 = idxEmot3 +1;
-                idxEmot = idxEmot3;
-        end
-        for cc = 1:length(chNum)
+
+for cc = 1:length(chNum)
+    idx1 = 1;
+    idxID = 1;
+    idxEmot = 1;
+    idxIti = 1;
+
+    idxID1 = 0; idxEmot1 = 0;
+    idxID2 = 0; idxEmot2 = 0;
+    idxID3 = 0; idxEmot3 = 0;
+    for ii = 1:length(timeStampsImage)
+        if timeStampsImage(ii) + postTimeC > length(data.iti.(chName{1}).bandPassed.(filterNames{1}))...
+                || timeStampsResponse(ii) + postTimeC > length(data.iti.(chName{1}).bandPassed.(filterNames{1}))%make sure data not too long
+            break
+        else
+            switch PresentedIdentityIdx(idx1)
+                case 1
+                    idxID1 = idxID1 +1;
+                    idxID = idxID1;
+                case 2
+                    idxID2 = idxID2 +1;
+                    idxID = idxID2;
+                case 3
+                    idxID3 = idxID3 +1;
+                    idxID = idxID3;
+            end
+            switch PresentedEmotionIdx(idx1)
+                case 1
+                    idxEmot1 = idxEmot1 +1;
+                    idxEmot = idxEmot1;
+                case 2
+                    idxEmot2 = idxEmot2 +1;
+                    idxEmot = idxEmot2;
+                case 3
+                    idxEmot3 = idxEmot3 +1;
+                    idxEmot = idxEmot3;
+            end
+
             %the
             %by image, second group is responese
             for fn = 1:length(filterNames)
                 if fn == 1
-                    nback.byidentity.(chName{cc}).image.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxId)...
-                        = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
-                    nback.byidentity.(chName{cc}).image.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                    nback.byidentity.(chName{cc}).image.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxID)...
+                        = data.iti.(chName{cc}).Hilbert.Power(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                    nback.byidentity.(chName{cc}).image.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxID)...
                         = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
-                    %WILL NEED TO FILL THIS IN.
-                    %itiFiltered.(chName{cc}).Power(:,:,idxIti) = filtD(:, behavioralIndexResponse(ii) + itiEpochC: behavioralIndexResponse(ii) + itiEpochCplus);%will take 1 second of iti.
 
                 end
                 nback.byidentity.(chName{cc}).image.bandPassed.(filterNames{fn}){PresentedIdentityIdx(idx1)}(idxID,:)...
                     = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                 if ii >1
                     if fn == 1
-                        nback.byidentity.(chName{cc}).response.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxId)...
-                            = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
-                        nback.byidentity.(chName{cc}).response.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxId)...
+                        nback.byidentity.(chName{cc}).response.Hilbert.Power{PresentedIdentityIdx(idx1)}(:,:,idxID)...
+                            = data.iti.(chName{cc}).Hilbert.Power(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                        nback.byidentity.(chName{cc}).response.Hilbert.Angle{PresentedIdentityIdx(idx1)}(:,:,idxID)...
                             = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                        % grab an iti of the hilbert.
+                        if size(data.iti.(chName{cc}).Hilbert.Power,2) < timeStampsResponse(ii) + itiEpochPlusBand
+                            continue
+                        else
+                            itiFiltered.(chName{cc}).Hilbert.Power(:,:,idxIti) = data.iti.(chName{cc}).Hilbert.Power(:, timeStampsResponse(ii) + itiEpochBand: timeStampsResponse(ii) + itiEpochPlusBand);%will take 1 second of iti.
+                            itiFiltered.(chName{cc}).Hilbert.Angle(:,:,idxIti) = data.iti.(chName{cc}).Hilbert.Angle(:, timeStampsResponse(ii) + itiEpochBand: timeStampsResponse(ii) + itiEpochPlusBand);%will take 1 second of iti.
+                            idxIti = idxIti +1;
+                        end
                     end
                     nback.byidentity.(chName{cc}).response.bandPassed.(filterNames{fn}){PresentedIdentityIdx(idx1)}(idxID,:)...
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
@@ -137,7 +145,7 @@ for ii = 1:length(timeStampsImage)
             for fn = 1:length(filterNames) %%
                 if fn == 1
                     nback.byemotion.(chName{cc}).image.Hilbert.Power{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
-                        = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
+                        = data.iti.(chName{cc}).Hilbert.Power(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                     nback.byemotion.(chName{cc}).image.Hilbert.Angle{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
                         = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC));
                 end
@@ -146,7 +154,7 @@ for ii = 1:length(timeStampsImage)
                 if ii >1
                     if fn == 1
                         nback.byemotion.(chName{cc}).response.Hilbert.Power{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
-                            = data.iti.(chName{cc}).Hilbert.Data(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
+                            = data.iti.(chName{cc}).Hilbert.Power(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                         nback.byemotion.(chName{cc}).response.Hilbert.Angle{PresentedEmotionIdx(idx1)}(:,:,idxEmot)...
                             = data.iti.(chName{cc}).Hilbert.Angle(:,timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                     end
@@ -154,8 +162,9 @@ for ii = 1:length(timeStampsImage)
                         = data.iti.(chName{cc}).bandPassed.(filterNames{fn})(timeStampsResponse(ii) - (preTimeResC): timeStampsResponse(ii) + (postTimeResC));
                 end
             end
-            
-            
+
+            %THIS IS WHERE IT IS BROKEN UP BY TRIAL AND FILTERED LIKE THAT,
+            %BETTER TO FILTER THE WHOLE THING.
             if filterByTrial
                 %image presentation epoch
                 [filtDataTemp] =   Analysis.BasicDataProc.dataPrep(data(timeStampsImage(ii) - (preTimeC): timeStampsImage(ii) + (postTimeC), cc), 'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow); %calls this function for my basic processing stepsdata
@@ -221,7 +230,7 @@ if filterAllData
         preTimeCRes = round(ResponsepreTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
         postTimeCRes = round(ResponsepostTime/(timeStampsFiltData(2)-timeStampsFiltData(1)));
         itiEpochC = round(itiEpoch/(timeStampsFiltData(2)-timeStampsFiltData(1)));
-        itiEpochCplus = round(2.5/(timeStampsFiltData(2)-timeStampsFiltData(1)));
+        itiEpochCplus = round(itiEpochPlus/(timeStampsFiltData(2)-timeStampsFiltData(1)));
 
         %break up into data epochs centered on image presentation
         %timestamp 2 = first image, and every other is new image until the last one
@@ -269,14 +278,14 @@ if filterAllData
                         idxEmot3 = idxEmot3 +1;
                         idxEmot = idxEmot3;
                 end
-               
+                %by identity
                 nback.byidentity.(chName{cc}).image.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
-                
                 if ii ~= 1 %no response for the first one, is a nan
                     nback.byidentity.(chName{cc}).response.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexResponse(ii) - (preTimeCRes): behavioralIndexResponse(ii) + (postTimeCRes));
                     nback.byidentity.(chName{cc}).responseTimesInSec{PresentedIdentityIdx(idx1)}(idxID,:) = ResponseTimesAdj(ii-1);
                     nback.byidentity.(chName{cc}).correctTrial{PresentedIdentityIdx(idx1)}(idxID,:) = CorrectTrials(ii-1);
                 end
+
                 %by emotion
                 nback.byemotion.(chName{cc}).image.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
                 if ii ~=1
@@ -303,6 +312,7 @@ elseif filterAllData
     nback.tPlotImage = timePlotImage;
     nback.tPlotResponse = timePlotResponse;
     nback.freq = data.freq;
+    nback.freqHilbert = data.iti.(chName{1}).Hilbert.f;
 
 end
 

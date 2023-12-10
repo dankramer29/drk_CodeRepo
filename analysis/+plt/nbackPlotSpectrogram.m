@@ -50,7 +50,7 @@ for ii = 1:length(chNum)
     for jj = 1:8 %first do all identities
         if jj == 4 || jj == 8
             S1 = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{3});%identity task allIDs/allEmots mean
-            S1 = normalize(S1, 2);
+            S1 = normalize(S1, 2);            
             sigClustIDTask{jj} = nbackCompare.(chNum{ii}).(conditionName{jj}).(resultNameAll{5});
             mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
             mn(idx2) = min(min(S1)); idx2 = idx2+1;

@@ -2,7 +2,90 @@
 
 %% this is all scratch pad stuff for now.
 
-%testing
+
+%%Hilbert
+tt = emotionTaskLFP.tPlotImage;
+ff = emotionTaskLFP.freq;
+
+ttH = emotionTaskLFP.tPlotImageBandPass;
+ffH = emotionTaskLFP.freqHilbert;
+ffHt = emotionTaskLFP.freqHilbert;
+
+chWant = 'ch38';
+chWantBP = 'ch3938';
+
+xx1 = emotionTaskLFP.byemotion.(chWantBP).image.specD{1};
+xx2 = emotionTaskLFP.byemotion.(chWantBp).image.specD{2};
+xx3 = emotionTaskLFP.byemotion.(chWantBp).image.specD{3};
+xx=cat(3, xx1, xx2, xx3);
+xxN=normalize(xx,2);
+xxNM = mean(xxN,3);
+
+xx1 = emotionTaskLFPT.byemotion.(chWant).image.specD{1};
+xx2 = emotionTaskLFPT.byemotion.(chWant).image.specD{2};
+xx3 = emotionTaskLFPT.byemotion.(chWant).image.specD{3};
+xxT=cat(3, xx1, xx2, xx3);
+xxTN=normalize(xxT,2);
+xxTNM = mean(xxTN,3);
+
+xx1 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{1};
+xx2 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{2};
+xx3 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{3};
+xxBp=cat(3, xx1, xx2, xx3);
+xxBpN=normalize(xxBp,2);
+xxBpNM = mean(xxBpN,3);
+
+xx1 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{1};
+xx2 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{2};
+xx3 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{3};
+xxH=cat(3, xx1, xx2, xx3);
+xxNH=normalize(xxH,2);
+xxNMH = mean(xxNH,3);
+
+xx1 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{1};
+xx2 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{2};
+xx3 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{3};
+xxTH=cat(3, xx1, xx2, xx3);
+xxTNH=normalize(xxTH,2);
+xxTNMH = mean(xxTNH,3);
+
+xx1 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{1};
+xx2 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{2};
+xx3 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{3};
+xxBpH=cat(3, xx1, xx2, xx3);
+xxBpNH=normalize(xxBpH,2);
+xxBpNMH = mean(xxBpNH,3);
+
+
+figure
+subplot(2,1,1)
+imagesc(tt,ff, xxNM); axis xy;
+subplot(2,1,2)
+imagesc(ttH, ffHt, xxBpNMH); axis xy;
+
+
+figure
+sgtitle('Hilbert2hzComparisonsBPandCar')
+subplot(2,3,1)
+imagesc(tt,ff, xxNM); axis xy;
+title('CARall')
+subplot(2,3,2)
+imagesc(ttH, ffH, xxTNM); axis xy;
+title('CARchIonly')
+subplot(2,3,3)
+imagesc(tt,ff, xxBpNM); axis xy;
+title('BP')
+subplot(2,3,4)
+imagesc(ttH, ffH, xxNMH); axis xy;
+title('CARallHilbert')
+subplot(2,3,5)
+imagesc(ttH, ffH, xxTNMH); axis xy;
+title('CARchIonlyHilbert')
+subplot(2,3,6)
+imagesc(ttH, ffHt, xxBpNMH); axis xy;
+title('BpHilbert')
+
+
 %%time issues, for testing when the session started to compare to ImageOn
 %%times
 emotionFilter = 'JM_MW2_Session_8_filter.nwb';

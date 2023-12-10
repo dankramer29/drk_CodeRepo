@@ -22,13 +22,13 @@ function [bandfilterAmp, bandfilterPhase, bandfilterP, bandfilterS, bandfilterC]
 [varargin, AmpFreqVectorRun] = util.argkeyval('AmpFreqVectorRun',varargin, false);  % to run the AmpFreqVector turn false if you just want the classic bands and make classic band true
 
 %     bandfilterC= optional set of classic bands, to run do this:         [~, ~, ~, bandfilterBroad]=Analysis.PAC.bandfiltersAP(2, fs, 'ClassicBand', true); %create the band filters
-[varargin, filterSteps] = util.argkeyval('filterSteps',varargin, 1);  % step the filter through. Different than the band widths of the filters, i.e. if 1, will have lots of overlap.
+[varargin, filterOverlap] = util.argkeyval('filterOverlap',varargin, 0);  % step the filter through. Different than the band widths of the filters, i.e. if 1, will have lots of overlap.
 
 [varargin, AmpFreq_BandWidth] = util.argkeyval('AmpFreq_BandWidth',varargin, 2);  % amplitude frequency band width to create the bandwidths around
 [varargin, MaxAmpFreq] = util.argkeyval('MaxAmpFreq',varargin, 100);  % maximum Amplitude frequency for your bands, amplitude being the higher frequency bands
 [varargin, MinAmpFreq] = util.argkeyval('MinAmpFreq',varargin, 10);  % minimium Amplitude frequency for your bands
 %%
-[varargin, PhaseFreq] = util.argkeyval('PhaseFreq',varargin, true);  % run separate phase filtering for the phases, if the filters are used for both phase and amp, don't need it.
+[varargin, PhaseFreq] = util.argkeyval('PhaseFreq',varargin, false);  % run separate phase filtering for the phases in PAC, if the filters are not for PAC and used the same for both phase and amp, don't need it.
 [varargin, PhaseFreq_BandWidth] = util.argkeyval('PhaseFreq_BandWidth',varargin, 10);  % phase frequency band width
 [varargin, MaxPhaseFreq] = util.argkeyval('MaxPhaseFreq',varargin, 30);  % maximum phase frequency to run PAC to
 [varargin, MinPhaseFreq] = util.argkeyval('MinPhaseFreq',varargin, 1);  % maximum phase frequency to run PAC to
@@ -54,13 +54,14 @@ bandfilterS= struct;
 bandfilterC= struct;
 
 
+
 %% filters for nerdcoPAC
 if nerdcoPACFilter
-    AmpFreqVector = [MinAmpFreq:filterSteps:MaxAmpFreq]; %can start with 10:4:200
+    AmpFreqVector = [MinAmpFreq:AmpFreq_BandWidth:MaxAmpFreq]; %can start with 10:4:200
     lbl = cell(1);
-    for ii=1:length(AmpFreqVector)
-        Af1 = AmpFreqVector(ii)-AmpFreq_BandWidth/2;
-        Af2 = AmpFreqVector(ii)+AmpFreq_BandWidth/2;
+    for ii=1:length(AmpFreqVector)-1
+       Af1 = AmpFreqVector(ii)-filterOverlap;
+        Af2 = AmpFreqVector(ii+1);
         if Af1 <= 0
             Af1 = 1;
         end
@@ -72,11 +73,11 @@ if nerdcoPACFilter
     end
 
     if PhaseFreq
-        PhaseFreqVector = [MinPhaseFreq:filterSteps:MaxPhaseFreq]; %low freq
+        PhaseFreqVector = [MinPhaseFreq:PhaseFreq_BandWidth:MaxPhaseFreq]; %low freq
         lbl = cell(1);
-        for ii=1:length(PhaseFreqVector)
-            Af1 = PhaseFreqVector(ii)-PhaseFreq_BandWidth/2;
-            Af2 = PhaseFreqVector(ii)+PhaseFreq_BandWidth/2;
+        for ii=1:length(PhaseFreqVector)-1
+            Af1 = PhaseFreqVector(ii)-filterOverlap;
+            Af2 = PhaseFreqVector(ii+1);
             if Af1 <= 0
                 continue
             end
@@ -106,7 +107,8 @@ if AmpFreqVectorRun
             'HalfPowerFrequency2',Af2,...
             'SampleRate',fs);
     end
-
+%THIS IS THE EXACT SAME SET OF FILTERS, PROBABLY WANTED TO DO A
+%BANDFILTERB? CAN REEVALUATE LATER
     AmpFreqVector = [MinAmpFreq:AmpFreq_BandWidth:MaxAmpFreq]; %can start with 10:4:200
     lbl = cell(1);
     for ii=1:length(AmpFreqVector)

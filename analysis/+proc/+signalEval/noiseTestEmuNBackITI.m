@@ -10,8 +10,13 @@ function [T, dataLFP] = noiseTestEmuNBackITI(dataLFP, varargin)
 [varargin, sessionName, ~, found]=util.argkeyval('sessionName', varargin, []);
 [varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
 [varargin, versionNum, ~, found]=util.argkeyval('versionNum', varargin, '_'); %if you want to do multiple versions of the same file
+[varargin, channelName]=util.argkeyval('channelName', varargin, []); %add the channel names
 
-channelName = fieldnames(dataLFP);
+
+
+if isempty(channelName)
+    channelName = fieldnames(dataLFP);
+end
 
 if taskNameSel == 1
     taskType = 2;

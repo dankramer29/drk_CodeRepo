@@ -148,7 +148,9 @@ DoPlot = 1; %toggle plotting on or off
 savePlot = 1; %toggle on if you want to save the plots up front, doesn't close them so ok to save them. saves as jpg. in that script you can save them as individual mat files for the paper.
 saveSelectFile = 0; %toggle on if you want to save select files as mat
 timeCheck = 0; %toggle on if you want to check the clock for neural data and that for behavioral data (right now off by 6 hours as of 11/15/2023 for unknown reasons)
+referenceStrategy = 3;  %case switch 1 is CAR with all electrodes, 2 is with just the ones you are using and,3 is bipolar
 
+%
 beh_timestamps = [];
 ma_timestamps = [];
 ResponseTimes = [];
@@ -264,6 +266,7 @@ if height(TableChannel) ~= TableChannel.channID(end)
     %chLocationName (change everywhere in that for loop that says channID
     %to channIDadjTot)
     %change in the chann
+    %this is manually adjusted for MW18:
     channIDadj = channID;    
     microCh2Remove = find(channID>200);
     channIDadj(microCh2Remove) = [];
@@ -272,6 +275,8 @@ if height(TableChannel) ~= TableChannel.channID(end)
     channIDpadding(1:8,1) = NaN;
     channIDadjTot = vertcat(channIDpadding,channIDadj);
     TableChannel.channIDadjusted = channIDadjTot;
+else
+    TableChannel.channIDadjusted = channID;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% change channels here %
@@ -282,7 +287,7 @@ dbstop %this is not how to stop, but it does the trick of breaking it! adjust th
 %%
 %
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
-chInterest = [12,13, 22:27, 36:39, 149:152, 158:161];
+chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
 %MW16 Channels
 %chInterest = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
 %MW23 channels (NOTE HAVE NOT SEEN RECON SO BEING BROAD HERE)
@@ -304,19 +309,10 @@ chInterest = [12,13, 22:27, 36:39, 149:152, 158:161];
 %chInterest = [1 9 29 45 59 67 81 139];
 %chInterest = [7, 8, 15 16, 27, 28];  %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
 %[2, 10, 30, 46, 60, 68, 82, 119, 120, 140 ];
-%chInterest = [17,25,45,61,75,83,97];
+chInterest = [17,25,45,61,75,83,97];
 
 
-%setup for accessing channels
-%channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
 
-for ff=1:length(chInterest)
-    ch = num2str(chInterest(ff));
-    channelName{ff} = ['ch' ch];
-    str = location(channID ==chInterest(ff));
-    strout = plt.lowup(str); %converts to upper case for plotting later
-    chLocationName{ff,1} = strcat(hemis(channID == chInterest(ff)), {' '}, strout);
-end
 
 %% find the behavioral timestamps
 %first convert if MW_16 or 18
@@ -353,7 +349,6 @@ end
 %   OUT IN THE 20S I BELIEVE WITHOUT ALL THE ONE FILE STUFF. SO DOUBLE
 %   CHECK IF THAT IS ALL THE CASE AND PROBABLY JUST DO IT BY HAND.
 if oneFile == true
-
     beh_timestampsEm = beh_timestamps(hexNum == 255);
     beh_timestampsId = beh_timestamps(hexNum == 256); %NEED TO CHANGE THIS BASED ON WHAT IT REALLY IS.  
     [behavioralIndexTTLEm, closestValue] = Analysis.emuEmot.timeStampConversion(beh_timestampsEm, ma_timestampsDS); %finds the ttl
@@ -375,21 +370,79 @@ elseif oneFile == false
     end
 end
 
-%% common average rerefernce
-macrowiresCAREm = double(macrowiresEm) - repmat(nanmean(macrowiresEm,1), size(macrowiresEm,1),1);
-
-%% low pass the data (nyquist 250)
+%% reference strategy
+% low pass the data (nyquist 250)
 lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
-'PassbandFrequency',200,'PassbandRipple',0.2, ...
-'SampleRate',500);
+    'PassbandFrequency',200,'PassbandRipple',0.2, ...
+    'SampleRate',fs);
 
-%cut data to channels of interest
-data = double(macrowiresCAREm(chInterest, :));
+switch referenceStrategy
+    case 1
+        macrowiresCAREm = double(macrowiresEm) - repmat(nanmean(macrowiresEm,1), size(macrowiresEm,1),1);
+        %cut data to channels of interest
+        chInterest = chInterestActual;
+        data = double(macrowiresCAREm(chInterest, :));
+        %setup for accessing channels
+        %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
+
+        for ff=1:length(chInterest)
+            ch = num2str(chInterest(ff));
+            channelName{ff} = ['ch' ch];
+            str = location(TableChannel.channIDadjusted ==chInterest(ff));
+            strout = plt.lowup(str); %converts to upper case for plotting later
+            chLocationName{ff,1} = strcat(hemis(TableChannel.channIDadjusted == chInterest(ff)), {' '}, strout);
+        end
+        emotionTaskLFP.ReferenceStrategy = 'CARallElectrodes'; 
+        itiDataReal.ReferenceStrategy = 'CARallElectrodes';
+    case 2
+        chInterest = chInterestActual;
+        data = double(macrowiresEm(chInterest,:)) - repmat(nanmean(macrowiresEm(chInterest,:),1), size(macrowiresEm(chInterest,:),1),1);
+        %setup for accessing channels
+        %channels in dixi and pmt are 1=distal contact, adtech is 1=proximal
+
+        for ff=1:length(chInterest)
+            ch = num2str(chInterest(ff));
+            channelName{ff} = ['ch' ch];
+            str = location(TableChannel.channIDadjusted ==chInterest(ff));
+            strout = plt.lowup(str); %converts to upper case for plotting later
+            chLocationName{ff,1} = strcat(hemis(TableChannel.channIDadjusted == chInterest(ff)), {' '}, strout);
+        end
+        emotionTaskLFP.ReferenceStrategy = 'CARElectrodesOfInterestOnly'; 
+        itiDataReal.ReferenceStrategy = 'CARElectrodesOfInterestOnly';
+    case 3
+        %bipolar strategy
+
+        idxBp = 1;
+        for ii = 2:length(chInterestActual)
+            if chInterestActual(ii)-chInterestActual(ii-1) <= 2
+                dataBp(idxBp,:) = macrowiresEm(chInterestActual(ii),:)-macrowiresEm(chInterestActual(ii-1),:);
+                tempNum = [num2str(chInterestActual(ii)), num2str(chInterestActual(ii-1))];
+                chInterestBp(idxBp) = str2double(tempNum);
+                channelName{idxBp} = ['ch', num2str(chInterestBp(idxBp))];
+                %for plotting naming later
+                str = location(TableChannel.channIDadjusted ==chInterestActual(ii));
+                strout = plt.lowup(str); %converts to upper case for plotting later
+                chLocationName{idxBp,1} = strcat(hemis(TableChannel.channIDadjusted == chInterestActual(ii)), {' '}, strout);
+                idxBp = idxBp + 1;
+            end
+        end       
+        chInterest = chInterestBp;
+        data = double(dataBp);
+         emotionTaskLFP.ReferenceStrategy = 'Bipolar'; 
+        itiDataReal.ReferenceStrategy = 'Bipolar';
+end
+
+
+
 
 %lowpass filter
 dataFemotion = filtfilt(lpFilt,data');
+%dataFemotionT = filtfilt(lpFilt,dataT');
+%dataFemotionBp = filtfilt(lpFilt,dataBp');
 
-clear data; clear macrowiresCAREm; 
+clear data; 
+% clear dataT; 
+% clear macrowiresCAREm; 
 
 %% 
 % set up the behavioral timestamps to ensure they are the presentation of
@@ -529,6 +582,7 @@ if ~oneFile %need to fix this for the one file situations because you will have 
     ma_timestampsDSId = [];
     PresentedEmotionIdx = [];
     PresentedIdentityIdx = [];
+    dataBp = [];
 else
     ResponseTimes = [];
     Response = [];
@@ -538,6 +592,8 @@ else
     PresentedEmotionIdx = [];
     PresentedIdentityIdx = [];
 end
+
+combinedHexKey = [];
 
 %% load the behavioral data
 
@@ -568,8 +624,8 @@ if oneFile == false
         %you don't need the commented out part, but it puts it together for
         %ease of looking at 
         %For looking at the combined hexs
-        combinedHexKey(:,1) = EvKeyId.Names;
-        for jj = 1:length(combinedHexKey)
+        for jj = 1:length(EvKeyId.Names)
+            combinedHexKey{jj,1} = EvKeyId.Names{jj};
             combinedHexKey{jj,2} = EvKeyId.Codes(jj);
             combinedHexKey{jj,3} = EvKeyId.GoodTTLs(jj);
         end
@@ -599,21 +655,39 @@ end
 % macrowiresId = macrowiresId(:,behavioralIndexTTLId(627)-(fs*5):end); %remove all but 5 seconds worth of the macrowire data
 % ma_timestampsDSId = ma_timestampsDS(behavioralIndexTTLId(627)-(fs*5):end);
 % end
+switch referenceStrategy
+    case 1
+        macrowiresCARId = double(macrowiresId) - repmat(nanmean(macrowiresId,1), size(macrowiresId,1),1);
+        %cut data to channels of interest
+        data = double(macrowiresCAREm(chInterest, :));
+        identityTaskLFP.ReferenceStrategy = 'CARallElectrodes'; 
+        itiDataReal.ReferenceStrategy = 'CARallElectrodes';
+    case 2
+        data = double(macrowiresId(chInterest,:)) - repmat(nanmean(macrowiresId(chInterest,:),1), size(macrowiresId(chInterest,:),1),1);
+        identityTaskLFP.ReferenceStrategy = 'CARElectrodesOfInterestOnly'; 
+        itiDataReal.ReferenceStrategy = 'CARElectrodesOfInterestOnly';
+    case 3
+        %bipolar strategy
+       
+            idxBp = 1;
+            for ii = 2:length(chInterestActual)
+                if chInterestActual(ii)-chInterestActual(ii-1) <= 2
+                    dataBp(idxBp,:) = macrowiresId(chInterestActual(ii),:)-macrowiresId(chInterestActual(ii-1),:);                   
+                    idxBp = idxBp + 1;
+                end
+            end           
+            data = double(dataBp);
+        
+        identityTaskLFP.ReferenceStrategy = 'Bipolar'; 
+        itiDataReal.ReferenceStrategy = 'Bipolar';
+end
 
-macrowiresCARId = double(macrowiresId) - repmat(nanmean(macrowiresId,1), size(macrowiresId,1),1);
 
-%% low pass the data (nyquist 250)
-lpFiltlow = designfilt('lowpassiir','FilterOrder',8, ...
-    'PassbandFrequency',200,'PassbandRipple',0.2, ...
-    'SampleRate',fs);
 
-%cut data to channels of interest
-data = double(macrowiresCARId(chInterest, :));
+
 %lowpass filter
-dataFidentity = filtfilt(lpFiltlow,data');
-
-clear data; clear macrowiresCARId;
-
+dataFidentity = filtfilt(lpFilt,data');
+clear data; 
 
 % set up the behavioral timestamps to ensure they are the presentation of
 % the image
@@ -720,6 +794,7 @@ end
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeIdentity,...
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
+
 
 %% for saving any variables
 %THE NEXT STEP IS NOISE REMOVAL SO PROBABLY SAVE THE

@@ -26,6 +26,7 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, rlab ] = cluster_
 [varargin, tt]=util.argkeyval('tt', varargin, []); %include a tplot if you want to plot
 [varargin, ff]=util.argkeyval('ff', varargin, []); %include a freq if you want to plot
 [varargin, splitPosNeg]=util.argkeyval('splitPosNeg', varargin, 1); %if you want to split positive and negative deflections into own one tailed ttest. 0 is no and will do one tailed ttest on abs of data
+[varargin, percentageOfMaxCluster]=util.argkeyval('percentageOfMaxCluster', varargin, 0.25); %sometimes clusters cover nearly the entire time frequency plot (all connected) so this gives them a size max. Set the percentage of the total possible that they can be
 
 
 util.argempty(varargin); % check all additional inputs have been processed
@@ -33,9 +34,12 @@ util.argempty(varargin); % check all additional inputs have been processed
 alphaHistoAdj = 1-alphaHisto;
 alphaHistoHalf = alphaHistoAdj+(alphaHisto/2); %two tailed split
 
-%calculate the size of the samples you want to take, default is just over
-%half
 
+%find a max cluster size that it shouldn't be over. this prevents a cluster
+%from being some weird noise thing that makes a cluster be 50% or more of
+%the time frequency plot
+maxCluster = size(data1,1) * size(data1,2);
+maxClusterPercentage = maxCluster*percentageOfMaxCluster; %cluster shouldn't be bigger than 50%
 
 %preallocate
 if gpuOn %last check on gpu was 34 without and 8 with. bwconncomp doesn't work with gpu...
@@ -122,6 +126,7 @@ for ii=1:xshuffles
             if clustP.NumObjects>=1
                 clP=regionprops(clustP); %get the region properties
                 cl_aP=[clP.Area];
+                cl_aP(cl_aP>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
                 [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
                 max_matP=false(size(thresh_binarydP));
                 max_matP(clustP.PixelIdxList{max_idxP})=true;
@@ -135,6 +140,7 @@ for ii=1:xshuffles
             if clustN.NumObjects>=1
                 clN=regionprops(clustN); %get the region properties
                 cl_aN=[clN.Area];
+                cl_aN(cl_aN>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
                 [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
                 max_matN=false(size(thresh_binarydN));
                 max_matN(clustN.PixelIdxList{max_idxN})=true;
@@ -148,6 +154,7 @@ for ii=1:xshuffles
                 clust=bwconncomp(thresh_binaryd,8);
                 cl=regionprops(clust); %get the region properties
                 cl_a=[cl.Area];
+                cl_a(cl_a>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
                 [~,max_idx]=max(cl_a); %get the index of the largest cluster
                 max_mat=false(size(thresh_binaryd));
                 max_mat(clust.PixelIdxList{max_idx})=true;
@@ -198,6 +205,7 @@ if splitPosNeg
     clustRPos=bwconncomp(thresh_binaryRPos,8);
     clRPos=regionprops(clustRPos, 'all'); %get the region properties
     cl_aRPos=[clRPos.Area];
+    cl_aRPos(cl_aRPos>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
     cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
     idxc=1; idxd=1;
     tstat_sumsP = []; tstat_sumsN = [];
@@ -216,6 +224,7 @@ if splitPosNeg
     clustRNeg=bwconncomp(thresh_binaryRNeg,8);
     clRNeg=regionprops(clustRNeg); %get the region properties
     cl_aRNeg=[clRNeg.Area];
+    cl_aRNeg(cl_aRNeg>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
     cl_keepNeg=find(cl_aRNeg>100); %get the ones with an area >100 pixels
     idxc=1;
     for ii=1:length(cl_keepNeg)
@@ -243,6 +252,7 @@ else
     clustR=bwconncomp(thresh_binaryR,8);
     clR=regionprops(clustR); %get the region properties
     cl_aR=[clR.Area];
+    cl_aR(cl_aR>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
     cl_keep=find(cl_aR>100); %get the ones with an area >100 pixels
     idxc=1;
     for ii=1:length(cl_keep)

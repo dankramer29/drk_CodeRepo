@@ -154,7 +154,7 @@ if comparedToITI == 1
         idx2 = 1;
         itiDataId = itiDataFilt.IdentityTask.(chName{ii}).specD; %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
         itiDataEm = itiDataFilt.EmotionTask.(chName{ii}).specD; %RUN THIS WITH THE ITI SHUFFLE DATA NOW FROM ONE ITI NOW. NEED TO CHANGE ALL THE REST IF THIS WORKS.
-
+        
         %this run compares the same identity, compared for the identity
         %task against the emotion task (so same face, different attention)
         for jj = 1:numIDs %goes through each identity (remember identity is the face, image refers to image vs response)

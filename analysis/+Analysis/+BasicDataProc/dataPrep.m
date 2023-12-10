@@ -55,6 +55,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 [varargin, bandfilter] = util.argkeyval('bandfilter',varargin, []);  % check if filters already made so you don't have to keep making them each run
 [varargin, filterClassBand] = util.argkeyval('dataClassBand',varargin, []);  % check if classic broad filters already made so you don't have to keep making them each run
 [varargin, classicBandRange]= util.argkeyval('classicBandRange', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 150]); %filtered data classic
+
 %flip data if suspect it's in channels x data
 if size(data,1)<=size(data,2)
     %warning('data in channels x voltage, not voltage x channels, converted to voltage x channels for analysis');
@@ -204,7 +205,7 @@ end
      %% set up the filtering
      lblA=fieldnames(bandfilter);
      tt=tic;
-     for ii=1:length(freqBand)
+     for ii=1:length(lblA)
          %run the filters and make power
          tempMD=filtfilt(bandfilter.(lblA{ii}), dataM).^2;
          %lowpass to smooth the data.  This can be a variable pass, based on what "window" you want to smooth over
@@ -230,7 +231,7 @@ end
      %% set up the filtering
      lblA=fieldnames(bandfilter);
      tt=tic;
-     for ii=1:length(freqBand)
+     for ii=1:length(lblA)
          %run the filters and make power
          tempMDh=filtfilt(bandfilter.(lblA{ii}), dataM);
          %run a hilbert to store the power and the angle

@@ -10,6 +10,7 @@ function [Filtered] = nwbLFPchProcITI(data,varargin)
 [varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %enter the channels
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %window to do spectrogram in with multitaper window in seconds
+[varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %window to do spectrogram in with multitaper window in seconds
 
 
 if isempty(chNum)
@@ -17,10 +18,17 @@ if isempty(chNum)
 end
 
 %% set up names for the struct
+
 for ff=1:length(chNum)
-    ch = num2str(chNum(ff));
-    chName{ff} = ['ch' ch];
+    if isnumeric(chNum(1))
+        ch = num2str(chNum(ff));
+        chName{ff} = ['ch' ch];
+    else
+        chName{ff} = ['ch', chNum{ff}];
+    end
 end
+
+    
 
 %% this is breaking the data up by session, then filtering, see below for an alternative DO NOT NEED TO DO BOTH, JUST TROUBLESHOOTING
 
@@ -36,7 +44,7 @@ for cc = 1:length(chNum) %channels
         [filtDataTemp, ~, ~, bandfilter, filterClassicBand] =  Analysis.BasicDataProc.dataPrep(data(:, cc, ii),...
             'needsCombfilter', 0, 'fs', fs, 'MaxFreq', 150, 'multiTaperWindow', multiTaperWindow,...
             'DoBandFilterBroad', true, 'bandfilter', bandfilter, 'filterClassBand', filterClassicBand,...
-            'Spectrogram', true); 
+            'hilbertPowerAngle', true, 'Spectrogram', true, 'Freq_BandWidth', 2); 
         %Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
         Filtered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
         Filtered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;

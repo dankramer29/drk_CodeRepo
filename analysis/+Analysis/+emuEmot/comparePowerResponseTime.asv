@@ -160,7 +160,7 @@ for cc = 1:length(chNum)
                     if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
                         bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                         sData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
-                        sData{idxCl} = normalize(sData{idxCl},2);
+                        sData{idxCl} = normalize(sData,2);
                         allVsingle = 1;
                         idxSigClusterSingleCriteria(idxCl) = ii;
                         idxCl = idxCl + 1;

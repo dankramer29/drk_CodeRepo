@@ -797,10 +797,6 @@ end
 
 
 %% for saving any variables
-%THE NEXT STEP IS NOISE REMOVAL SO PROBABLY SAVE THE
-%IDENTITY/EMOTIONTASKLFP AFTER THAT STEP
-
-
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  

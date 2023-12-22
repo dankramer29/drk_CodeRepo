@@ -55,7 +55,7 @@ TNoise = vertcat(TNoise, Tident);
         'versionNum', 'v1');
 [TchannelCheckId, itiDataReal.IdentityTask] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.IdentityTask, ...
     'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v2');
+        'versionNum', 'v1');
 
 
 

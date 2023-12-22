@@ -182,6 +182,15 @@ for cc = 1:length(chNum)
                         %%check if there is a cluster on each trial and record descriptive info on it
                         sDataTemp = sData{rr}(:,:,jj); %take the normalized data
                         mask = sDataTemp>sdThreshold;
+                        %this if for checking that it is doing what it is 
+                        %supposed to.
+                        % maskT = sDataTemp>1.5;
+                        % subplot(3,1,1)
+                        % imagesc(sDataTemp); axis xy;
+                        % subplot(3,1,2)
+                        % imagesc(mask); axis xy;
+                        % subplot(3,1,3)
+                        % imagesc(maskT); axis xy;
                         clustP=bwconncomp(mask,8);
                         clRPos=regionprops(clustP, 'all'); %get the region properties
                         cl_aRPos=[clRPos.Area];

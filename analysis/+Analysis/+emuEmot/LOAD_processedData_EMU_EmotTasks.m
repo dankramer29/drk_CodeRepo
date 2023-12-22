@@ -5,12 +5,15 @@
 
 %%Timestamp count
 % NLX time [microseconds] equal to timestamp values from recording data
-if oneFile == true
-    testfile = testfileEmId;
-elseif trialEm == true
-    testfile = testfileEm;
-elseif trialEm == false
-    testfile = testfileId;
+switch fileVariation
+    case 2 %add any one file formats here
+        testfile = testfileEmId;
+    case {1,3,4}
+        if trialEm == true
+            testfile = testfileEm;
+        elseif trialEm == false
+            testfile = testfileId;
+        end
 end
 beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 cellVar = [];

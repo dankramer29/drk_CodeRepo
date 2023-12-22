@@ -401,10 +401,8 @@ end
 
 %   CASE SWITCH ALL OF THESE BECAUSE THIS GETS VERY SPECIFIC FOR
 %   MW16, 18, 19, IT'S ALL PATIENT SPECIFIC AROUND THEN BUT SETTLES
-%   OUT IN THE 20S I BELIEVE WITHOUT ALL THE ONE FILE STUFF. THE CONNECTION
-%   BETWEEN THE HEX AND THE EVKEY ETC IS RELATIVELY SORTED OUT, JUST FOR
-%   EACH CASE, IT'S WORTH FOLLOWING IT DOWN TO MAKE SURE THAT IMAGEON IS
-%   THE RIGHT NWB TTL AND FROM THERE IT SHOULD WORK.
+%   OUT IN THE 20S I BELIEVE WITHOUT ALL THE ONE FILE STUFF. SO DOUBLE
+%   CHECK IF THAT IS ALL THE CASE AND PROBABLY JUST DO IT BY HAND.
 switch fileVariation
     case 2 %MW_5 one file and with a EvKey and no hex
         idxTS = 1; idxTS2 = 1;
@@ -569,9 +567,6 @@ end
 NWBtimeStampDiffEm = NWBtimeStampDiffEm/1000000;
 
 % find the timestamp conversion of the phys data and the psychtoolbox data
-if size(imageOn)>54
-    warning('imageOn has too many timestamps, should be 54 max, so double check')
-end
 ttl_behImage = beh_timestampsEm(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
 
 %% get behavioral stamps
@@ -856,9 +851,6 @@ end
 %% 
 
 % find the timestamp conversion of the phys data and the psychtoolbox data
-if size(imageOn)>54
-    warning('imageOn has too many timestamps, should be 54 max, so double check')
-end
 ttl_behImage = beh_timestampsId(imageOn); %get only the ttls of image on (verified these match the TTL output of psych toolbox and image on
 
 ImageTimesDiffCheckId = (ImageTimesId-TTLTimesId)*24*60*60; %in seconds to ensure that the TTLs and Imagetimes are as expected, closefor ii= 1:length(ImageTimesId)-1
@@ -908,6 +900,17 @@ switch fileVariation
         [behavioralIndexResponseId, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjId, ma_timestampsDSId);
 end
 
+ResponseTimesDiffEmotion = (ResponseTimesNanRemoved-TTLTimesEm)*24*60*60*1e6; %this takes the difference between the response and the TTL which is image on (in the hex code, you dont' need this but it still works)
+itiTimeEmotion = (ImageTimesEm(3:end)-ResponseTimesNanRemoved(2:end-1))*24*60*60; %take the image time between the response and the next image.
+ResponseTimesAdjEm = ttl_behImage+ResponseTimesDiffEmotion; %moves the time into neural time scale
+
+%find if the responses were correct or not
+ResponseNanRemoved(1) = []; %remove the non first trial;
+CorrectTrialsEm = CorrectResponseEm == ResponseNanRemoved;
+
+
+[behavioralIndexImageOnEm, closestValue] = Analysis.emuEmot.timeStampConversion(ImageTimesAdjEm, ma_timestampsDSEm); %finds the image onset which is more accurate
+[behavioralIndexResponseEm, closestValue] = Analysis.emuEmot.timeStampConversion(ResponseTimesAdjEm, ma_timestampsDSEm); %finds the response time
 
 %% take the data down to what you need so not filtering the whole recording session, gives a buffer but mostly removes the beginning
 taskTimeSt = closestValue(1);

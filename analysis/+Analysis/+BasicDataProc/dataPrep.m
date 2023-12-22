@@ -27,7 +27,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 [varargin, needsCombfilter] = util.argkeyval('needsCombfilter',varargin, true); % option to comb filter/bandpass filter the data
 [varargin, commonAverage] = util.argkeyval('commonAverage',varargin, false); % option to do a common average rereference
-[varargin, dBPower] = util.argkeyval('dBPower',varargin, true); % option to turn to dB
+[varargin, dBPower] = util.argkeyval('dBPower',varargin, true); % option to turn to dB which you SHOULD do.
 [varargin, zScore] = util.argkeyval('zScore',varargin, true); % option to turn on Z scoring
 [varargin, itiProc] = util.argkeyval('itiProc',varargin, false); % option to make an iti, which averages across it before doing dB etc
 [varargin, convWin] = util.argkeyval('convWin',varargin, 60); % what convolve window to use on either FIR or IIR filtered data.  30 to 60 seems right.  Doesn't affect lower freq, largely affects higher freq in a positive smoothing way.

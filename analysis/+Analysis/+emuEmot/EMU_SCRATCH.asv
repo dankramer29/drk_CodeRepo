@@ -28,11 +28,11 @@ ffHt = emotionTaskLFP.freqHilbert;
 chWant = 'ch38';
 chWantBP = 'ch2524';
 
-xx1 = emotionTaskLFP.byemotion.ch2524.image.specD{1};
+xx1 = emotionTaskLFP.byemotion.(chWantBP).image.specD{1};
 xx2 = emotionTaskLFP.byemotion.(chWantBp).image.specD{2};
 xx3 = emotionTaskLFP.byemotion.(chWantBp).image.specD{3};
 xx=cat(3, xx1, xx2, xx3);
-xxN=normalize(xx1,2);
+xxN=normalize(xx,2);
 xxNM = mean(xxN,3);
 
 xx1 = emotionTaskLFPT.byemotion.(chWant).image.specD{1};
@@ -583,6 +583,7 @@ for ii = 82:100
 end
 
 testT = stats.cluster_permutation_Ttest_gpu3d( S2, S1, 'xshuffles', 100);
+
 
 
 

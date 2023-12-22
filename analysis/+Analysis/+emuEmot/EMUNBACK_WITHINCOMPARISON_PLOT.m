@@ -78,12 +78,12 @@ if savePlot
     hh =  findobj('type','figure'); 
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
+        'versionNum', 'v3');
 end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [21,22,25];
+    nS = [3,4];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -92,9 +92,11 @@ end
 %timeMinMax and freqMinMax are to capture only significant epochs in those
 %frequency bands during that period of time (so like 50 to 150 hz
 %significant epochs that are between 100 and 900 ms). 
+%compared 2sd and 1.5 and 1.5 is a better capture of what we are looking
+%for. probably will want a few examples for supp mats.
 [MWX.SigClusterSummStats] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
-    'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 2);
+    'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 1.5);
 
 
 
@@ -111,20 +113,29 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW18 = MWX;
+MW19 = MWX;
 %%%%
+
+%% for saving any variables
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
     if ~isfolder(folder_name)
         %make the directory folder
-        mkdir(folder_name)
+        mkdir (folder_name)
     end
-    fileName = [folder_name, '\', 'MW23_itiDataFiltIdentity', '.mat'];    save(fileName, '-v7.3');
-    fileName = [folder_name, '\', 'MW23_itiDataFiltEmotion', '.mat'];    save(fileName, '-v7.3');    
+    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
+    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
 
 
+    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW5', '.mat'];    save(fileName);
 
+    
 end
 
 

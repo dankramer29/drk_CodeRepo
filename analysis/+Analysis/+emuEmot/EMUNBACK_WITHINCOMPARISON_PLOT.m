@@ -78,7 +78,7 @@ if savePlot
     hh =  findobj('type','figure'); 
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v3');
+        'versionNum', 'v4');
 end
 
 savePlotSpecificMat = false;

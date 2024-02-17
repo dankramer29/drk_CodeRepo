@@ -126,18 +126,18 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %an EvKey
 fileVariation = 4;
 %USE _X IF SINGLE DIGITS
-sessionName = 'MW_19';
-subjName = 'MW_19';
+sessionName = 'MW_23';
+subjName = 'MW_23';
 %MWX - remember to change the name in the within subject processing!!
 
 
-matNameId = 'NBack_EMOTION_2022_10_31.16_10_12'; 
-matNameEm = 'NBack_IDENTITY_2022_10_31.16_02_28'; 
+matNameId = 'NBack_EMOTION_2023_06_27.13_29_53'; 
+matNameEm = 'NBack_IDENTITY_2023_06_27.13_22_22'; 
 
 switch fileVariation
     case {1, 3, 4}
-        identityFilter = 'JM_MW19_Session_6_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW19_Session_7_filter.nwb';
+        identityFilter = 'JM_MW23_Session_8_filter.nwb'; %does NOT need to be placed in a folder
+        emotionFilter = 'JM_MW23_Session_9_filter.nwb';
     case  2
         emotionidentityFilter = 'JM_MW5_Session_8_filter.nwb'; %if they are one file
 end
@@ -331,12 +331,12 @@ dbstop %this is not how to stop, but it does the trick of breaking it! adjust th
 %MW16 Channels
 %chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
 %MW23 channels
-%chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+chInterestActual = [46:48,54:57,68:70,145:147,154:158];
 %MW13 channels for Middle Frontal:
 %chInterestActual = [49:56];
 %MW19 channels:
 %chInterestActual = [11,12,13,14,19,20,23,24,25,28,29,42,43,47,48,51,52,116,117,118,131,132,133,121,122];
-chInterestActual = [11:14, 23:25, 115:117, 123:125];
+%chInterestActual = [11:14, 23:25, 115:117, 123:125];
 %MW22 channels:
 %chInterestActual=[16:19,28:31,40:42,169:171,178:181];
 %chInterestActual = [2,3,4,5,13,14,19,20,21,22,30,31,32,33,34,...
@@ -526,7 +526,7 @@ dataFemotion = filtfilt(lpFilt,data');
 %dataFemotionT = filtfilt(lpFilt,dataT');
 %dataFemotionBp = filtfilt(lpFilt,dataBp');
 
-clear data; 
+
 % clear dataT; 
 % clear macrowiresCAREm; 
 
@@ -697,6 +697,7 @@ switch fileVariation
         PresentedEmotionIdx = [];
         PresentedIdentityIdx = [];
         dataBp = [];
+        data = [];
     case 2 %one nwb and one EvKey
         ResponseTimes = [];
         Response = [];
@@ -706,9 +707,14 @@ switch fileVariation
         PresentedEmotionIdx = [];
         PresentedIdentityIdx = [];
         ma_timestampsDSId = ma_timestampsDSEm;
+        data = [];
+
     case 4 %two nwb and good hex
         hexNumId = [];
         imageOn = [];
+        dataBp = [];
+        data = [];
+
 end
 
 combinedEvKey = [];
@@ -935,6 +941,12 @@ end
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 
+
+      [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltIdentity, PresentedEmotionIdxId,...
+       PresentedIdentityIdxId, behavioralIndexImageOnId, behavioralIndexResponseId, ...
+       'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeIdentity,...
+       'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
+       multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 
 
 %% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK.M

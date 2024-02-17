@@ -135,6 +135,10 @@ for cc = 1:length(chNum)
                         else
                             itiFiltered.(chName{cc}).Hilbert.Power(:,:,idxIti) = data.iti.(chName{cc}).Hilbert.Power(:, timeStampsResponse(ii) + itiEpochBand: timeStampsResponse(ii) + itiEpochPlusBand);%will take 1 second of iti.
                             itiFiltered.(chName{cc}).Hilbert.Angle(:,:,idxIti) = data.iti.(chName{cc}).Hilbert.Angle(:, timeStampsResponse(ii) + itiEpochBand: timeStampsResponse(ii) + itiEpochPlusBand);%will take 1 second of iti.
+                            %load the bandpassed voltage 1 to 200 for noise
+                            %check
+                            itiFiltered.(chName{cc}).bandPassed(:,:,idxIti) = data.iti.(chName{cc}).bandPassed.(filterNames{7})(:, timeStampsResponse(ii) + itiEpochBand: timeStampsResponse(ii) + itiEpochPlusBand);%will take 1 second of iti.
+
                             idxIti = idxIti +1;
                         end
                     end

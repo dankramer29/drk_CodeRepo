@@ -101,8 +101,7 @@ end
 L1 = size(data1, 3);
 L2 = size(data2, 3);
 
-%ONE THING TO DO IS GET THE A AND B FROM ALL THE DATA AND THEN Z SCORE
-%ACROSS IT SO FEED THE A AND B IN
+%option to z score across all the data.
 if zscoreAcrossAllData
     a1Temp = mean(data1,3);
     a1 = mean(a1Temp, 2);

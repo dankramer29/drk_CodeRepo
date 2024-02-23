@@ -17,18 +17,21 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, thresholds ] = cl
 
 
 [varargin, plt]=util.argkeyval('plt', varargin, false); %option to plot the historgram
-[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 100); %how many shuffles you want to do, default is 5k
+[varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 1000); %how many shuffles you want to do, default is 5k
 %adjust the alpha level that the permutations are compared to, meaning the percentile on the histogram, over which something is considered positive
 %0.00024 is 0.05/(64*3+20) the number of electrodes for the real touch
-[varargin, alph]=util.argkeyval('alph', varargin, 0.10); %sets the alpha for the shuffle (NOT THE HISTOGRAM)
-[varargin, alphaHisto]=util.argkeyval('alphaHisto', varargin, 0.10); %sets the alpha for histogram (i.e. the real alpha)
+[varargin, alph]=util.argkeyval('alph', varargin, 0.05); %sets the alpha for the shuffle (NOT THE HISTOGRAM)
+[varargin, alphaHisto]=util.argkeyval('alphaHisto', varargin, 0.05); %sets the alpha for histogram (i.e. the real alpha)
 [varargin, gpuOn]=util.argkeyval('gpuOn', varargin, true); %turn on gpu or not. appears to be faster as of 2023
 [varargin, tt]=util.argkeyval('tt', varargin, []); %include a tplot if you want to plot
 [varargin, ff]=util.argkeyval('ff', varargin, []); %include a freq if you want to plot
 [varargin, splitPosNeg]=util.argkeyval('splitPosNeg', varargin, 1); %if you want to split positive and negative deflections into own one tailed ttest. 0 is no and will do one tailed ttest on abs of data
 [varargin, percentageOfMaxCluster]=util.argkeyval('percentageOfMaxCluster', varargin, 0.25); %sometimes clusters cover nearly the entire time frequency plot (all connected) so this gives them a size max. Set the percentage of the total possible that they can be
+[varargin, HzThresholdPos]=util.argkeyval('HzThresholdPos', varargin, 20); %if there is a lot of large clusters at the lower frequencies due to smearing, cut off any where the centroid is below this value, make it 1 if you don't want any.
+[varargin, HzThresholdNeg]=util.argkeyval('HzThresholdNeg', varargin, 1); %if there is a lot of large clusters at the lower frequencies due to smearing, cut off any where the centroid is below this value, make it 1 if you don't want any.
 [varargin, zscoreAcrossAllData]=util.argkeyval('zscoreAcrossAllData', varargin, 1); %z score across the whole data set instead of later by section
-
+[varargin, flipData]=util.argkeyval('flipData', varargin, 1); %flip some of the data on the time axis to really shuffle it up.
+[varargin, timeSmearMean]=util.argkeyval('timeSmearMean', varargin, 0); %this is an option to take the mean and std across time. the point here is the the comparison group of itis may have random ups and downs at specific time points, so this equalizes the mean and variance for one frequency across time.
 
 %an option to build a histogram where you enter data1 and data2 as just
 %itis or itis and all trials and then just shuffle it up to build the
@@ -101,6 +104,7 @@ end
 L1 = size(data1, 3);
 L2 = size(data2, 3);
 
+%option to z score across all the data.
 if zscoreAcrossAllData
     a1Temp = mean(data1,3);
     a1 = mean(a1Temp, 2);
@@ -148,26 +152,32 @@ if isempty(histogramBuiltThresholds)
         totdata=cat(3, data1, data2_temp);
         totdata=totdata(:,:,randperm(size(totdata,3)));
         %flip half of the data around to really mix it up
-        for rr = 1:size(totdata,3)/2
-            kk = randi(size(totdata,3));
-            totdata(:,:,kk) = flip(totdata(:,:,kk),2);
+        if flipData
+            for rr = 1:size(totdata,3)/2
+                kk = randi(size(totdata,3));
+                totdata(:,:,kk) = flip(totdata(:,:,kk),2);
+            end
         end
         %take the means
         mean1=nanmean(totdata(:,:,1:L1),3);
         mean2=nanmean(totdata(:,:,L1+1:end),3);
-        %THIS IS TEST AND DELETE IF NOT WORKING
-        mean2temp = nanmean(mean2,2);
-        mean2All = repmat(mean2temp, 1, size(mean2,2));
-        stdev1 = std(totdata(:,:,1:L1),0,3);
-        stdev2 = std(totdata(:,:,L1+1:end),0,3);
-        stdev2temp = std(stdev2, 0, 2);
-        stdev2All = repmat(stdev2temp, 1, size(stdev2,2));
-        sp=sqrt(((L1-1)*stdev1.^2+(L2-1)*stdev2All.^2)./(L1+L2-2));
-        tstat_res(:,:, ii)=(mean1-mean2All)./(sp*sqrt(1/L1+1/L2));
-        %DELETE TO HERE
-        %run the guts of a ttest2 (much faster than the built in function)
-        %sp=sqrt(((L1-1)*std(totdata(:,:,1:L1),0,3).^2+(L2-1)*std(totdata(:,:,L1+1:end),0,3).^2)./(L1+L2-2));
-        %tstat_res(:,:, ii)=(mean1-mean2)./(sp*sqrt(1/L1+1/L2));
+        %option to smear across time so fluctuations in the iti data don't
+        %alter the primary data clusters.
+        if timeSmearMean
+            mean2temp = nanmean(mean2,2);
+            mean2All = repmat(mean2temp, 1, size(mean2,2));
+            stdev1 = std(totdata(:,:,1:L1),0,3);
+            stdev2 = std(totdata(:,:,L1+1:end),0,3);
+            stdev2temp = std(stdev2, 0, 2);
+            stdev2All = repmat(stdev2temp, 1, size(stdev2,2));
+            sp=sqrt(((L1-1)*stdev1.^2+(L2-1)*stdev2All.^2)./(L1+L2-2));
+            tstat_res(:,:, ii)=(mean1-mean2All)./(sp*sqrt(1/L1+1/L2));
+        else
+            %run the guts of a ttest2 (much faster than the built in function)
+            sp=sqrt(((L1-1)*std(totdata(:,:,1:L1),0,3).^2+(L2-1)*std(totdata(:,:,L1+1:end),0,3).^2)./(L1+L2-2));
+            tstat_res(:,:, ii)=(mean1-mean2)./(sp*sqrt(1/L1+1/L2));
+        end
+   
         tsr_pNeg=2*tcdf((tstat_res(:,:,ii)), (L1+L2-2)); %get the p values for adjustment, for just negative deflections
         tsr_pPos=2*tcdf(-(tstat_res(:,:,ii)), (L1+L2-2)); %get the p values for adjustment, for just positive deflections
         tsr_p=2*tcdf(-abs(tstat_res(:,:,ii)), (L1+L2-2)); %if want to combine, do abs because it won't matter here whether + or -
@@ -259,25 +269,27 @@ end
 
 %%
 %get the real mean difference and sd at each value
-%TESTING
-mnd1=nanmean(data1,3);
-mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
-mean2temp = nanmean(mnd2,2);
-mean2All = repmat(mean2temp, 1, size(mnd2,2));
-sd1=std(data1,0,3);
-sd2=std(data2_temp,0,3);
-stdev2temp = std(sd2, 0, 2);
-std2All = repmat(stdev2temp, 1, size(sd2,2));
-sp=sqrt(((L1-1)*sd1.^2+(L2-1)*std2All.^2)./(L1+L2-2));
-tstat_R=(mnd1-mean2All)./(sp*sqrt(1/L1+1/L2));
-%DELETE TO HERE
-% mnd1=nanmean(data1,3);
-% mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
-% sd1=std(data1,0,3);
-% sd2=std(data2_temp,0,3);
-% spR=sqrt(((L1-1)*sd1.^2+(L2-1)*sd2.^2)./(L1+L2-2));
-%tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L2));
-tstat_R=gather(tstat_R);
+%TAKING THE MEAN ACROSS EVERYTHING AND THE STD ACROSS EVERYTHING
+if timeSmearMean
+    mnd1=nanmean(data1,3);
+    mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
+    mean2temp = nanmean(mnd2,2);
+    mean2All = repmat(mean2temp, 1, size(mnd2,2));
+    sd1=std(data1,0,3);
+    sd2=std(data2_temp,0,3);
+    stdev2temp = std(sd2, 0, 2);
+    std2All = repmat(stdev2temp, 1, size(sd2,2));
+    sp=sqrt(((L1-1)*sd1.^2+(L2-1)*std2All.^2)./(L1+L2-2));
+    tstat_R=(mnd1-mean2All)./(sp*sqrt(1/L1+1/L2));
+else
+    mnd1=nanmean(data1,3);
+    mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
+    sd1=std(data1,0,3);
+    sd2=std(data2_temp,0,3);
+    spR=sqrt(((L1-1)*sd1.^2+(L2-1)*sd2.^2)./(L1+L2-2));
+    tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L2));
+    tstat_R=gather(tstat_R);
+end
 %tstat_Rabs=abs(tstat_R); %take absolute for adjustment. makes negative deflections and positive deflections of equal value. don't do this if there is a difference between the degrees of positive and negative deflections
 %% find which clusters are sig
 %allocate
@@ -313,12 +325,12 @@ if splitPosNeg
     cl_aRPos=[clRPos.Area];
     cl_aRPos(cl_aRPos>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
     for cii = 1:size(clRPos)
-        if clRPos(cii).Centroid(1,2)<20 %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+        if clRPos(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
             cl_aRPos(cii) = 1;
             xx(cii) = cii;
         end
     end
-    cl_keepPos=find(cl_aRPos>100); %get the ones with an area >100 pixels
+    cl_keepPos=find(cl_aRPos>50); %get the ones with an area >100 pixels
     idxc=1; idxd=1;
     tstat_sumsP = []; tstat_sumsN = [];
     for ii=1:length(cl_keepPos)
@@ -334,21 +346,27 @@ if splitPosNeg
         end
     end
     %% for plotting if you want
-    figure
-    subplot(4,1,1)
-    imagesc(normalize(mnd1,2)); axis xy;
-    subplot(4,1,2)
-    imagesc(normalize(mnd2,2)); axis xy;
-    subplot(4,1,3)
-    imagesc(thresh_binaryRPos); axis xy;
-    subplot(4,1,4)
-    imagesc(sigclustPos); axis xy;
+    % figure
+    % subplot(4,1,1)
+    % imagesc(normalize(mnd1,2)); axis xy;
+    % subplot(4,1,2)
+    % imagesc(normalize(mnd2,2)); axis xy;
+    % subplot(4,1,3)
+    % imagesc(thresh_binaryRPos); axis xy;
+    % subplot(4,1,4)
+    % imagesc(matPos); axis xy;
 
     clustRNeg=bwconncomp(thresh_binaryRNeg,8);
     clRNeg=regionprops(clustRNeg); %get the region properties
     cl_aRNeg=[clRNeg.Area];
     cl_aRNeg(cl_aRNeg>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    cl_keepNeg=find(cl_aRNeg>100); %get the ones with an area >100 pixels
+    for cii = 1:size(clRNeg)
+        if clRNeg(cii).Centroid(1,2)<HzThresholdNeg %remove any that are below the a hz threshold
+            cl_aRNeg(cii) = 1;
+            xx(cii) = cii;
+        end
+    end
+    cl_keepNeg=find(cl_aRNeg>50); %get the ones with an area >100 pixels
     idxc=1;
     for ii=1:length(cl_keepNeg)
         matNeg=false(size(thresh_binaryRNeg));
@@ -379,7 +397,13 @@ else
     clR=regionprops(clustR); %get the region properties
     cl_aR=[clR.Area];
     cl_aR(cl_aR>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    cl_keep=find(cl_aR>100); %get the ones with an area >100 pixels
+    for cii = 1:size(clRPos)
+        if clRPos(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
+            cl_aRPos(cii) = 1;
+            xx(cii) = cii;
+        end
+    end
+    cl_keep=find(cl_aR>50); %get the ones with an area >100 pixels
     idxc=1;
     for ii=1:length(cl_keep)
         mat=false(size(thresh_binaryR));

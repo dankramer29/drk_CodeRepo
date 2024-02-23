@@ -48,9 +48,9 @@ MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
 %  shown
 tTot = tic;
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 1);
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'eventChoice', 2);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2);
 toc(tTot)
 
 %% plotting
@@ -78,12 +78,12 @@ if savePlot
     hh =  findobj('type','figure'); 
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v4');
+        'versionNum', 'vRandIti_p05_NOTDOUBLEMEAN');
 end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [3,4];
+    nS = [9,11,12,13,14,];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -113,7 +113,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW19 = MWX;
+MW23 = MWX;
 %%%%
 
 %% for saving any variables
@@ -133,7 +133,8 @@ if saveSelectFile
 
     fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'MW5', '.mat'];    save(fileName);
+    %CHANGE MW BELOW!!!
+    fileName = [folder_name, '\', 'MW23', '.mat'];    save(fileName);
 
     
 end

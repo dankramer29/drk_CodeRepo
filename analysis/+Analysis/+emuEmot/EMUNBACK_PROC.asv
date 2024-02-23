@@ -171,6 +171,7 @@ savePlot = 1; %toggle on if you want to save the plots up front, doesn't close t
 saveSelectFile = 0; %toggle on if you want to save select files as mat
 timeCheck = 0; %toggle on if you want to check the clock for neural data and that for behavioral data (right now off by 6 hours as of 11/15/2023 for unknown reasons)
 referenceStrategy = 3;  %case switch 1 is CAR with all electrodes, 2 is with just the ones you are using and,3 is bipolar
+randomTimeIti = 1; %to make your iti a bunch of randomly selected time points so the average is essentially low.
 
 %
 beh_timestamps = [];
@@ -292,7 +293,7 @@ end
 
 TableChannel = table(location, hemis, macroROWS, label, channID, channelNumber, shortBAn, wireID);
 if size(macrowires,1) ~= TableChannel.channID(end)
-    error('channel numbers do not match row numbers, check that some channels are removed for some reason AND REMEMBER TO ADJUST THE CHANNEL NAMES')
+    warning('channel numbers do not match row numbers, check that some channels are removed for some reason AND REMEMBER TO ADJUST THE CHANNEL NAMES')
     %REMEMBER YOU MUST CHANGE THE NAMES OF THE CHANNELS BELOW AS WELL! for
     %chLocationName (change everywhere in that for loop that says channID
     %to channIDadjTot)
@@ -321,7 +322,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %MW5 channels:
 open TableChannel
-dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
+%dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
 %%
 %
 %MW5 
@@ -669,11 +670,20 @@ end
 %the final filtered data (1to200) is broad so it can be inserted into PAC
 %as desired
 
-[emotionTaskLFP, itiDataReal.EmotionTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdxEm,...
+[emotionTaskLFP, itiDataReal.EmotionTask.trueIti] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltEmotion, PresentedEmotionIdxEm,...
     PresentedIdentityIdxEm, behavioralIndexImageOnEm, behavioralIndexResponseEm, ...
     'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
     'ImpreTime', preTime, 'ImpostTime', postTime, 'RespreTime', preTimeRes, 'RespostTime', postTimeRes, 'multiTaperWindow',...
     multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
+
+
+%this is an option to make an iti that is a bunch of random times chosen.
+%iti count is 250 so it will be 500 total, 250 from each. the total time is
+%about 335 seconds to 250 1 s ITIs.
+if randomTimeIti
+    [itiDataReal.EmotionTask.RandomTimeIti] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltEmotion, 'fs', fs,...
+        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -935,13 +945,24 @@ end
 %point here (so beginning (1), middle(2), or end(3) of the moving window)
 %the final filtered data (1to200) is broad so it can be inserted into PAC
 %as desired
-   [identityTaskLFP, itiDataReal.IdentityTask] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdxId,...
+   [identityTaskLFP, itiDataReal.IdentityTask.trueIti] = Analysis.emuEmot.nwbLFPchProc(itiDataFiltIdentity, PresentedEmotionIdxId,...
        PresentedIdentityIdxId, behavioralIndexImageOnId, behavioralIndexResponseId, ...
        'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeIdentity,...
        'ImagepreTime', preTime, 'ImagepostTime', postTime, 'ResponsepreTime', preTimeRes, 'ResponsepostTime', postTimeRes, 'multiTaperWindow',...
        multiTaperWindow, 'CorrectTrials', CorrectTrialsId, 'ResponseTimesAdj', ResponseTimesDiffIdentity);
 
+   %this is an option to make an iti that is a bunch of random times chosen.
+%iti count is 250 so it will be 500 total, 250 from each. the total time is
+%about 335 seconds to 250 1 s ITIs.
+if randomTimeIti
+    [itiDataReal.IdentityTask.RandomTimeIti, percKeptbyChId] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltIdentity, 'fs', fs,...
+        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
+end
 
+%record details of the run.
+MWX.itiSDThresh = itiDataReal.IdentityTask.RandomTimeIti.sdThresh;  
+MWX.itiTime = itiDataReal.IdentityTask.RandomTimeIti.tPlot; 
+MWX.percentKeptI
 
 %% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK.M
 % then Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M

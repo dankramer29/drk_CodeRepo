@@ -11,6 +11,7 @@ function [T, meanSacrosstrials] = noiseTestEmuNBack(dataLFP, varargin)
 [varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
 [varargin, versionNum, ~, found]=util.argkeyval('versionNum', varargin, '_'); %if you want to do multiple versions of the same file
 [varargin, channelName]=util.argkeyval('channelName', varargin, []); %add the channel names
+[varargin, hilbertDisplay]=util.argkeyval('hilbertDisplay', varargin, 0); %if you want to see the hilbert version of power
 
 
 
@@ -56,7 +57,7 @@ for cc = 1:length(channelName)
         sdSline(1:length(tplotBP)) = sdSall;
         tempFltrials = [];
         idxTemp = 1;
-        for ii = 1:size(sAll,1)
+        for ii = 1:size(dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj},1)
             mx= max(sAll(ii,:));
             mn = min(sAll(ii,:));
             if mx >= (meanSall + (stdAbove*sdSall)) || mn <= (meanSall - (stdAbove*sdSall))
@@ -64,12 +65,17 @@ for cc = 1:length(channelName)
                 flaggedChannel{idxFl,1} = channelName{cc}; 
                 flaggedVariant(idxFl,1) = jj;
                 flaggedTrialType{idxFl,1} = taskName; %place holder. will be emotion or identity
+                if ii <= size(dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj},1) 
+                    flaggedVariantOtherway(idxFl,1) = dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj}(ii,1);
+                    flaggedTrialOtherway(idxFl,1) = dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj}(ii,2);
+                end
                 tempFltrials(idxTemp) = ii;
                 idxTemp = idxTemp +1;
                 idxFl = idxFl + 1;
                 idxFPlot = idxFPlot + 1;
             end
         end
+        
         if flaggedplotNoiseCheck
             if ~isempty(tempFltrials)
                 [subN1, subN2] = plt.subplotSize(size(sAll,1));
@@ -130,38 +136,38 @@ for cc = 1:length(channelName)
                 end
                 %% hilbert
                 if hilbertDisplay
-                F = figure;
-                F.WindowState = 'fullscreen';
-                F.Name = ([channelName{cc}, ' ', 'variant', num2str(jj), ...
-                    ' ', taskName, ' ', 'mean LFP across trials Hilbert']);
-                sgtitle([channelName{cc}, ' ', 'variant', num2str(jj), ...
-                    ' ', taskName, ' ', 'mean LFP across trials Hilbert'])
-                idxT = 1;
-                idxT2 = 1;
-                flTrNum = length(tempFltrials); %for some goofy math to count correctly
-                for kk = 1:subN1d*subN2
-                    [rw, cl] = find(matN==kk);
-                    if ismember(rw, oddN) && idxT <= size(sAll,1)
-                        subplot(subN1d,subN2,kk)
-                        plot(tplotBP, meanLine)
-                        hold on
-                        plot(tplotBP, meanLine(idxT) + stdAbove*sdSline)
-                        plot(tplotBP, meanLine(idxT) - stdAbove*sdSline)
-                        plot(tplotBP, sAll(idxT, :))
-                        if ismember(idxT, tempFltrials)
-                            title(['* trial', num2str(idxT), ' line', num2str(idxFPlot-1-flTrNum+1)], 'FontSize', 14) %ignore the goofy math here, it's so if there are 3 in this session, and idxFl is at 11, you subtract 1 to bold this trial at 10 (where it's at) and then remove the number in this session (e.g. 3, but 10-3 is 7 so add one back to be 8) then subtract 1 from the idx so it's now subtracting 2 (+1 back) so the next is 9, and the final one will flag 10. i hope i never read this again. 
-                            flTrNum = flTrNum - 1;
-                        else
-                            title(['\color{magenta}trial', num2str(idxT)])
+                    F = figure;
+                    F.WindowState = 'fullscreen';
+                    F.Name = ([channelName{cc}, ' ', 'variant', num2str(jj), ...
+                        ' ', taskName, ' ', 'mean LFP across trials Hilbert']);
+                    sgtitle([channelName{cc}, ' ', 'variant', num2str(jj), ...
+                        ' ', taskName, ' ', 'mean LFP across trials Hilbert'])
+                    idxT = 1;
+                    idxT2 = 1;
+                    flTrNum = length(tempFltrials); %for some goofy math to count correctly
+                    for kk = 1:subN1d*subN2
+                        [rw, cl] = find(matN==kk);
+                        if ismember(rw, oddN) && idxT <= size(sAll,1)
+                            subplot(subN1d,subN2,kk)
+                            plot(tplotBP, meanLine)
+                            hold on
+                            plot(tplotBP, meanLine(idxT) + stdAbove*sdSline)
+                            plot(tplotBP, meanLine(idxT) - stdAbove*sdSline)
+                            plot(tplotBP, sAll(idxT, :))
+                            if ismember(idxT, tempFltrials)
+                                title(['* trial', num2str(idxT), ' line', num2str(idxFPlot-1-flTrNum+1)], 'FontSize', 14) %ignore the goofy math here, it's so if there are 3 in this session, and idxFl is at 11, you subtract 1 to bold this trial at 10 (where it's at) and then remove the number in this session (e.g. 3, but 10-3 is 7 so add one back to be 8) then subtract 1 from the idx so it's now subtracting 2 (+1 back) so the next is 9, and the final one will flag 10. i hope i never read this again.
+                                flTrNum = flTrNum - 1;
+                            else
+                                title(['\color{magenta}trial', num2str(idxT)])
+                            end
+                            idxT = idxT +1;
+                        elseif ismember(rw, evenN) && idxT2 <= size(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj},3)%spectrogram
+                            subplot(subN1d,subN2,kk)
+                            imagesc(tplotBP, fff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.Hilbert.Power{jj}(:,:,idxT2),2)); axis xy;
+                            %imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
+                            idxT2 = idxT2 +1;
                         end
-                        idxT = idxT +1;
-                    elseif ismember(rw, evenN) && idxT2 <= size(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj},3)%spectrogram
-                        subplot(subN1d,subN2,kk)
-                        imagesc(tplotBP, fff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.Hilbert.Power{jj}(:,:,idxT2),2)); axis xy;
-                        %imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
-                        idxT2 = idxT2 +1;
                     end
-                end
                 end
                 if savePlot
                     if ~isempty(sessionName)
@@ -209,7 +215,7 @@ for cc = 1:length(channelName)
                     hold on
                     plot(tplotBP, meanS(idxT) + stdAbove*sdSline)
                     plot(tplotBP, meanS(idxT) - stdAbove*sdSline)
-                    plot(tplotBP, sAll(idxT, :))                    
+                    plot(tplotBP, sAll(idxT, :))
                     if ismember(idxT, flaggedTrials)
                         title(['* trial', num2str(idxNoise)])
                         idxNoise = idxNoise + 1;
@@ -219,7 +225,7 @@ for cc = 1:length(channelName)
                     idxT = idxT +1;
                 elseif ismember(rw, evenN) && idxT2 <= size(sAll,1)%spectrogram
                     subplot(subN1d,subN2,kk)
-                    imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy; 
+                    imagesc(tplotSp, ff, normalize(dataLFP.(task{taskType}).(channelName{cc}).image.specD{jj}(:,:,idxT2),2)); axis xy;
                     idxT2 = idxT2 +1;
                 end
             end
@@ -227,6 +233,6 @@ for cc = 1:length(channelName)
     end
 end
 
-T = table(flaggedTrialType, flaggedChannel, flaggedVariant, flaggedTrials);
+T = table(flaggedTrialType, flaggedChannel, flaggedVariant, flaggedTrials, flaggedVariantOtherway, flaggedTrialOtherway);
 
 end

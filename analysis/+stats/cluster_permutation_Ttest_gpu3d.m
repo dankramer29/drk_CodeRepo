@@ -281,6 +281,7 @@ if timeSmearMean
     std2All = repmat(stdev2temp, 1, size(sd2,2));
     sp=sqrt(((L1-1)*sd1.^2+(L2-1)*std2All.^2)./(L1+L2-2));
     tstat_R=(mnd1-mean2All)./(sp*sqrt(1/L1+1/L2));
+    tstat_R=gather(tstat_R);
 else
     mnd1=nanmean(data1,3);
     mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size

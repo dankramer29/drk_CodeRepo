@@ -124,35 +124,68 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %no EvKey and good hex. This is after MW_19.
     %fileVariation = 5; This is one NWB and with bad hex numbers and with
             %an EvKey
-fileVariation = 4;
+fileVariation = 3;
 %USE _X IF SINGLE DIGITS
-sessionName = 'MW_23';
-subjName = 'MW_23';
-%MWX - remember to change the name in the within subject processing!!
-
-
-matNameId = 'NBack_EMOTION_2023_06_27.13_29_53'; 
-matNameEm = 'NBack_IDENTITY_2023_06_27.13_22_22'; 
+sessionName = 'MW_16';
+subjName = 'MW_16';
+    %MWX - remember to change the name in the within subject processing!!
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %REMEMBER TO CHANGE THE CHANNELS BELOW
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; 
+matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; 
 
 switch fileVariation
     case {1, 3, 4}
-        identityFilter = 'JM_MW23_Session_8_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW23_Session_9_filter.nwb';
+        identityFilter = 'JM_MW16_Session_1_filter.nwb'; %does NOT need to be placed in a folder
+        emotionFilter = 'JM_MW16_Session_3_filter.nwb';
     case  2
         emotionidentityFilter = 'JM_MW5_Session_8_filter.nwb'; %if they are one file
 end
 %For the hex code shenaningans
 switch fileVariation
     case {1, 2, 3}
+        %earlier is identity task
+        load JM_MW16_Session_1_EventKey.mat
+        EvKeyId = EvKey;
         load JM_MW16_Session_3_EventKey.mat
         %EvKeyCodes 629 = Image_Shown and 649 = Response_Made
         EvKeyEm = EvKey;
-        load JM_MW16_Session_1_EventKey.mat
-        EvKeyId = EvKey;
     case {4, 5}
         EvKeyEm = [];
         EvKeyId = [];
 end
+%REPEATED HERE AND BELOW. CAN TURN IT ON HERE IF YOU ALREADY PICKED OUT THE
+%CHANNELS, OTHERWISE BELOW FOR WHEN YOU MAKE THE CHANNELS TABLE.
+%MW5 
+%chInterestActual = [37:40,49:52,61:64,139:142,151:154];
+%MW18 channels NOTE MW18 HAS CHANNELS MISSING
+%chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
+%MW16 Channels
+chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
+%MW23 channels
+%chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+%MW13 channels for Middle Frontal:
+%chInterestActual = [49:56];
+%MW19 channels:
+%chInterestActual = [11,12,13,14,19,20,23,24,25,28,29,42,43,47,48,51,52,116,117,118,131,132,133,121,122];
+%chInterestActual = [11:14, 23:25, 115:117, 123:125];
+%MW22 channels:
+%chInterestActual=[16:19,28:31,40:42,169:171,178:181];
+%chInterestActual = [2,3,4,5,13,14,19,20,21,22,30,31,32,33,34,...
+%     45,46,47,56,57,73,74,75,88,89,90,121,122,123,139,140,...
+%     141,142,143,172,173,174,181,182,183,184,192,193,194,196,197,198];
+
+% %MW21 channels:
+%chInterestActual = [2,3,34,35,38,39,49,50,54,56,63,64,77,88,89,134,135];
+%MW9 channels (not confirmed):
+%chInterestActual = [1, 2, 17, 18, 75, 76, 107, 108, 114, 115, 117, 118, 123, 124, 125, 126];
+%MW13 channels:
+% chInterestActual = [17,18,26,69,77,78,79,59,60,83,89,90,91,126,127,129,130,93,94,95];
+%chInterest = [1 9 29 45 59 67 81 139];
+%chInterest = [7, 8, 15 16, 27, 28];  %REMEMBER, PMT OR DIXI HAVE 1 AS DISTAL (confirmed, REALLY IT'S THAT THE TECHS PUT 1 AS THE FARTHEST CHANNEL ON CHANNEL ID SO DOESNT MATTER WHAT BRAND)
+%[2, 10, 30, 46, 60, 68, 82, 119, 120, 140 ];
+%chInterest = [17,25,45,61,75,83,97];
 
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
@@ -332,7 +365,7 @@ open TableChannel
 %MW16 Channels
 %chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
 %MW23 channels
-chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+%chInterestActual = [46:48,54:57,68:70,145:147,154:158];
 %MW13 channels for Middle Frontal:
 %chInterestActual = [49:56];
 %MW19 channels:
@@ -539,7 +572,7 @@ dataFemotion = filtfilt(lpFilt,data');
 %made 649. (and fixation is 639)
 %finds the image on time. realize this is variable but about 2 seconds.s
 switch fileVariation
-    case {1, 2}
+    case {1}
         %if EvKey is present, it has the time stamps already and only those
         %time stamps.
         imageOn = 1:length(beh_timestampsEm);
@@ -548,17 +581,18 @@ switch fileVariation
             NWBtimeStampDiffEm(idx1,1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
             idx1 = idx1+1;
         end
-    case 3
+    case 2
+        %NEED TO FIGURE OUT WHICH ONES ARE THESE, MW13 I THINK??
         idx1 = 1; idx2 = 1;
         for ii=2:length(beh_timestampsEm)
-            NWBtimeStampDiffEm(idx1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
+            NWBtimeStampDiffEm(idx1,1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
             if NWBtimeStampDiffEm(idx1) >= 499001 && NWBtimeStampDiffEm(idx1) <= 500999 %50000/500 = 1000ms
                 imageOn(idx2) = ii-1; %record the relevant image onsets indices, here we are assuming the ttls that are on for 1 second, the start of that 1s ttl is image on (THIS APPEARS CONFIRMED)
                 idx2 = idx2 + 1;
             end
             idx1 = idx1 +1;
         end
-    case {4, 5}
+    case {3, 4, 5}
         hexNumEm = hexNum;
         imageOn = find(hexNumEm == 29 | hexNumEm == 629);
         idx1 = 1;
@@ -815,7 +849,7 @@ end
 %primarily gets image on so no need to do if one file and have the image on
 %for the ID task
 switch fileVariation
-    case {1, 2} %EvKey and no hex
+    case {1} %EvKey and no hex
         %if EvKey is present, it has the time stamps already and only those
         %time stamps.
         imageOn = 1:length(beh_timestampsId);
@@ -824,7 +858,7 @@ switch fileVariation
             NWBtimeStampDiffId(idx1,1) = beh_timestampsId(ii)-beh_timestampsId(ii-1);
             idx1 = idx1+1;
         end
-    case 3 %two files EvKey, bad hex
+    case 2 %two files EvKey, bad hex
         idx1 = 1; idx2 = 1;
         for ii=2:length(beh_timestampsEm)
             NWBtimeStampDiffId(idx1) = beh_timestampsId(ii)-beh_timestampsId(ii-1);
@@ -834,7 +868,7 @@ switch fileVariation
             end
             idx1 = idx1 +1;
         end
-    case {4, 5} %two files, good hex
+    case {3, 4, 5} %two files, good hex
         hexNumId = hexNum;
         imageOn = find(hexNumId == 29 | hexNumId == 629);
         idx1 = 1;

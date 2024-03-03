@@ -124,31 +124,33 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %no EvKey and good hex. This is after MW_19.
     %fileVariation = 5; This is one NWB and with bad hex numbers and with
             %an EvKey
-fileVariation = 4;
+fileVariation = 3;
 %USE _X IF SINGLE DIGITS
-sessionName = 'MW_23';
-subjName = 'MW_23';
-%MWX - remember to change the name in the within subject processing!!
-
-
-matNameId = 'NBack_EMOTION_2023_06_27.13_29_53'; 
-matNameEm = 'NBack_IDENTITY_2023_06_27.13_22_22'; 
+sessionName = 'MW_18';
+subjName = 'MW_18';
+    %MWX - remember to change the name in the within subject processing!!
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %REMEMBER TO CHANGE THE CHANNELS BELOW
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+matNameId = 'NBack_IDENTITY_2022_10_20.13_12_18'; 
+matNameEm = 'NBack_EMOTION_2022_10_20.13_20_21'; 
 
 switch fileVariation
     case {1, 3, 4}
-        identityFilter = 'JM_MW23_Session_8_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW23_Session_9_filter.nwb';
+        identityFilter = 'JM_MW18_Session_11_filter.nwb'; %does NOT need to be placed in a folder
+        emotionFilter = 'JM_MW18_Session_12_filter.nwb';
     case  2
         emotionidentityFilter = 'JM_MW5_Session_8_filter.nwb'; %if they are one file
 end
 %For the hex code shenaningans
 switch fileVariation
     case {1, 2, 3}
-        load JM_MW16_Session_3_EventKey.mat
+        %earlier is identity task
+        load JM_MW18_Session_11_EventKey.mat
+        EvKeyId = EvKey;
+        load JM_MW18_Session_12_EventKey.mat
         %EvKeyCodes 629 = Image_Shown and 649 = Response_Made
         EvKeyEm = EvKey;
-        load JM_MW16_Session_1_EventKey.mat
-        EvKeyId = EvKey;
     case {4, 5}
         EvKeyEm = [];
         EvKeyId = [];
@@ -328,11 +330,11 @@ open TableChannel
 %MW5 
 %chInterestActual = [37:40,49:52,61:64,139:142,151:154];
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
-%chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
+chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
 %MW16 Channels
 %chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
 %MW23 channels
-chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+%chInterestActual = [46:48,54:57,68:70,145:147,154:158];
 %MW13 channels for Middle Frontal:
 %chInterestActual = [49:56];
 %MW19 channels:
@@ -539,7 +541,7 @@ dataFemotion = filtfilt(lpFilt,data');
 %made 649. (and fixation is 639)
 %finds the image on time. realize this is variable but about 2 seconds.s
 switch fileVariation
-    case {1, 2}
+    case {1}
         %if EvKey is present, it has the time stamps already and only those
         %time stamps.
         imageOn = 1:length(beh_timestampsEm);
@@ -548,7 +550,7 @@ switch fileVariation
             NWBtimeStampDiffEm(idx1,1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
             idx1 = idx1+1;
         end
-    case 3
+    case 2
         idx1 = 1; idx2 = 1;
         for ii=2:length(beh_timestampsEm)
             NWBtimeStampDiffEm(idx1) = beh_timestampsEm(ii)-beh_timestampsEm(ii-1);
@@ -558,7 +560,7 @@ switch fileVariation
             end
             idx1 = idx1 +1;
         end
-    case {4, 5}
+    case {3,4, 5}
         hexNumEm = hexNum;
         imageOn = find(hexNumEm == 29 | hexNumEm == 629);
         idx1 = 1;
@@ -681,7 +683,7 @@ end
 %iti count is 250 so it will be 500 total, 250 from each. the total time is
 %about 335 seconds to 250 1 s ITIs.
 if randomTimeIti
-    [itiDataReal.EmotionTask.RandomTimeIti] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltEmotion, 'fs', fs,...
+    [itiDataReal.EmotionTask.RandomTimeIti, percKeptbyChEm] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltEmotion, 'fs', fs,...
         'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
 end
 
@@ -959,10 +961,13 @@ if randomTimeIti
         'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
 end
 
-%record details of the run.
+%record details of the run of the iti. threshold is what was the automatic
+%removal threshold. percentKept is how many were kept and 1-percentKept is
+%how many were rejected.
 MWX.itiSDThresh = itiDataReal.IdentityTask.RandomTimeIti.sdThresh;  
 MWX.itiTime = itiDataReal.IdentityTask.RandomTimeIti.tPlot; 
-MWX.percentKeptI
+MWX.percentKeptIti.Id = percKeptbyChId;
+MWX.percentKeptIti.Em = percKeptbyChEm;
 
 %% next section is Analysis.emuEmot.EMUNBACK_NOISECHECK.M
 % then Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M

@@ -57,7 +57,7 @@ for cc = 1:length(channelName)
         sdSline(1:length(tplotBP)) = sdSall;
         tempFltrials = [];
         idxTemp = 1;
-        for ii = 1:size(sAll,1)
+        for ii = 1:size(dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj},1)
             mx= max(sAll(ii,:));
             mn = min(sAll(ii,:));
             if mx >= (meanSall + (stdAbove*sdSall)) || mn <= (meanSall - (stdAbove*sdSall))
@@ -65,12 +65,17 @@ for cc = 1:length(channelName)
                 flaggedChannel{idxFl,1} = channelName{cc}; 
                 flaggedVariant(idxFl,1) = jj;
                 flaggedTrialType{idxFl,1} = taskName; %place holder. will be emotion or identity
+                if ii <= size(dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj},1) 
+                    flaggedVariantOtherway(idxFl,1) = dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj}(ii,1);
+                    flaggedTrialOtherway(idxFl,1) = dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj}(ii,2);
+                end
                 tempFltrials(idxTemp) = ii;
                 idxTemp = idxTemp +1;
                 idxFl = idxFl + 1;
                 idxFPlot = idxFPlot + 1;
             end
         end
+        
         if flaggedplotNoiseCheck
             if ~isempty(tempFltrials)
                 [subN1, subN2] = plt.subplotSize(size(sAll,1));
@@ -228,6 +233,6 @@ for cc = 1:length(channelName)
     end
 end
 
-T = table(flaggedTrialType, flaggedChannel, flaggedVariant, flaggedTrials);
+T = table(flaggedTrialType, flaggedChannel, flaggedVariant, flaggedTrials, flaggedVariantOtherway, flaggedTrialOtherway);
 
 end

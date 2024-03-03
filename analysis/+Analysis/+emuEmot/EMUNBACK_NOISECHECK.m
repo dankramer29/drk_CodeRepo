@@ -48,8 +48,7 @@ end
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
-%THERE IS AN ERROR IN THIS THAT HAS TO DO WITH SAVING AND I CAN'T FIGURE IT
-%OUT
+
 [TchannelCheckEm, itiDataReal.EmotionTask.trueIti] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask.trueIti, ...
     'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
@@ -62,32 +61,32 @@ TNoise = vertcat(TNoise, Tident);
 
 
 MWX.TNoise = TNoise;
-MWX.TNoiseITIEm=TchannelCheckEm;
-MWX.TNoiseITIId=TchannelCheckId;
+%MWX.TNoiseITIEm=TchannelCheckEm;
+%MWX.TNoiseITIId=TchannelCheckId;
 MWX.RemovedEm = removeTrialsEmot;
 MWX.RemovedId = removeTrialsId;
 %allChannelMean = vertcat(allChannelMean, allChannelMeanTemp); %not necessary since this is just to see if a channel is bad.
 
-%plot the periodogram for the mean of all trials across all channels to
-%look for bad channels.
-plotNoiseCheck = 1;
-if plotNoiseCheck
-   [subN1, subN2] = plt.subplotSize(length(chInterest));
-    figure
-    for cc=1:length(chInterest) %do all of the channels, go by 2 to get the spikes then the bands
-        subplot(subN1, subN2, cc);        
-        periodogram(allChannelMean(cc,:),[],size(allChannelMean,2), fs);
-        title(num2str(chInterest(cc)))
-    end
-end
-%turns out easiest way to eliminate a channel is to just ignore it.
-removeChannel = input('which channels from the trial do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
+% %plot the periodogram for the mean of all trials across all channels to
+% %look for bad channels.
+% plotNoiseCheck = 1;
+% if plotNoiseCheck
+%    [subN1, subN2] = plt.subplotSize(length(chInterest));
+%     figure
+%     for cc=1:length(chInterest) %do all of the channels, go by 2 to get the spikes then the bands
+%         subplot(subN1, subN2, cc);        
+%         periodogram(allChannelMean(cc,:),[],size(allChannelMean,2), fs);
+%         title(num2str(chInterest(cc)))
+%     end
+% end
+% %turns out easiest way to eliminate a channel is to just ignore it.
+% removeChannel = input('which channels from the trial do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
 channelNameFinal = channelName;
 %as you remove channels, you need to adjust, for now, just enter them in
 %and delete, and should work.
-for ii = 1:length(removeChannel)
-%    channelNameFinal(42:47) = [];
-end
-%%
+% for ii = 1:length(removeChannel)
+% %    channelNameFinal(42:47) = [];
+% end
+% %%
 % next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
-edit Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT
+ 

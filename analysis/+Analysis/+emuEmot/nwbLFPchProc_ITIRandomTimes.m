@@ -97,9 +97,11 @@ for cc = 1:length(chNum)
             %convert the time to spectral time
             [behavioralIndexrandTime, closestValuerandTime] = Analysis.emuEmot.timeStampConversion(randTimeS, timeStampsFiltData);
             %get the spectral data
-            itiRandomTime.(chName{cc}).specD(:,:,idx) = data.iti.(chName{cc}).specD(:,behavioralIndexrandTime - itiEpochC: behavioralIndexrandTime + itiEpochCplus);
-            itiRandomTime.(chName{cc}).RandomTimesInSec(idx) = randTimeS;
-            idx = idx + 1;
+            if behavioralIndexrandTime + itiEpochCplus <size(data.iti.(chName{cc}).specD,2)
+                itiRandomTime.(chName{cc}).specD(:,:,idx) = data.iti.(chName{cc}).specD(:,behavioralIndexrandTime - itiEpochC: behavioralIndexrandTime + itiEpochCplus);
+                itiRandomTime.(chName{cc}).RandomTimesInSec(idx) = randTimeS;
+                idx = idx + 1;
+            end
         end
 
     end

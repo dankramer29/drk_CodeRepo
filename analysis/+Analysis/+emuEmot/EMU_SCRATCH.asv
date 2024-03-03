@@ -1,6 +1,24 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
+SS1 = emotionTaskLFP.byemotion.ch1716.image.
+figure
+imagesc(normalize(mean(dataEmotionTaskAllEmotions,3),2)); axis xy;
+figure
+imagesc(normalize(mean(dataEmotionTaskAllIdentities,3),2)); axis xy;
+
+
+figure
+subplot(2,2,1)
+imagesc(normalize(nback.(chName{ii}).allIdentities.identityTaskMean,2)); axis xy;
+subplot(2,2,3)
+imagesc(nback.(chName{ii}).allIdentities.identityTasksigclust); axis xy;
+subplot(2,2,2)
+imagesc(normalize(nback.(chName{ii}).allEmotions.identityTaskMean,2)); axis xy;
+subplot(2,2,4)
+imagesc(nback.(chName{ii}).allEmotions.identityTasksigclust); axis xy;
+
+
 %checking the masking part
 mask = sDataTemp>1.5;
 clustP=bwconncomp(mask,4);
@@ -28,11 +46,11 @@ ffHt = emotionTaskLFP.freqHilbert;
 chWant = 'ch38';
 chWantBP = 'ch2524';
 
-xx1 = emotionTaskLFP.byemotion.(chWantBP).image.specD{1};
+xx1 = emotionTaskLFP.byemotion.ch2524.image.specD{1};
 xx2 = emotionTaskLFP.byemotion.(chWantBp).image.specD{2};
 xx3 = emotionTaskLFP.byemotion.(chWantBp).image.specD{3};
 xx=cat(3, xx1, xx2, xx3);
-xxN=normalize(xx,2);
+xxN=normalize(xx1,2);
 xxNM = mean(xxN,3);
 
 xx1 = emotionTaskLFPT.byemotion.(chWant).image.specD{1};
@@ -583,7 +601,6 @@ for ii = 82:100
 end
 
 testT = stats.cluster_permutation_Ttest_gpu3d( S2, S1, 'xshuffles', 100);
-
 
 
 

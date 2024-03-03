@@ -1,6 +1,26 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
+SS1 = emotionTaskLFP.byemotion.ch1716.image.specD{1}(:,:,11);
+SS2 = emotionTaskLFP.byidentity.ch1716.image.specD{1}(:,:,7);
+
+figure
+imagesc(normalize(SS1,2)); axis xy;
+figure
+imagesc(normalize(SS2,2)); axis xy;
+
+
+figure
+subplot(2,2,1)
+imagesc(normalize(nback.(chName{ii}).allIdentities.identityTaskMean,2)); axis xy;
+subplot(2,2,3)
+imagesc(nback.(chName{ii}).allIdentities.identityTasksigclust); axis xy;
+subplot(2,2,2)
+imagesc(normalize(nback.(chName{ii}).allEmotions.identityTaskMean,2)); axis xy;
+subplot(2,2,4)
+imagesc(nback.(chName{ii}).allEmotions.identityTasksigclust); axis xy;
+
+
 %checking the masking part
 mask = sDataTemp>1.5;
 clustP=bwconncomp(mask,4);

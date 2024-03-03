@@ -78,12 +78,12 @@ if savePlot
     hh =  findobj('type','figure'); 
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'vRandIti_p05_NOTDOUBLEMEAN');
+        'versionNum', 'vRandIti_p05_NODOUBLEMEAN');
 end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [9,11,12,13,14,];
+    nS = [29,30];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -113,10 +113,11 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW23 = MWX;
+MW16 = MWX;
 %%%%
 
 %% for saving any variables
+saveSelectFile = true;
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
@@ -124,17 +125,17 @@ if saveSelectFile
         %make the directory folder
         mkdir (folder_name)
     end
-    fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
+    % fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
 
 
     fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
     %CHANGE MW BELOW!!!
-    fileName = [folder_name, '\', 'MW23', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW16', '.mat'];    save(fileName);
 
     
 end

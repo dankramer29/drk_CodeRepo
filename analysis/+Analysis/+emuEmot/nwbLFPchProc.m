@@ -284,6 +284,17 @@ if filterAllData
                 end
                 %by identity
                 nback.byidentity.(chName{cc}).image.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
+                %this will make it so column one is the cell (the index of
+                %the the ID like face 1 or 2, so which cell to grab) and
+                %column two is which trial. the idea here is so when you
+                %cut out trial 3 for noise, you are cutting it out of both
+                %the emotion and the identity. (there is an easier way to
+                %do this, but i'd have to redo a lot of code). 
+                %the way this reads is if in cell 2, row 3 is [2,4] then
+                %the 3rd presentation of identity 2 is the same as the 4th
+                %presentation of emotion 2.
+                nback.byidentity.(chName{cc}).presentedEmId{PresentedIdentityIdx(idx1)}(idxID,1) = PresentedEmotionIdx(ii);
+                nback.byidentity.(chName{cc}).presentedEmId{PresentedIdentityIdx(idx1)}(idxID,2) = idxEmot;
                 if ii ~= 1 %no response for the first one, is a nan
                     nback.byidentity.(chName{cc}).response.specD{PresentedIdentityIdx(idx1)}(:,:,idxID) = filtD(:, behavioralIndexResponse(ii) - (preTimeCRes): behavioralIndexResponse(ii) + (postTimeCRes));
                     nback.byidentity.(chName{cc}).responseTimesInSec{PresentedIdentityIdx(idx1)}(idxID,:) = ResponseTimesAdj(ii-1);
@@ -292,6 +303,15 @@ if filterAllData
 
                 %by emotion
                 nback.byemotion.(chName{cc}).image.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexImage(ii) - (preTimeC): behavioralIndexImage(ii) + (postTimeC));
+                %this will make it so column one is the cell (the index of
+                %the the ID like face 1 or 2, so which cell to grab) and
+                %column two is which trial. the idea here is so when you
+                %cut out trial 3 for noise, you are cutting it out of both
+                %the emotion and the identity. (there is an easier way to
+                %do this, but i'd have to redo a lot of code)
+                nback.byemotion.(chName{cc}).presentedEmId{PresentedEmotionIdx(idx1)}(idxEmot,1) = PresentedIdentityIdx(ii);
+                nback.byemotion.(chName{cc}).presentedEmId{PresentedEmotionIdx(idx1)}(idxEmot,2) = idxID;
+
                 if ii ~=1
                     nback.byemotion.(chName{cc}).response.specD{PresentedEmotionIdx(idx1)}(:,:,idxEmot) = filtD(:, behavioralIndexResponse(ii) - (preTimeCRes): behavioralIndexResponse(ii) + (postTimeCRes));
                     nback.byemotion.(chName{cc}).responseTimesInSec{PresentedIdentityIdx(idx1)}(idxID,:) = ResponseTimesAdj(ii-1);

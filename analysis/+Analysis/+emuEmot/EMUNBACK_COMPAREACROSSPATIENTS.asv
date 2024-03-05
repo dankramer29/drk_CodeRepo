@@ -100,35 +100,25 @@ L.LineWidth = 4;
 %     centroid by time
 %     cluster centroid by frequency
 %     centroid
-C=linspecer(100); %sets up plotting colors
-
 
 xx = []; %load with stats of whatever category (say Amygdala centroid time)
 yy = []; %load with stats of whatever is the second category (say Hippo)
 zz = []; %load with stats of the third category
-Ramy = [];
-Lamy= [];
-RAhip= [];
-LAhip= [];
-RPhip= [];
-LPhip= [];
-nameTable = {'Cluster Centroid By Frequency'};
-varTested = {'Frequency (Hz)'};
-testDone = {'Kruskall Wallis'};
+
 %pull out the areas you want
 
 idxX = 1; idxY = 1; idxZ = 1;
 %
 %delete the category and then tab through to the one you want below
-Ramy = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'R Amygdala'" ); 
-Lamy = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'L Amygdala'");
-xx = vertcat(Ramy, Lamy);
-RAhip = MWallForLoading.VarName17(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
-LAhip =  MWallForLoading.VarName17(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
-yy = vertcat(RAhip, LAhip);
-RPhip = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
-LPhip =  MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
-zz = vertcat(RPhip, LPhip);
+Ramy = MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation == "'R Amygdala'" ); 
+Lamy = MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation == "'L Amygdala'");
+Amy = vertcat(Ramy, Lamy);
+RAhip = MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
+LAhip =  MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
+Ahip = vertcat(RAhip, LAhip);
+RPhip = MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
+LPhip =  MWallForLoading.ByTrialCentroidnansIndicateNothingWasInTheSpecifiedRange(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
+Phip = verRPhip+LPhip;
 
 
 % for ii = 1:height(MWallForLoading)
@@ -144,7 +134,8 @@ zz = vertcat(RPhip, LPhip);
 % end
 
 TstTemp = [];
-
+nameTable = {'Cluster Centroid By Time'};
+testDone = {'Kruskall Wallis'};
 
 %HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
 for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
@@ -185,12 +176,12 @@ p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:))
 %legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
 ax=gca;
 ax.XTick = [1,2,3];
-% ax.YLim = [0:1.5];
-% ax.YTick = [0:0.2:1.50];
+ax.YLim = [0:1.5];
+ax.YTick = [0:0.2:1.50];
 ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
 ax.FontSize = 13;
 ax.FontWeight = 'bold';
-ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
+ylabel('Time (S)', 'FontSize', 18, 'FontWeight','bold')
 
 
  %% a repeat for frequency based stuff to make it easier 

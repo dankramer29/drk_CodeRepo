@@ -124,21 +124,21 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %no EvKey and good hex. This is after MW_19.
     %fileVariation = 5; This is one NWB and with bad hex numbers and with
             %an EvKey
-fileVariation = 3;
-%USE _X IF SINGLE DIGITS
-sessionName = 'MW_16';
-subjName = 'MW_16';
+fileVariation = 4;
+
+sessionName = 'MW_22';
+subjName = 'MW_22';
     %MWX - remember to change the name in the within subject processing!!
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %REMEMBER TO CHANGE THE CHANNELS BELOW
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; 
-matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; 
+matNameId = 'NBack_IDENTITY_2023_04_10.15_56_32'; 
+matNameEm = 'NBack_EMOTION_2023_04_10.16_04_57'; 
 
 switch fileVariation
     case {1, 3, 4}
-        identityFilter = 'JM_MW16_Session_1_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW16_Session_3_filter.nwb';
+        identityFilter = 'JM_MW22_Session_6_filter.nwb'; %does NOT need to be placed in a folder
+        emotionFilter = 'JM_MW22_Session_7_filter.nwb';
     case  2
         emotionidentityFilter = 'JM_MW5_Session_8_filter.nwb'; %if they are one file
 end
@@ -162,7 +162,7 @@ end
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
 %chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
 %MW16 Channels
-chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
+%chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
 %MW23 channels
 %chInterestActual = [46:48,54:57,68:70,145:147,154:158];
 %MW13 channels for Middle Frontal:
@@ -171,7 +171,7 @@ chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,6
 %chInterestActual = [11,12,13,14,19,20,23,24,25,28,29,42,43,47,48,51,52,116,117,118,131,132,133,121,122];
 %chInterestActual = [11:14, 23:25, 115:117, 123:125];
 %MW22 channels:
-%chInterestActual=[16:19,28:31,40:42,169:171,178:181];
+chInterestActual=[16:19,28:31,40:42,169:171,178:181];
 %chInterestActual = [2,3,4,5,13,14,19,20,21,22,30,31,32,33,34,...
 %     45,46,47,56,57,73,74,75,88,89,90,121,122,123,139,140,...
 %     141,142,143,172,173,174,181,182,183,184,192,193,194,196,197,198];

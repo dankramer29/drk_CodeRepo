@@ -1,4 +1,4 @@
-function [figIdxNow] = nbackPlotSpectrogramManuscriptCompare(nbackCompare, chName, varargin)
+function [figIdxNow] = nbackPlotSpectrogramManuscriptCompare(nbackCompare, varargin)
 %This is to put in nice figures and output the comparison of the two
 %allemotions/allidentities.
 %   Detailed explanation goes here
@@ -10,7 +10,8 @@ function [figIdxNow] = nbackPlotSpectrogramManuscriptCompare(nbackCompare, chNam
 [varargin, figTitleName]=util.argkeyval('figTitleName', varargin, 'Image On'); %Name of what you are comparing
 [varargin, timePlot]=util.argkeyval('timePlot', varargin, []); %pull in the time plot vector
 [varargin, frequencyRange]=util.argkeyval('frequencyRange', varargin, []); %pull in the frequency range
-[varargin, chName]=util.argkeyval('chName', varargin, []); %use the channel names for labeling
+[varargin, chName]=util.argkeyval('chName', varargin, []); %chNumber you are using like ch1312
+[varargin, chLocationName]=util.argkeyval('chLocationName', varargin, []); %ch location like L amygdala
 [varargin, adjustedColorMap]=util.argkeyval('adjustedColorMap', varargin, false); %this will adjust a colormap to prevent outliers from making the map too dull
 [varargin, flatColorMap]=util.argkeyval('flatColorMap', varargin, true); %this just sets it at 3 SD (can adjust below to a different set). if both of these are off the heatmaps will set their own colormaps
 [varargin, doMask]=util.argkeyval('doMask', varargin, true); %set a mask for only the significant portions
@@ -46,17 +47,27 @@ else
     ff = 1:size(nbackCompare.(chNum{1}).(conditionName{1}).(resultName{1}),1);
 end
 
+if isempty(chName)
+    chName = chNum;
+end
+if isempty(chLocationName)
+    chLocationName = ' ';
+end
+
 
 %% plot
+
 for ii = 1:length(chName)
-    S1 = nbackCompare.(chName(ii)).(conditionName{jj}).(resultNameAll{3});%identity task allIDs/allEmots mean
+    idx1 = 1;
+    idx2 = 1;
+    S1 = nbackCompare.(chName{ii}).(conditionName{4}).(resultNameAll{3});%iidentity task all identities
     S1 = normalize(S1, 2);
-    sigClustIDTask{jj} = nbackCompare.(chName(ii)).(conditionName{jj}).(resultNameAll{5});
+    sigClustIDTask = nbackCompare.(chName{ii}).(conditionName{4}).(resultNameAll{5});
     mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
     mn(idx2) = min(min(S1)); idx2 = idx2+1;
-    S2 = nbackCompare.(chName(ii)).(conditionName{jj}).(resultNameAll{8});%emotion task allIDs/allEmots mean
+    S2 = nbackCompare.(chName{ii}).(conditionName{8}).(resultNameAll{8});%emotion task  all emotions
     S2 = normalize(S2, 2);
-    sigClustEmTask{jj} = nbackCompare.(chName(ii)).(conditionName{jj}).(resultNameAll{10});
+    sigClustEmTask = nbackCompare.(chName{ii}).(conditionName{8}).(resultNameAll{10});
     mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
     mn(idx2) = min(min(S2)); idx2 = idx2+1;
 
@@ -70,24 +81,23 @@ for ii = 1:length(chName)
     elseif flatColorMap
         mxT = 3; mnT = -3;
     end
-    figtitle = strcat('Fig', num2str(figIdx), '  LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));
-    figIdx = figIdx +1;
-    figtitleSplit = strcat('LFP Power during ', {' '}, figTitleName, '\n', ' Identities for ', {' '}, (chName{ii,1}), {' '}, (chNum{ii}));
+    figtitle = strcat('Fig', num2str(figIdx), '  LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chLocationName{ii}), {' '}, (chName{ii}));
+   % figIdx = figIdx +1;
+    figtitleSplit = strcat('LFP Power during ', {' '}, figTitleName, ' Identities for ', {' '}, (chLocationName{ii}), {' '}, (chName{ii}));
     figure('Name', figtitle{1}, 'Position', [10 100 1200 750]) %x bottom left, y bottom left, x width, y height
     sgtitle(compose(figtitleSplit)); %gives a supertitle
 
-    subplot(1, 2, 1)
-    mask = ones(size(S1{jj})); %this fades the color except where positive
+    subplot(2, 1, 1)
+    mask = ones(size(S1)); %this fades the color except where positive
     if doMask
         mask = mask*maskPerc;
     end
-    if nnz(S1)
-        mask(logical(S1)) = 1;
-        bw = bwperim(S1);
+    if nnz(sigClustIDTask)
+        mask(logical(sigClustIDTask)) = 1;
+        bw = bwperim(sigClustIDTask);
     else
-        bw = zeros(size(S1));
+        bw = zeros(size(sigClustIDTask));
     end
-    S1 = S1;
     minV= min(min(S1));
     S1(bw>0) = minV;
     im=imagesc(tt,ff, S1); axis xy;
@@ -103,20 +113,20 @@ for ii = 1:length(chName)
     if flatColorMap || adjustedColorMap; caxis([mnT mxT]); end
     colormap(inferno(100));
     im.AlphaData = mask;
-    idx1 = idx1+2;
+    %idx1 = idx1+2;
     
     
     %emotion task
-    subplot(1, 2, 2)
-    mask = ones(size(S2{jj})); %this fades the color except where positive
+    subplot(2, 1, 2)
+    mask = ones(size(S2)); %this fades the color except where positive
     if doMask
         mask = mask*maskPerc;
     end
-    if nnz(S2{jj})
-        mask(logical(S2)) = 1;
-        bw = bwperim(S2);
+    if nnz(sigClustEmTask)
+        mask(logical(sigClustEmTask)) = 1;
+        bw = bwperim(sigClustEmTask);
     else
-        bw = zeros(size(S2));
+        bw = zeros(size(sigClustEmTask));
     end
     
     minV= min(min(S2));
@@ -133,8 +143,7 @@ for ii = 1:length(chName)
     colormap(inferno(100));
 
     im.AlphaData = mask;
-    idx2 = idx2+2;
-    idx3 = idx3+1;
+    %idx2 = idx2+2;
 
 end
 

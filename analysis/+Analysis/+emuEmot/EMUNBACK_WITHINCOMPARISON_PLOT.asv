@@ -73,7 +73,7 @@ end
 %this allows you to plot the emotion task vs identity task for a channel.
 plotForManuscript = 0;
 if plotForManuscript
-    chNumName = {'ch1817', 'ch1918'};
+    chNumName = {'ch2625'};
     clear chNumLocationName
     for jj = 1:length(chNumName)
         for ii = 1:length(channelNameFinal)
@@ -101,7 +101,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [3,4,5,6,53,54];
+    nS = [29,30];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -131,7 +131,7 @@ end
 % MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW22 = MWX;
+MW16 = MWX;
 %%%%
 
 %% for saving any variables
@@ -153,7 +153,7 @@ if saveSelectFile
     fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
     %CHANGE MW BELOW!!!
-    fileName = [folder_name, '\', 'MW22', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW16', '.mat'];    save(fileName);
 
     
 end

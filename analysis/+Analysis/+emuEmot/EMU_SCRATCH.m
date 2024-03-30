@@ -1,12 +1,35 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
-SS1 = emotionTaskLFP.byemotion.ch1716.image.specD{1}(:,:,11);
-SS2 = emotionTaskLFP.byidentity.ch1716.image.specD{1}(:,:,7);
+emotionTaskLFP = emotionTaskLFP_noNoiseRemoval;
+
+SS1 = emotionTaskLFP.byemotion.ch3433.image.specD{1};
+SS2 = emotionTaskLFP.byidentity.ch3433.image.specD{1};
+
+SSE=[]; SSI=[];
+for ii=1:3
+ss1 = dataLFP.byemotion.ch2524.image.specD{ii};
+ss2 = dataLFP.byidentity.ch2524.image.specD{ii};
+SSE = cat(3, SSE, ss1);
+SSI = cat(3, SSI, ss2);
+end
+SS1 = normalize(mean(SSE,3),2);
+SS2 = normalize(mean(SSI,3),2);
+figure
+subplot(2,1,1)
+imagesc(SS1); axis xy;
+subplot(2,1,2)
+
+imagesc(SS2); axis xy;
+
+
+SS1 = dataLFP.byemotion.ch2524.image.specD{1}(:,:,7);
+SS2 = dataLFP.byidentity.ch2524.image.specD{2}(:,:,7);
 
 figure
+subplot(2,1,1)
 imagesc(normalize(SS1,2)); axis xy;
-figure
+subplot(2,1,2)
 imagesc(normalize(SS2,2)); axis xy;
 
 

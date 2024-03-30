@@ -48,13 +48,13 @@ end
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
 TNoise = vertcat(TNoise, Tident);
 
-
-[TchannelCheckEm, itiDataReal.EmotionTask.trueIti] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask.trueIti, ...
-    'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
-[TchannelCheckId, itiDataReal.IdentityTask.trueIti] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.IdentityTask.trueIti, ...
-    'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'v1');
+% NO LONGER CURRENTLY USING BECAUSE ITI STRATEGY WAS RANDOM SELECTION
+% [TchannelCheckEm, itiDataReal.EmotionTask.trueIti] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.EmotionTask.trueIti, ...
+%     'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
+%         'versionNum', 'v1');
+% [TchannelCheckId, itiDataReal.IdentityTask.trueIti] = proc.signalEval.noiseTestEmuNBackITI(itiDataReal.IdentityTask.trueIti, ...
+%     'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
+%         'versionNum', 'v1');
 
 
 
@@ -88,5 +88,5 @@ channelNameFinal = channelName;
 % %    channelNameFinal(42:47) = [];
 % end
 % %%
-% next section Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
+% next section  Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
  

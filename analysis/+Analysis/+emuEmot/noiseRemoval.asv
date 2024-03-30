@@ -50,16 +50,13 @@ end
 
 
 %this is the same thing, but removes it from the other variant (so by
-%identity if by emotion and vice versa). Make a temp table and do rowsort
-%and it will sort it in order of the other flagged variants so that it
-%works like above.
-TremoveTemp = Tremove;
-TremoveTemp.flaggedVariant = [];
-TremoveTemp.flaggedTrials = [];
-TrempveTemp = sortrows(TremoveTemp);
-ch = TrempveTemp.flaggedChannel;
-variant = TrempveTemp.flaggedVariantOtherway;
-trial = TrempveTemp.flaggedTrialOtherway;
+%identity if by emotion and vice versa)
+ch = Tremove.flaggedChannel;
+variant = Tremove.flaggedVariantOtherway;
+trial = Tremove.flaggedTrialOtherway;
+TremoveTemp = sortrows(Tremove,'flaggedVariantOtherway');
+TremoveTemp2 = sortrows(TremoveTemp,'flaggedChannel');
+
 trialAdj = 1;
 for ii = 1:size(Tremove,1)
     if ii > 1

@@ -8,7 +8,7 @@
 switch fileVariation
     case 2 %add any one file formats here
         testfile = testfileEmId;
-    case {1,3,4}
+    case {1,3,4,6}
         if trialEm == true
             testfile = testfileEm;
         elseif trialEm == false
@@ -19,15 +19,18 @@ beh_timestamps = testfile.acquisition.get('events').timestamps.load;
 cellVar = [];
 
 cellVar = testfile.acquisition.get('events').data.load;
-if ~isempty(cellVar)
-    for ii = 1:size(cellVar,1)
-        if contains(cellVar(ii,:), 'TTL')
-            hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
-        else
-            hexStr(ii,:) = {'0x0000'};
+switch fileVariation
+    case {3,4,5}
+        if ~isempty(cellVar)
+            for ii = 1:size(cellVar,1)
+                if contains(cellVar(ii,:), 'TTL')
+                    hexStr(ii,:) = extractBetween(cellVar(ii,:),'(',')');
+                else
+                    hexStr(ii,:) = {'0x0000'};
+                end
+            end
+            hexNum = hex2dec(hexStr);
         end
-    end
-    hexNum = hex2dec(hexStr);  
 end
 
 % You can use these values to search the timestamp data from the ephys

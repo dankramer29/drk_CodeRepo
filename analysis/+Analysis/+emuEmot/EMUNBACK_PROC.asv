@@ -10,8 +10,6 @@
 
 %MW21 10 is identity, 12 is emo
 %MW22 Session 6 - 331 TTL - NBack IDEN Session 7 - 331 TTL - NBack EMO
-%MW24 the first ttl didn't make it into the nwb so the first image on is
-%actually the second image. the first is just skipped (emotion task only).
 
 % Structure: image 1 on, then off with fixation
 % cross on, then image 2 on and response about same/different at any time
@@ -122,7 +120,7 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
     %fileVariation = 1; This is two NWB files and two behavioral files, no
             %hex, with EvKey
             %This is MW_1 and MW_3,  but will need to double check both    
-    %fileVariation = 2; MW_5, MW_1, MW_2 this is one NWB files and two behavioral files with
+    %fileVariation = 2; MW_5, MW_1 this is one NWB files and two behavioral files with
             %no hex code and with EvKey. 
            
     %fileVariation = 6; don't ask, this is MW13. it's two behavioral, two
@@ -134,7 +132,7 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %no EvKey and good hex. This is after MW_19.
     %fileVariation = 5; This is one NWB and with bad hex numbers and with
             %an EvKey
-fileVariation = 2;
+fileVariation = 1;
 
 sessionName = 'MW_2';
 subjName = 'MW_2';
@@ -147,10 +145,10 @@ matNameEm = 'NBack_2021_3_23.17_32_58';
 
 switch fileVariation
     case {1, 3, 4, 6}
-        identityFilter = 'JM_MW24_Session_6_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW24_Session_7_filter.nwb';
+        identityFilter = 'JM_MW2_Session_7_filter.nwb'; %does NOT need to be placed in a folder
+        emotionFilter = 'JM_MW2_Session_8_filter.nwb';
     case  2
-        emotionidentityFilter = 'MW2_Session_7_filter.nwb'; %if they are one file
+        emotionidentityFilter = 'JM_MW1_Session_11_filter.nwb'; %if they are one file
 end
 %For the hex code shenaningans
 switch fileVariation
@@ -162,15 +160,13 @@ switch fileVariation
         %EvKeyCodes 629 = Image_Shown and 649 = Response_Made
         EvKeyEm = EvKey;
     case 2
-        load MW2_Session_7_EventKey.mat       
+        load JM_MW1_Session_11_EventKey.mat       
     case {4, 5, 6}
         EvKeyEm = [];
         EvKeyId = [];
 end
 %REPEATED HERE AND BELOW. CAN TURN IT ON HERE IF YOU ALREADY PICKED OUT THE
 %CHANNELS, OTHERWISE BELOW FOR WHEN YOU MAKE THE CHANNELS TABLE.
-%MW24
-%
 %MW2
 %MW5 
 %chInterestActual = [37:40,49:52,61:64,139:142,151:154];
@@ -376,12 +372,8 @@ end
 open TableChannel
 %dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
 %%
-%MW_2
-chInterestActual = [47:50, 85:88, 97:100, 149:152];
-%MW_23 bipolar
-%chInterestActual = [24:27, 33:36, 45:48, 145:149];
 %MW_1
-%chInterestActual=[17:20,31:34,45:48,127:130,141:144];
+chInterestActual=[17:20,31:34,45:48,127:130,141:144];
 
 %MW5 
 %chInterestActual = [37:40,49:52,61:64,139:142,151:154];
@@ -454,13 +446,7 @@ switch fileVariation
         for jj = 1:length(combinedEvKey)
             combinedEvKey{jj,2} = EvKey.GoodTTLs(jj);
         end
-        %THIS APPEARS TO MESS IT UP AND BE REDUNDANT BECAUSE THERE ARE TOO
-        %MANY BEH TIME STAMPS AND WE ONLY WANT EMOTION OR IDENTITY (BROKEN
-        %UP BELOW) HOWEVER I HAD THIS FOR MW5 SO WILL LEAVE IT FOR NOW, BUT
-        %MAY NOT WORK FOR MW5 EITHER?
-        if strcmp(sessionName, 'MW_5') %if MW_2 it doesn't works so don't do it.
         beh_timestampsEm = beh_timestamps;
-        end            
     case {4, 5, 6}
         beh_timestampsEm = beh_timestamps;
 end
@@ -711,8 +697,10 @@ if ~isempty(TTLTimesEm) %MW1 doesn't have it
     ImageTimesDiffCheckEm = (ImageTimesEm-TTLTimesEm)*24*60*60; %in seconds to ensure that the TTLs and Imagetimes are as expected, close
 end
 %this is an attempt to make sure the times for the image onsets are on
-%point, but a lot of caveats per case. MW24 has something weird with the ttls so you just ignore the first behavioral event marker for the first image and start at the second.
-%This part will error but you can see that after the first image the times match up. And then it's kluged together from there. 
+%point, but in reality there is no way to know because they are set at
+%around 4 seconds between them so they will always be lined up. You could
+%do like audio on as the first ttl if it's always audio on and then the
+%time to the first image I guess. 
 for ii= 1:length(ImageTimesEm)-1
     PTB_ImageTimesDiffEm(ii,1) = (ImageTimesEm(ii+1)-ImageTimesEm(ii))*24*60*60;
 end
@@ -737,9 +725,7 @@ if nnz(find(abs(PTB_NWBImageDiffEm(:,1))>0.1))>0
     warning('Image time diff between TTLs and image on is more than 100ms and likely the timing is off')
 end
 
-if strcmp(sessionName, 'MW_24')%special case MW_24 where the first image on is not in the ttls for em task only
-    ImageTimesAdjEm = ttl_behImage;
-elseif    ~isempty(TTLTimesEm) %MW1 doesn't have it
+if ~isempty(TTLTimesEm) %MW1 doesn't have it
     ImageTimesDiff = ImageTimesDiffCheckEm*1e6; %convert to microseconds
     ImageTimesAdjEm = ttl_behImage+ImageTimesDiff; %moves the time into neural time scale
 else
@@ -758,11 +744,7 @@ end
 
 %both gets the response adjusted and finds the "iti" which is the time
 %between the response and the next image being shown.
-if strcmp(sessionName, 'MW_24')
-    ResponseTimesDiffEmotion = (ResponseTimesNanRemoved-TTLTimesEm)*24*60*60*1e6; %this takes the difference between the response and the TTL which is image on (in the hex code, you dont' need this but it still works)
-    itiTimeEmotion = (ImageTimesEm(3:end)-ResponseTimesNanRemoved(2:end-1))*24*60*60; %take the image time between the response and the next image.
-    ResponseTimesAdjEm = ttl_behImage+ResponseTimesDiffEmotion(2:end);
-elseif ~isempty(TTLTimesEm) %MW1 doesn't have it
+if ~isempty(TTLTimesEm) %MW1 doesn't have it
     ResponseTimesDiffEmotion = (ResponseTimesNanRemoved-TTLTimesEm)*24*60*60*1e6; %this takes the difference between the response and the TTL which is image on (in the hex code, you dont' need this but it still works)
     itiTimeEmotion = (ImageTimesEm(3:end)-ResponseTimesNanRemoved(2:end-1))*24*60*60; %take the image time between the response and the next image.
     ResponseTimesAdjEm = ttl_behImage+ResponseTimesDiffEmotion; %moves the time into neural time scale
@@ -1042,7 +1024,7 @@ switch fileVariation
         PTB_NWBImageDiffId = PTB_ImageTimesDiffId-NWBtimeStampDiffId;
         PTB_NWBImageDiffId(:,2) = PTB_ImageTimesDiffId;
         PTB_NWBImageDiffId(:,3) = NWBtimeStampDiffId;
-        open PTB_NWBImageDiffId;
+        open PTB_NWBImageDiffEm;
     case 6
         idx = 1;
         for ii = 1:length(imageOn)-1

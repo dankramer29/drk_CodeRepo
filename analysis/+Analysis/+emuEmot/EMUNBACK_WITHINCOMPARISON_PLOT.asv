@@ -73,7 +73,7 @@ end
 %this allows you to plot the emotion task vs identity task for a channel.
 plotForManuscript = 0;
 if plotForManuscript
-    chNumName = {'ch2625'};
+    chNumName = {'ch10099', 'ch9998'};
     clear chNumLocationName
     for jj = 1:length(chNumName)
         for ii = 1:length(channelNameFinal)
@@ -96,12 +96,12 @@ if savePlot
     hh =  findobj('type','figure'); 
     nh = length(hh);
     plt.save_plots([1:nh], 'sessionName', sessionName, 'subjName', subjName, ...
-        'versionNum', 'vRandIti_p05_NODOUBLEMEAN');
+        'versionNum', 'v2RandIti_p05_NODOUBLEMEAN');
 end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [29,30];
+    nS = [15:22];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -121,17 +121,9 @@ end
 
 %% for saving. probably easier to do by hand
 % So save these variables with these names
-% MW13_itiDataFiltEmotion
-% MW13_itiDataFiltIdentity
-% MW13_emotionTaskLFP
-% MW13_identityTaskLFP
-% MW13_itiDataReal
-% MW13_nbackCompareImageOn
-% MW13_nbackCompareResponse
-% MW13_AllPatientsSigClusterSummStats
 
 %%%%
-MW16 = MWX;
+MW_2 = MWX;
 %%%%
 
 %% for saving any variables
@@ -153,7 +145,7 @@ if saveSelectFile
     fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
     fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
     %CHANGE MW BELOW!!!
-    fileName = [folder_name, '\', 'MW16', '.mat'];    save(fileName);
+    fileName = [folder_name, '\', 'MW24', '.mat'];    save(fileName);
 
     
 end

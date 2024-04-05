@@ -1,11 +1,7 @@
 %% EMUNBACK COMPARE ACROSS PATIENTS
 C=linspecer(100); %sets up plotting colors
 
-
-% COMBINE THE TABLES (doing this in excel, much easier)
-% TtotalAllTrials = [statsAllTrialsId];
-% TtotalSigClust = [AllPatientsSigClusterSummStats]; %add the tables together.
-
+%To pull in:
 %Cut and paste it into the file MWallForLoading, then import as a table to
 %have it all as a table.
 
@@ -100,6 +96,12 @@ L.LineWidth = 4;
 %     centroid by time
 %     cluster centroid by frequency
 %     centroid
+clmns = MWallForLoading.Properties.VariableNames;
+clmnNum = 16; %pick the column number here.
+nameTable = {'Cluster Centroid By Time '};
+varTested = {'Time (S)'};
+testDone = {'Kruskall Wallis'};
+
 C=linspecer(100); %sets up plotting colors
 
 
@@ -112,23 +114,35 @@ RAhip= [];
 LAhip= [];
 RPhip= [];
 LPhip= [];
-nameTable = {'Cluster Centroid By Frequency'};
-varTested = {'Frequency (Hz)'};
-testDone = {'Kruskall Wallis'};
+
 %pull out the areas you want
 
 idxX = 1; idxY = 1; idxZ = 1;
 %
 %delete the category and then tab through to the one you want below
-Ramy = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'R Amygdala'" ); 
-Lamy = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'L Amygdala'");
+Ramy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" ); 
+Lamy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'");
 xx = vertcat(Ramy, Lamy);
-RAhip = MWallForLoading.VarName17(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
-LAhip =  MWallForLoading.VarName17(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
+RAhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
+LAhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
 yy = vertcat(RAhip, LAhip);
-RPhip = MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
-LPhip =  MWallForLoading.VarName17(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
+RPhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
+LPhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
 zz = vertcat(RPhip, LPhip);
+
+for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
+for ii = 1:length(yy); nameYY{ii,1} = 'Anterior Hippocampus'; end
+for ii = 1:length(zz); nameZZ{ii,1} = 'Posterior Hippocampus'; end
+colorTemp = [C(3,:); C(28,:); C(80,:)];
+
+
+for ii = 1:length(Ramy); nameRamy{ii,1} = 'Right Amygdala'; end
+for ii = 1:length(RAhip); nameRAhip{ii,1} = 'Right Anterior Hippocampus'; end
+for ii = 1:length(RPhip); nameRPhip{ii,1} = 'Right Posterior Hippocampus'; end
+for ii = 1:length(Lamy); nameLamy{ii,1} = 'Left Amygdala'; end
+for ii = 1:length(LAhip); nameLAhip{ii,1} = 'Left Anterior Hippocampus'; end
+for ii = 1:length(LPhip); nameLPhip{ii,1} = 'Left Posterior Hippocampus'; end
+colorTempLR = [C(6,:); C(32,:); C(84,:); C(13,:), C(38, :), C(93,:)];
 
 
 % for ii = 1:height(MWallForLoading)
@@ -143,14 +157,7 @@ zz = vertcat(RPhip, LPhip);
 %     end
 % end
 
-TstTemp = [];
 
-
-%HAND ADD THE ONES YOU WANT, IT'S MUCH EASIER
-for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
-for ii = 1:length(yy); nameYY{ii,1} = 'Anterior Hippocampus'; end
-for ii = 1:length(zz); nameZZ{ii,1} = 'Posterior Hippocampus'; end
-colorTemp = [C(3,:); C(28,:); C(80,:)];
 
 %no inputs needed from here below (unless more variables needed, add
 %accordingly)
@@ -191,9 +198,70 @@ ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
 ax.FontSize = 13;
 ax.FontWeight = 'bold';
 ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
+open tbleTemp
+
+xxx=[];
+xxxN=[];
+
+%no inputs needed from here below (unless more variables needed, add
+%accordingly)
+xxx= vertcat(Ramy,Lamy,RAhip, LAhip, RPhip, LPhip);
+xxxN = vertcat(nameRamy,nameLamy, nameRAhip, nameLAhip, nameRPhip, nameLPhip);
+[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+multC = multcompare(stats);
+meanXXR = nanmean(Ramy);
+meanYYR = nanmean(RAhip);
+meanZZR = nanmean(RPhip);
+medianXXR = nanmedian(RAhip);
+medianYYR = nanmedian(RAhip);
+medianZZR = nanmedian(RPhip);
+stdXXR = nanstd(Ramy);
+stdYYR = nanstd(RAhip);
+stdZZR = nanstd(RPhip);
+meanXXL = nanmean(Lamy);
+meanYYL = nanmean(LAhip);
+meanZZL = nanmean(LPhip);
+medianXXL = nanmedian(LAhip);
+medianYYL = nanmedian(LAhip);
+medianZZL = nanmedian(LPhip);
+stdXXL = nanstd(Lamy);
+stdYYL = nanstd(LAhip);
+stdZZl = nanstd(LPhip);
+TstTempKWLR = table(nameTable, meanXXR, stdXXR, meanYYR, stdYYR, meanZZR, stdZZR, meanXXL, stdXXL, meanYYL, stdYYL, meanZZL, stdZZL, pvalue,  testDone);
+tbleTempLR = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+figure
+title(nameTable);
+wdth = 1;
+x1 = ones(1,length(xx));
+x2 = 2*wdth*ones(1,length(yy));
+x3 = 3*wdth*ones(1,length(zz));
+x4 = ones(1,length(xx));
+x5 = 2*wdth*ones(1,length(yy));
+x6 = 3*wdth*ones(1,length(zz));
+swarmchart(x1,Ramy,5, colorTemp(1,:), 'filled');
+hold on
+swarmchart(x2,RAhip,5, colorTemp(2,:), 'filled');
+swarmchart(x3,RPhip,5, colorTemp(3,:), 'filled');
+swarmchart(x4,Lamy,5, colorTemp(4,:), 'filled');
+swarmchart(x5,LAhip,5, colorTemp(5,:), 'filled');
+swarmchart(x6,LPhip,5, colorTemp(6,:), 'filled');
+p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color',C(5,:));
+p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',C(30,:));
+p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:));
+%legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
+ax=gca;
+ax.XTick = [1,2,3];
+% ax.YLim = [0:1.5];
+% ax.YTick = [0:0.2:1.50];
+ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
+ax.FontSize = 13;
+ax.FontWeight = 'bold';
+ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
+open tbleTemp
 
 
- %% a repeat for frequency based stuff to make it easier 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% a repeat for frequency based stuff to make it easier 
 TstTemp = [];
 nameTable = {'Cluster Centroid By Time'};
 testDone = {'Kruskall Wallis'};

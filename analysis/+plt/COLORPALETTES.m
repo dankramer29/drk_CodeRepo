@@ -1,4 +1,4 @@
-%MYColorWheels
+%ColorPalettes
 %this will take some aesthetically pleasing color wheels for use in plots.
 
 %%

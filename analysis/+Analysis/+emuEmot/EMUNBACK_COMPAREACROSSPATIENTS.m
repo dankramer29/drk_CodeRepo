@@ -169,6 +169,7 @@ for ii = 1:length(LPhip); nameLPhip{ii,1} = 'Left Posterior Hippocampus'; end
 %accordingly)
 xxx= vertcat(xx,yy,zz);
 xxxN = vertcat(nameXX,nameYY, nameZZ);
+figure
 [pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
 multC = multcompare(stats);
 meanXX = nanmean(xx);
@@ -188,7 +189,7 @@ wdth = 1;
 x1 = ones(1,length(xx));
 x2 = 2*wdth*ones(1,length(yy));
 x3 = 3*wdth*ones(1,length(zz));
-S1 = swarmchart(x1,xx,5, colorTemp(1,:), 'filled');
+S1 = swarmchart(x1,xx,  5,colorTemp(1,:), 'filled');
 hold on
 S2 = swarmchart(x2,yy,5, colorTemp(2,:), 'filled');
 S3 = swarmchart(x3,zz,5, colorTemp(3,:), 'filled');

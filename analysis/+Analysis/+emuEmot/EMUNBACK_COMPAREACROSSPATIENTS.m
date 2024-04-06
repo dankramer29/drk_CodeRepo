@@ -96,14 +96,21 @@ L.LineWidth = 4;
 %     centroid by time
 %     cluster centroid by frequency
 %     centroid
+
+colorTempTest = {'#fee327', '#fdca54', '#f6a570', '#f1969b', '#f08ab1', '#c78dbd', '#927db6', '#5da0d7', '#00b3e1', '#50bcbf', '#65bda5', '#87bf54' };
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = [C(12,:); C(9,:); C(7,:)];
+colorTempLR = [C(12,:); C(11,:); C(9,:); C(8,:); C(7, :); C(6,:)];
+
+
 clmns = MWallForLoading.Properties.VariableNames;
 clmnNum = 16; %pick the column number here.
 nameTable = {'Cluster Centroid By Time '};
 varTested = {'Time (S)'};
 testDone = {'Kruskall Wallis'};
-
-C=linspecer(100); %sets up plotting colors
-
 
 xx = []; %load with stats of whatever category (say Amygdala centroid time)
 yy = []; %load with stats of whatever is the second category (say Hippo)
@@ -133,7 +140,6 @@ zz = vertcat(RPhip, LPhip);
 for ii = 1:length(xx); nameXX{ii,1} = 'Amygdala'; end
 for ii = 1:length(yy); nameYY{ii,1} = 'Anterior Hippocampus'; end
 for ii = 1:length(zz); nameZZ{ii,1} = 'Posterior Hippocampus'; end
-colorTemp = [C(3,:); C(28,:); C(80,:)];
 
 
 for ii = 1:length(Ramy); nameRamy{ii,1} = 'Right Amygdala'; end
@@ -142,7 +148,7 @@ for ii = 1:length(RPhip); nameRPhip{ii,1} = 'Right Posterior Hippocampus'; end
 for ii = 1:length(Lamy); nameLamy{ii,1} = 'Left Amygdala'; end
 for ii = 1:length(LAhip); nameLAhip{ii,1} = 'Left Anterior Hippocampus'; end
 for ii = 1:length(LPhip); nameLPhip{ii,1} = 'Left Posterior Hippocampus'; end
-colorTempLR = [C(6,:); C(32,:); C(84,:); C(13,:), C(38, :), C(93,:)];
+
 
 
 % for ii = 1:height(MWallForLoading)
@@ -182,13 +188,13 @@ wdth = 1;
 x1 = ones(1,length(xx));
 x2 = 2*wdth*ones(1,length(yy));
 x3 = 3*wdth*ones(1,length(zz));
-swarmchart(x1,xx,5, colorTemp(1,:), 'filled');
+S1 = swarmchart(x1,xx,5, colorTemp(1,:), 'filled');
 hold on
-swarmchart(x2,yy,5, colorTemp(2,:), 'filled');
-swarmchart(x3,zz,5, colorTemp(3,:), 'filled');
-p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color',C(5,:));
-p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',C(30,:));
-p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:));
+S2 = swarmchart(x2,yy,5, colorTemp(2,:), 'filled');
+S3 = swarmchart(x3,zz,5, colorTemp(3,:), 'filled');
+p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color', colorTemp(1,:));
+p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',colorTemp(2,:));
+p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',colorTemp(3,:));
 %legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
 ax=gca;
 ax.XTick = [1,2,3];
@@ -207,57 +213,66 @@ xxxN=[];
 %accordingly)
 xxx= vertcat(Ramy,Lamy,RAhip, LAhip, RPhip, LPhip);
 xxxN = vertcat(nameRamy,nameLamy, nameRAhip, nameLAhip, nameRPhip, nameLPhip);
+figure
 [pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
 multC = multcompare(stats);
 meanXXR = nanmean(Ramy);
 meanYYR = nanmean(RAhip);
 meanZZR = nanmean(RPhip);
-medianXXR = nanmedian(RAhip);
-medianYYR = nanmedian(RAhip);
-medianZZR = nanmedian(RPhip);
-stdXXR = nanstd(Ramy);
-stdYYR = nanstd(RAhip);
-stdZZR = nanstd(RPhip);
 meanXXL = nanmean(Lamy);
 meanYYL = nanmean(LAhip);
 meanZZL = nanmean(LPhip);
+medianXXR = nanmedian(RAhip);
+medianYYR = nanmedian(RAhip);
+medianZZR = nanmedian(RPhip);
 medianXXL = nanmedian(LAhip);
 medianYYL = nanmedian(LAhip);
 medianZZL = nanmedian(LPhip);
+stdXXR = nanstd(Ramy);
+stdYYR = nanstd(RAhip);
+stdZZR = nanstd(RPhip);
 stdXXL = nanstd(Lamy);
 stdYYL = nanstd(LAhip);
-stdZZl = nanstd(LPhip);
-TstTempKWLR = table(nameTable, meanXXR, stdXXR, meanYYR, stdYYR, meanZZR, stdZZR, meanXXL, stdXXL, meanYYL, stdYYL, meanZZL, stdZZL, pvalue,  testDone);
+stdZZL = nanstd(LPhip);
+TstTempKWLR = table(nameTable, meanXXR, stdXXR, meanXXL, stdXXL, meanYYR, stdYYR,  meanYYL, stdYYL, meanZZR, stdZZR, meanZZL, stdZZL, pvalue,  testDone);
 tbleTempLR = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
 figure
 title(nameTable);
 wdth = 1;
-x1 = ones(1,length(xx));
-x2 = 2*wdth*ones(1,length(yy));
-x3 = 3*wdth*ones(1,length(zz));
-x4 = ones(1,length(xx));
-x5 = 2*wdth*ones(1,length(yy));
-x6 = 3*wdth*ones(1,length(zz));
-swarmchart(x1,Ramy,5, colorTemp(1,:), 'filled');
+x1 = ones(1,length(Ramy));
+x2 = 2*wdth*ones(1,length(Lamy));
+x3 = 3*wdth*ones(1,length(RAhip));
+x4 = 4*wdth*ones(1,length(LAhip));
+x5 = 5*wdth*ones(1,length(RPhip));
+x6 = 6*wdth*ones(1,length(LPhip));
+swarmchart(x1,Ramy,5, colorTempLR(1,:), 'filled');
 hold on
-swarmchart(x2,RAhip,5, colorTemp(2,:), 'filled');
-swarmchart(x3,RPhip,5, colorTemp(3,:), 'filled');
-swarmchart(x4,Lamy,5, colorTemp(4,:), 'filled');
-swarmchart(x5,LAhip,5, colorTemp(5,:), 'filled');
-swarmchart(x6,LPhip,5, colorTemp(6,:), 'filled');
-p1=plot([0.75,0.75+(wdth/2)],[meanXX,meanXX],'LineWidth',4, 'Color',C(5,:));
-p2=plot([0.75+1,0.75+1+(wdth/2)],[meanYY,meanYY],'LineWidth',4, 'Color',C(30,:));
-p3=plot([0.75+2,0.75+2+(wdth/2)],[meanZZ,meanZZ],'LineWidth',4, 'Color',C(82,:));
+swarmchart(x2,Lamy, 5, colorTempLR(2,:), 'filled');
+swarmchart(x3,RAhip,5, colorTempLR(3,:), 'filled');
+swarmchart(x4,LAhip,5, colorTempLR(4,:), 'filled');
+swarmchart(x5,RPhip,5, colorTempLR(5,:), 'filled');
+swarmchart(x6,LPhip,5, colorTempLR(6,:), 'filled');
+idx = 1;
+p1=plot([0.75,0.75+(wdth/2)],[meanXXR,meanXXR],'LineWidth',4, 'Color',colorTempLR(1,:));
+p2=plot([0.75+idx,0.75+idx+(wdth/2)],[meanXXL,meanXXL],'LineWidth',4, 'Color',colorTempLR(2,:));
+idx=idx+1;
+p3=plot([0.75+idx,0.75+idx+(wdth/2)],[meanYYR,meanYYR],'LineWidth',4, 'Color',colorTempLR(3,:));
+idx=idx+1;
+p4=plot([0.75+idx,0.75+idx+(wdth/2)],[meanYYL,meanYYL],'LineWidth',4, 'Color',colorTempLR(4,:));
+idx=idx+1;
+p5=plot([0.75+idx,0.75+idx+(wdth/2)],[meanZZR,meanZZR],'LineWidth',4, 'Color',colorTempLR(5,:));
+idx=idx+1;
+p6=plot([0.75+idx,0.75+idx+(wdth/2)],[meanZZL,meanZZL],'LineWidth',4, 'Color',colorTempLR(6,:));
 %legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
 ax=gca;
-ax.XTick = [1,2,3];
+ax.XTick = [1,2,3,4,5,6];
 % ax.YLim = [0:1.5];
 % ax.YTick = [0:0.2:1.50];
-ax.XTickLabel = {nameXX{1}, nameYY{1}, nameZZ{1}};
+ax.XTickLabel = {nameRamy{1}, nameLamy{1}, nameRAhip{1}, nameLAhip{1}, nameRPhip{1}, nameLPhip{1}};
 ax.FontSize = 13;
 ax.FontWeight = 'bold';
 ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
-open tbleTemp
+open tbleTempLR
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

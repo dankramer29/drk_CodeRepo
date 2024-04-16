@@ -74,7 +74,7 @@ end
 plotForManuscript = 0;
 chNumLocationName = [];
 if plotForManuscript
-    chNumName = {'ch5655', 'ch6968', 'ch7069'};
+    chNumName = {'ch9695'};
     %clear chNumLocationName
     for jj = 1:length(chNumName)
         for ii = 1:length(channelNameFinal)
@@ -102,7 +102,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [7,8,11,12,13,14,53,54,55];
+    nS = [25,26,53];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -126,7 +126,7 @@ end
 %%%%
 MWX.channelName =  channelName; %this is so you can paste in the ID/EM Kept
 MWX.channelLocation = chLocationName';
-MW_9 = MWX;
+MW_19 = MWX;
 %%%%
 
 %% for saving any variables

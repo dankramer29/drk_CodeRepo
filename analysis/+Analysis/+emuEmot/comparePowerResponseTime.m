@@ -1,10 +1,13 @@
-function [summaryStatsSigTrials] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
+function [summaryStatsSigTrials, summaryStatsSigIndividualEmId, TxChannel] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
 %Primary function to pull out cluster descriptors and compare. creates a
 %table of information on clusters
 %   Detailed explanation goes here
 %   Currently recording the cluster for AllID/AllEM if it is a cluster between timeMinMax and FreqMinMax and then going through
 %   each trial to pull anything over a sdThreshold that is 100 clustered
 %   points or more.
+
+%Note in TxChannel, all images means just in the region of interest and in
+%summaryStats that's anywhere there is a significant cluster.
 
 %   Outputs: 
 %   PatientName - eg MWx
@@ -78,6 +81,17 @@ ff = identityTaskLFP.freq;
 [~, tMinBand] = min(abs(bTT-timeMinMax(1)));
 [~, tMaxBand] = min(abs(bTT-timeMinMax(2)));
 
+AllEmSigRegionOfInterest = zeros(length(chNum),1);
+AllIdSigRegionOfInterest = zeros(length(chNum),1);
+emotion1 = zeros(length(chNum),1);
+emotion2 = zeros(length(chNum),1);
+emotion3 = zeros(length(chNum),1);
+id1 = zeros(length(chNum),1);
+id2 = zeros(length(chNum),1);
+id3 = zeros(length(chNum),1);
+
+TxChannel = table(chNum, chName, AllEmSigRegionOfInterest, AllIdSigRegionOfInterest, emotion1, emotion2, emotion3, id1, id2, id3);
+ 
 %%
 %look at high gamma for areas that were positive
 %NOTE: THIS IS GOING TO KEEP IT TASK RELEVANT RIGHT NOW MEANING ONLY
@@ -86,27 +100,27 @@ T2 = [];
 T3 = [];
 for cc = 1:length(chNum)
     %identity task
-%     T1 = [];
-%     ClusterCenter = [];
-%     TstatCluster = [];
-%     ImageType = [];
-%     MaxValue =[];
-%     pkIndex = [];
-%     TimeofMax=[];
-%     CorrectResponseId = [];
-%     CorrectResponseEm = [];
-%     ResponseTimeId = [];
-%     ResponseTimeEm = [];
-    idx2 = 1;   
-    for nn = 1:3  %runs through each id      
-        T2 = [];        
+    %     T1 = [];
+    %     ClusterCenter = [];
+    %     TstatCluster = [];
+    %     ImageType = [];
+    %     MaxValue =[];
+    %     pkIndex = [];
+    %     TimeofMax=[];
+    %     CorrectResponseId = [];
+    %     CorrectResponseEm = [];
+    %     ResponseTimeId = [];
+    %     ResponseTimeEm = [];
+    idx2 = 1;   %this is so the nn can move through the fields but the idx can stay at the emotion or identity you are interested in (emotion2 is nn6 for example)
+    for nn = 1:3  %runs through each id
+        T2 = []; %for multiple clusters
         pkIndex = [];
         bData = [];
-       
+
         PatientName =[];
-        ChannelNumber = [];        
+        ChannelNumber = [];
         TrialType = [];
-        TrialNumber = [];        
+        TrialNumber = [];
         ClusterCenter = [];
         ClusterNumber = [];
         TstatCluster = [];
@@ -123,49 +137,31 @@ for cc = 1:length(chNum)
         ByTrialArea =[];
         ByTrialBoundingBoxTimeRange = [];
         ByTrialBoundingBoxFreqRange =[];
-        AllImagesSignificant=[];
+        AllImagesSignificantAnywhere=[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
-        if nnz(nnz(nback.(chNum{cc}).(conditionName{4}).identityTasksigclust))>0 || nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{3})))>0
+        if nnz(nnz(nback.(chNum{cc}).(conditionName{4}).identityTasksigclust))>0 
             idxCl = 1; % this is to set up if there are multiple clusters within the range.
+            AllImages = [];
             if nnz(nnz(nback.(chNum{cc}).(conditionName{4}).identityTasksigclust))>0
-                AllImages = 1;
+                AllImages = 1; 
                 for ii = 1:size(nback.(chNum{cc}).(conditionName{4}).identityTaskcentroid,1)
                     %check the centroid is in the high gamma range in the
                     %region after image presentation
                     cent = nback.(chNum{cc}).(conditionName{4}).identityTaskcentroid(ii,:);
                     centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
-                    normS1 = normalize(nback.(chNum{cc}).(conditionName{4}).identityTaskMean,2);
-                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
+                    normS1 = normalize(nback.(chNum{cc}).(conditionName{4}).identityTaskMean,2); %normalize to make sure it's a rise in gamma
+                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{4}).identityTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
                         bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                         sData{idxCl}  = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
                         sData{idxCl}  = normalize(sData{idxCl} ,2);
                         allVsingle = 0;
                         idxSigClusterAllCriteria(idxCl) = ii;
+                        TxChannel.AllIdSigRegionOfInterest(cc) = 1; %record if a cluster in this region is positive for total counts.
                         idxCl = idxCl + 1;
                     end
-                end
-            elseif nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{3})))>0
-                AllImages = 0;
-                for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).(resultName{4}),1)
-                    %check the centroid is in the high gamma range in the
-                    %region after image presentation
-                    cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{4})(ii,:);
-                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
-                    normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2);
-                    %check that it's between the frequencies desired and is a
-                    %positive deflection, then go trial by trial to get trial
-                    %specific statistics.
-                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
-                        bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
-                        sData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
-                        sData{idxCl} = normalize(sData{idxCl},2);
-                        allVsingle = 1;
-                        idxSigClusterSingleCriteria(idxCl) = ii;
-                        idxCl = idxCl + 1;
-                    end
-                end
+                end          
             end
             %% this is for plotting the bandpassed against the spec. right now they aren't lining up that well, but i moved on to cluster stats instead
             %                     meanbData = mean(bData,1);
@@ -176,13 +172,13 @@ for cc = 1:length(chNum)
             %                     hold on; plot(centA(1), centA(2), '*b');
             %%
             if ~isempty(bData)
-                for rr = 1:length(bData)
+                for rr = 1:length(bData) %run through each cluster if more than one.
                     T1 = [];
-                    for jj = 1:size(sData{rr},3)
+                    for jj = 1:size(sData{rr},3)%run through each trial.
                         %%check if there is a cluster on each trial and record descriptive info on it
                         sDataTemp = sData{rr}(:,:,jj); %take the normalized data
                         mask = sDataTemp>sdThreshold;
-                        %this if for checking that it is doing what it is 
+                        %this if for checking that it is doing what it is
                         %supposed to.
                         % maskT = sDataTemp>1.5;
                         % subplot(3,1,1)
@@ -191,6 +187,173 @@ for cc = 1:length(chNum)
                         % imagesc(mask); axis xy;
                         % subplot(3,1,3)
                         % imagesc(maskT); axis xy;
+                        clustP=bwconncomp(mask,8);
+                        clRPos=regionprops(clustP, 'all'); %get the region properties
+                        cl_aRPos=[clRPos.Area];
+                        cl_keepPos=find(cl_aRPos>100); %only keep reasonably large ones
+                        trTrue = 0;
+                        centKeep = []; arKeep = []; BBTemp = []; BB = [];
+                        for kk=1:length(cl_keepPos) %may want to check that there aren't multiple clusters in the region or how to handle that.
+                            centr = clRPos(cl_keepPos(kk)).Centroid;
+                            centrR(1) = tt(round(centr(1))); centrR(2) = ff(round(centr(2)));
+                            if centrR(2)>=freqMinMax(1) && centrR(2)<=freqMinMax(2) && centrR(1) >= timeMinMax(1) && centrR(1) <= timeMinMax(2)
+                                trTrue = 1;
+                                centKeep(kk,:) = centrR;
+                                arKeep(kk,:) = sum(sDataTemp(clustP.PixelIdxList{cl_keepPos(kk)})); %add up the total cluster of stds to give a "cluster number"
+                                BBTemp(kk,:) = clRPos(cl_keepPos(kk)).BoundingBox;
+                                %convert the bounding box to actual values
+                                %of time and frequency
+                                BB(kk,1) =  tt(round(BBTemp(kk,1)));
+                                BB(kk,3) = BB(kk,1) + ((tt(2)-tt(1))*BBTemp(kk,3));
+                                BB(kk,2) = ff(round(BBTemp(kk,2)));
+                                BB(kk,4) = BB(kk,2) + ((ff(2)-ff(1))*BBTemp(kk,4));
+                            end
+                        end
+                        if size(arKeep,1) > 1 && trTrue == 1 %i think i am saying of the sum of the stds is positive
+                            [mx I] = max(arKeep);
+                            ByTrialCentroid(jj,:) = centKeep(I,:);
+                            ByTrialArea(jj,:) = arKeep(I,:);
+                            ByTrialBoundingBoxTimeRange(jj,:) = [BB(I,1) BB(I,3)];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [BB(I,2) BB(I,4)];
+                        elseif trTrue == 1
+                            ByTrialCentroid(jj,:) = centKeep(1,:);
+                            ByTrialArea(jj,:) = arKeep(1,:);
+                            ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
+                        elseif trTrue == 0
+                            ByTrialCentroid(jj,:) = [NaN NaN];
+                            ByTrialArea(jj,:) = [NaN];
+                            ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
+                        end
+                        RecordingLocation{jj,1} = chName{cc};
+                        ChannelNumber{jj,1} = chNum{cc};
+                        PatientName{jj,1} =  patientName;
+                        TrialType{jj,1} = 'identityTask';
+                        TrialNumber{jj,1} = jj;
+                        AllImagesSignificantAnywhere(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
+                        ClusterNumber(jj,1) = rr;
+                        TimeMinMax(jj,:) = timeMinMax;
+                        FreqMinMax(jj,:) = freqMinMax;
+                        ClusterCenter(jj,:) = centA;
+                        if allVsingle == 0
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{4}).identityTasktstatSum(idxSigClusterAllCriteria(rr),1); %if it's gamma, grab that tstat for the All (adjusted for which cluster to grab)
+                        elseif allVsingle == 1
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{5})(idxSigClusterSingleCriteria(rr),1); %if it's gamma, grab that tstat
+                        end
+                        ImageType{jj,1} = (conditionName{nn}); %should this be idx2? STOPPED LOOKING HERE.
+                        [MaxValue(jj,1), pkIndex] = max(bData{rr}(jj,tMinBand:tMaxBand).^2);
+                        TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
+                        if length(identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}) < jj
+                            CorrectResponse(jj,1) = 0;
+                            ResponseTime(jj,1) = mean(identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2});
+
+                        else
+                            CorrectResponse(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}(jj);
+                            ResponseTime(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                        end
+
+                    end
+                    %ONE OPTION IS FIX THE SECOND ONE TO MATCH (EMOTION)
+                    %AND CHECK THAT CHANNEL 19 SHOWS TWO OF THEM. IF SO, I
+                    %THINK IT SHOULD BE GOOD??
+                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificantAnywhere, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
+                        TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
+                        CorrectResponse, ResponseTime);
+
+                    T2 = [T2; T1];%this will combine if there is more than 1 cluster
+                end
+            end
+        end
+        %add each trial necessary        
+        idx2 = idx2+1;
+        T3 = [T3; T2];
+    end
+   
+end
+
+%% emotion task
+for cc = 1:length(chNum)
+    %identity task
+    %    T1 = [];
+    %     ClusterCenter = [];
+    %     TstatCluster = [];
+    %     ImageType = [];
+    %     MaxValue =[];
+    %     pkIndex = [];
+    %     TimeofMax=[];
+    %     CorrectResponseId = [];
+    %     CorrectResponseEm = [];
+    %     ResponseTimeId = [];
+    %     ResponseTimeEm = [];
+    idx2 = 1;   %idx2 is because nn goes 5-7 but you may want the 2nd emotion etc.
+    for nn = 5:7  %runs through each id
+        T2 = [];
+        pkIndex = [];
+        bData = [];
+        PatientName =[];
+        ChannelNumber = [];
+        TrialType = [];
+        TrialNumber = [];
+        ClusterCenter = [];
+        TstatCluster = [];
+        ClusterNumber = [];
+        ImageType = [];
+        MaxValue = [];
+        AllImages = [];
+        AllImagesSignificantAnywhere = [];
+        TimeofMax = [];
+        TimeMinMax = [];
+        FreqMinMax = [];
+        SecondTrial = [];
+        CorrectResponse = [];
+        ResponseTime = [];
+        RecordingLocation = [];
+        ByTrialCentroid = [];
+        ByTrialArea =[];
+        ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
+
+        %by identity that is statistically significant
+        %first check if either a single ID is significant or all IDs are
+        %significant, then run through that ID or all the IDs.
+        if nnz(nnz(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust))>0 
+            idxCl = 1; % this is to set up if there are multiple clusters within the range. 
+            if nnz(nnz(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust))>0 
+                AllImages = 1; 
+                for ii = 1:size(nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid,1)
+                    %check the centroid is in the high gamma range in the
+                    %region after image presentation
+                    cent = nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid(ii,:);
+                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+                    normS1 = normalize(nback.(chNum{cc}).(conditionName{8}).emotionTaskMean,2);
+                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
+                        bData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
+                        sData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
+                        sData{idxCl} = normalize(sData{idxCl},2);
+                        allVsingle = 0;
+                        TxChannel.AllEmSigRegionOfInterest(cc) = 1;
+                        idxCl = idxCl + 1;
+                    end
+                end
+            
+            end
+            %% this is for plotting the bandpassed against the spec. right now they aren't lining up that well, but i moved on to cluster stats instead
+            %                     meanbData = mean(bData,1);
+            %                     meanbDataS = meanbData.^2;
+            %                     bDataS = bData.^2;
+            %                     figure; plot(bTT,normalize(meanbDataS), 'LineWidth', 3); hold on; plot(bTT,normalize(bDataS,2))
+            %                     figure; imagesc(tt,ff, normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2)); axis xy
+            %                     hold on; plot(centA(1), centA(2), '*b');
+            %%
+            if ~isempty(bData)
+                for rr = 1:length(bData) %check if more than one cluster
+                    T1 = [];
+                    for jj = 1:size(sData{rr},3)
+                        %%check if there is a cluster on each trial and record descriptive info on it
+                        sDataTemp = sData{rr}(:,:,jj); %take the normalized data
+
+                        mask = sDataTemp>sdThreshold;
                         clustP=bwconncomp(mask,8);
                         clRPos=regionprops(clustP, 'all'); %get the region properties
                         cl_aRPos=[clRPos.Area];
@@ -233,65 +396,89 @@ for cc = 1:length(chNum)
                         RecordingLocation{jj,1} = chName{cc};
                         ChannelNumber{jj,1} = chNum{cc};
                         PatientName{jj,1} =  patientName;
-                        TrialType{jj,1} = 'identityTask';
+                        TrialType{jj,1} = 'emotionTask';
                         TrialNumber{jj,1} = jj;
-                        AllImagesSignificant(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
+                        AllImagesSignificantAnywhere(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
                         ClusterNumber(jj,1) = rr;
                         TimeMinMax(jj,:) = timeMinMax;
                         FreqMinMax(jj,:) = freqMinMax;
                         ClusterCenter(jj,:) = centA;
                         if allVsingle == 0
-                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{4}).identityTasktstatSum(idxSigClusterAllCriteria(rr),1); %if it's gamma, grab that tstat for the All (adjusted for which cluster to grab)
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{8}).emotionTasktstatSum(ii,1); %if it's gamma, grab that tstat for the All
                         elseif allVsingle == 1
-                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{5})(idxSigClusterSingleCriteria(rr),1); %if it's gamma, grab that tstat
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{10})(ii,1); %if it's gamma, grab that tstat
                         end
                         ImageType{jj,1} = (conditionName{nn});
                         [MaxValue(jj,1), pkIndex] = max(bData{rr}(jj,tMinBand:tMaxBand).^2);
                         TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
-                        if length(identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}) < jj
+                        if length(emotionTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}) < jj
                             CorrectResponse(jj,1) = 0;
-                            ResponseTime(jj,1) = mean(identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2});
-
+                            ResponseTime(jj,1) = mean(emotionTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2});
                         else
-                            CorrectResponse(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}(jj);
-                            ResponseTime(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                            CorrectResponse(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).correctTrial{idx2}(jj);
+                            ResponseTime(jj,1) = emotionTaskLFP.byemotion.(chNum{cc}).responseTimesInSec{idx2}(jj);
+
                         end
-                    
                     end
-                    %ONE OPTION IS FIX THE SECOND ONE TO MATCH (EMOTION)
-                    %AND CHECK THAT CHANNEL 19 SHOWS TWO OF THEM. IF SO, I
-                    %THINK IT SHOULD BE GOOD??
-                        T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificant, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
-                            TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
-                            CorrectResponse, ResponseTime);
-                        T2 = [T2; T1];
-                    
+                    %                 T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificant, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
+                    %                     TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
+                    %                     CorrectResponse, ResponseTime);
+                    %             end
+                    %         end
+                    %         %add each trial necessary
+                    %         T2 = [T2; T1];
+                    %     end
+                    %         idx2 = idx2+1;
+                    % end
+                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificantAnywhere, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
+                        TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
+                        CorrectResponse, ResponseTime);
+
+                    T2 = [T2; T1];%this will combine if there is more than 1 cluster (rr)
                 end
             end
         end
         %add each trial necessary
-        T3 = [T3; T2];
         idx2 = idx2+1;
+        T3 = [T3; T2];
+
     end
+end
 
-    %% emotion task
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% do it again but for all individual emotions and IDs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    idx2 = 1;    
-    for nn = 5:7  %runs through each id
-        T1 = [];        
+T2 = [];
+T4 = [];
+for cc = 1:length(chNum)
+    %identity task
+    %     T1 = [];
+    %     ClusterCenter = [];
+    %     TstatCluster = [];
+    %     ImageType = [];
+    %     MaxValue =[];
+    %     pkIndex = [];
+    %     TimeofMax=[];
+    %     CorrectResponseId = [];
+    %     CorrectResponseEm = [];
+    %     ResponseTimeId = [];
+    %     ResponseTimeEm = [];
+    idx2 = 1;   %this is so the nn can move through the fields but the idx can stay at the emotion or identity you are interested in (emotion2 is nn6 for example)
+    for nn = 1:3  %runs through each id
+        T2 = []; %for multiple clusters
         pkIndex = [];
         bData = [];
+
         PatientName =[];
-        ChannelNumber = [];        
+        ChannelNumber = [];
         TrialType = [];
-        TrialNumber = [];        
+        TrialNumber = [];
         ClusterCenter = [];
-        TstatCluster = [];
         ClusterNumber = [];
+        TstatCluster = [];
         ImageType = [];
         MaxValue = [];
-        AllImages = [];
-        AllImagesSignificant = [];
         TimeofMax = [];
         TimeMinMax = [];
         FreqMinMax = [];
@@ -303,48 +490,40 @@ for cc = 1:length(chNum)
         ByTrialArea =[];
         ByTrialBoundingBoxTimeRange = [];
         ByTrialBoundingBoxFreqRange =[];
-        
+        AllImagesSignificantAnywhere=[];
         %by identity that is statistically significant
         %first check if either a single ID is significant or all IDs are
         %significant, then run through that ID or all the IDs.
-        if nnz(nnz(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust))>0 || nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{8})))>0
+        if nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{3})))>0
             idxCl = 1; % this is to set up if there are multiple clusters within the range.
-            if nnz(nnz(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust))>0
-                AllImages = 1;
-                for ii = 1:size(nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid,1)
-                    %check the centroid is in the high gamma range in the
-                    %region after image presentation
-                    cent = nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid(ii,:);
-                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
-                    normS1 = normalize(nback.(chNum{cc}).(conditionName{8}).emotionTaskMean,2);
-                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
-                        bData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
-                        sData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
-                        sData{idxCl} = normalize(sData{idxCl},2);
-                        allVsingle = 0;
-                        idxCl = idxCl + 1;
-                    end
-                end
-            elseif nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{8})))>0
+            AllImages = [];
+            %record if this is an allimages + one or just by trial (can be
+            %either, just recording individual positive spots here)
+            if nnz(nnz(nback.(chNum{cc}).(conditionName{4}).identityTasksigclust))>0
+                AllImages = 1;            
+            elseif nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{3})))>0
                 AllImages = 0;
-                for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).(resultName{9}),1)
-                    %check the centroid is in the high gamma range in the
-                    %region after image presentation
-                    cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{9})(ii,:);
-                    centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
-                    normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{6}),2);
-                    %check that it's between the frequencies desired and is a
-                    %positive deflection, then go trial by trial to get trial
-                    %specific statistics.
-                    if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && normS1(round(cent(2)),round(cent(1)))>0
-                        bData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
-                        sData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
-                        sData{idxCl} = normalize(sData{idxCl},2);
-                        allVsingle = 1;
-                        idxCl = idxCl + 1;
-                    end
+            end
+            for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).(resultName{4}),1)
+                %check the centroid is in the high gamma range in the
+                %region after image presentation
+                cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{4})(ii,:);
+                centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+                normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2);
+                %check that it's between the frequencies desired and is a
+                %positive deflection, then go trial by trial to get trial
+                %specific statistics.
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).(resultName{3}))))>0 %second part to make sure it's positive (or negative, can change here)
+                    bData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
+                    sData{idxCl} = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
+                    sData{idxCl} = normalize(sData{idxCl},2);
+                    allVsingle = 1;
+                    idxSigClusterSingleCriteria(idxCl) = ii;
+                    TxChannel.(conditionName{nn})(cc) = 1;
+                    idxCl = idxCl + 1;
                 end
             end
+        
             %% this is for plotting the bandpassed against the spec. right now they aren't lining up that well, but i moved on to cluster stats instead
             %                     meanbData = mean(bData,1);
             %                     meanbDataS = meanbData.^2;
@@ -354,7 +533,191 @@ for cc = 1:length(chNum)
             %                     hold on; plot(centA(1), centA(2), '*b');
             %%
             if ~isempty(bData)
-                for rr = 1:length(bData) %check if more than one cluster 
+                for rr = 1:length(bData) %run through each cluster if more than one.
+                    T1 = [];
+                    for jj = 1:size(sData{rr},3)%run through each trial.
+                        %%check if there is a cluster on each trial and record descriptive info on it
+                        sDataTemp = sData{rr}(:,:,jj); %take the normalized data
+                        mask = sDataTemp>sdThreshold;
+                        %this if for checking that it is doing what it is
+                        %supposed to.
+                        % maskT = sDataTemp>1.5;
+                        % subplot(3,1,1)
+                        % imagesc(sDataTemp); axis xy;
+                        % subplot(3,1,2)
+                        % imagesc(mask); axis xy;
+                        % subplot(3,1,3)
+                        % imagesc(maskT); axis xy;
+                        clustP=bwconncomp(mask,8);
+                        clRPos=regionprops(clustP, 'all'); %get the region properties
+                        cl_aRPos=[clRPos.Area];
+                        cl_keepPos=find(cl_aRPos>100); %only keep reasonably large ones
+                        trTrue = 0;
+                        centKeep = []; arKeep = []; BBTemp = []; BB = [];
+                        for kk=1:length(cl_keepPos) %may want to check that there aren't multiple clusters in the region or how to handle that.
+                            centr = clRPos(cl_keepPos(kk)).Centroid;
+                            centrR(1) = tt(round(centr(1))); centrR(2) = ff(round(centr(2)));
+                            if centrR(2)>=freqMinMax(1) && centrR(2)<=freqMinMax(2) && centrR(1) >= timeMinMax(1) && centrR(1) <= timeMinMax(2)
+                                trTrue = 1;
+                                centKeep(kk,:) = centrR;
+                                arKeep(kk,:) = sum(sDataTemp(clustP.PixelIdxList{cl_keepPos(kk)})); %add up the total cluster of stds to give a "cluster number"
+                                BBTemp(kk,:) = clRPos(cl_keepPos(kk)).BoundingBox;
+                                %convert the bounding box to actual values
+                                %of time and frequency
+                                BB(kk,1) =  tt(round(BBTemp(kk,1)));
+                                BB(kk,3) = BB(kk,1) + ((tt(2)-tt(1))*BBTemp(kk,3));
+                                BB(kk,2) = ff(round(BBTemp(kk,2)));
+                                BB(kk,4) = BB(kk,2) + ((ff(2)-ff(1))*BBTemp(kk,4));
+                            end
+                        end
+                        if size(arKeep,1) > 1 && trTrue == 1 %i think i am saying of the sum of the stds is positive
+                            [mx I] = max(arKeep);
+                            ByTrialCentroid(jj,:) = centKeep(I,:);
+                            ByTrialArea(jj,:) = arKeep(I,:);
+                            ByTrialBoundingBoxTimeRange(jj,:) = [BB(I,1) BB(I,3)];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [BB(I,2) BB(I,4)];
+                        elseif trTrue == 1
+                            ByTrialCentroid(jj,:) = centKeep(1,:);
+                            ByTrialArea(jj,:) = arKeep(1,:);
+                            ByTrialBoundingBoxTimeRange(jj,:) = [BB(1,1) BB(1,3)];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [BB(1,2) BB(1,4)];
+                        elseif trTrue == 0
+                            ByTrialCentroid(jj,:) = [NaN NaN];
+                            ByTrialArea(jj,:) = [NaN];
+                            ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
+                            ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
+                        end
+                        RecordingLocation{jj,1} = chName{cc};
+                        ChannelNumber{jj,1} = chNum{cc};
+                        PatientName{jj,1} =  patientName;
+                        TrialType{jj,1} = 'identityTask';
+                        TrialNumber{jj,1} = jj;
+                        AllImagesSignificantAnywhere(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
+                        ClusterNumber(jj,1) = rr;
+                        TimeMinMax(jj,:) = timeMinMax;
+                        FreqMinMax(jj,:) = freqMinMax;
+                        ClusterCenter(jj,:) = centA;
+                        if allVsingle == 0
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{4}).identityTasktstatSum(idxSigClusterAllCriteria(rr),1); %if it's gamma, grab that tstat for the All (adjusted for which cluster to grab)
+                        elseif allVsingle == 1
+                            TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).(resultName{5})(idxSigClusterSingleCriteria(rr),1); %if it's gamma, grab that tstat
+                        end
+                        ImageType{jj,1} = (conditionName{nn}); %should this be idx2? STOPPED LOOKING HERE.
+                        [MaxValue(jj,1), pkIndex] = max(bData{rr}(jj,tMinBand:tMaxBand).^2);
+                        TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
+                        if length(identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}) < jj
+                            CorrectResponse(jj,1) = 0;
+                            ResponseTime(jj,1) = mean(identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2});
+
+                        else
+                            CorrectResponse(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}(jj);
+                            ResponseTime(jj,1) = identityTaskLFP.byidentity.(chNum{cc}).responseTimesInSec{idx2}(jj);
+                        end
+
+                    end
+                    %ONE OPTION IS FIX THE SECOND ONE TO MATCH (EMOTION)
+                    %AND CHECK THAT CHANNEL 19 SHOWS TWO OF THEM. IF SO, I
+                    %THINK IT SHOULD BE GOOD??
+                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificantAnywhere, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
+                        TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
+                        CorrectResponse, ResponseTime);
+
+                    T2 = [T2; T1];%this will combine if there is more than 1 cluster
+                end
+            end
+            
+        end
+        %add each trial necessary        
+        idx2 = idx2+1;
+        T4 = [T4; T2];
+    end
+   
+end
+
+%% emotion task
+for cc = 1:length(chNum)
+    %identity task
+    %    T1 = [];
+    %     ClusterCenter = [];
+    %     TstatCluster = [];
+    %     ImageType = [];
+    %     MaxValue =[];
+    %     pkIndex = [];
+    %     TimeofMax=[];
+    %     CorrectResponseId = [];
+    %     CorrectResponseEm = [];
+    %     ResponseTimeId = [];
+    %     ResponseTimeEm = [];
+    idx2 = 1;   %idx2 is because nn goes 5-7 but you may want the 2nd emotion etc.
+    for nn = 5:7  %runs through each Em
+        T2 = [];
+        pkIndex = [];
+        bData = [];
+        PatientName =[];
+        ChannelNumber = [];
+        TrialType = [];
+        TrialNumber = [];
+        ClusterCenter = [];
+        TstatCluster = [];
+        ClusterNumber = [];
+        ImageType = [];
+        MaxValue = [];
+        AllImages = [];
+        AllImagesSignificantAnywhere = [];
+        TimeofMax = [];
+        TimeMinMax = [];
+        FreqMinMax = [];
+        SecondTrial = [];
+        CorrectResponse = [];
+        ResponseTime = [];
+        RecordingLocation = [];
+        ByTrialCentroid = [];
+        ByTrialArea =[];
+        ByTrialBoundingBoxTimeRange = [];
+        ByTrialBoundingBoxFreqRange =[];
+
+        %by emotion that is statistically significant
+        %first check if either a single Em is significant or all Em are
+        %significant, then run through that ID or all the IDs.
+         if nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{8})))>0 %%
+            idxCl = 1; % this is to set up if there are multiple clusters within the range.
+            AllImages = [];
+            %record if this is an allimages + one or just by trial (can be
+            %either, just recording individual positive spots here)
+            if nnz(nnz(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust))>0
+                AllImages = 1;            
+            elseif nnz(nnz(nback.(chNum{cc}).(conditionName{nn}).(resultName{8})))>0
+                AllImages = 0;
+            end
+            for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).(resultName{9}),1)
+                %check the centroid is in the high gamma range in the
+                %region after image presentation
+                cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{9})(ii,:);
+                centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
+                normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{6}),2);
+                %check that it's between the frequencies desired and is a
+                %positive deflection, then go trial by trial to get trial
+                %specific statistics.
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2)  && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).(resultName{8}))))>0
+                    bData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
+                    sData{idxCl} = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
+                    sData{idxCl} = normalize(sData{idxCl},2);
+                    allVsingle = 1;
+                    idxSigClusterSingleCriteria(idxCl) = ii;
+                    TxChannel.(conditionName{nn})(cc) = 1;
+                    idxCl = idxCl + 1;
+                end
+            end       
+            %% this is for plotting the bandpassed against the spec. right now they aren't lining up that well, but i moved on to cluster stats instead
+            %                     meanbData = mean(bData,1);
+            %                     meanbDataS = meanbData.^2;
+            %                     bDataS = bData.^2;
+            %                     figure; plot(bTT,normalize(meanbDataS), 'LineWidth', 3); hold on; plot(bTT,normalize(bDataS,2))
+            %                     figure; imagesc(tt,ff, normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2)); axis xy
+            %                     hold on; plot(centA(1), centA(2), '*b');
+            %%
+            if ~isempty(bData)
+                for rr = 1:length(bData) %check if more than one cluster
                     T1 = [];
                     for jj = 1:size(sData{rr},3)
                         %%check if there is a cluster on each trial and record descriptive info on it
@@ -400,12 +763,12 @@ for cc = 1:length(chNum)
                             ByTrialBoundingBoxTimeRange(jj,:) = [NaN NaN];
                             ByTrialBoundingBoxFreqRange(jj,:) = [NaN NaN];
                         end
-                         RecordingLocation{jj,1} = chName{cc};
+                        RecordingLocation{jj,1} = chName{cc};
                         ChannelNumber{jj,1} = chNum{cc};
                         PatientName{jj,1} =  patientName;
                         TrialType{jj,1} = 'emotionTask';
                         TrialNumber{jj,1} = jj;
-                        AllImagesSignificant(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
+                        AllImagesSignificantAnywhere(jj,1) = AllImages; %if the summary of all has the cluster, then flag it.
                         ClusterNumber(jj,1) = rr;
                         TimeMinMax(jj,:) = timeMinMax;
                         FreqMinMax(jj,:) = freqMinMax;
@@ -437,23 +800,25 @@ for cc = 1:length(chNum)
                     %     end
                     %         idx2 = idx2+1;
                     % end
-                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificant, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
+                    T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificantAnywhere, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
                         TstatCluster, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
                         CorrectResponse, ResponseTime);
-                    T2 = [T2; T1];
 
+                    T2 = [T2; T1];%this will combine if there is more than 1 cluster (rr)
                 end
             end
         end
         %add each trial necessary
-        T3 = [T3; T2];
         idx2 = idx2+1;
+        T4 = [T4; T2];
+
     end
-
-
 end
 
+
 summaryStatsSigTrials = T3;
+summaryStatsSigIndividualEmId = T4;
+
 
 
 end

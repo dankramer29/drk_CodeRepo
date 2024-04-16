@@ -12,18 +12,34 @@
 emotionTaskLFP_noNoiseRemoval = emotionTaskLFP;
 identityTaskLFP_noNoiseRemoval = identityTaskLFP;
 %plots each trial so you can remove noisey ones.
-[Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
+
+if fastRun == false
+    [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
      'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
-dbstop
-removeTrialsEmot = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
-for ii = 2:length(removeTrialsEmot) %check none were entered wrong
-    if ii == length(removeTrialsEmot)
-        if removeTrialsEmot(ii) < removeTrialsEmot(ii-1)
-                    warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+    dbstop
+    removeTrialsEmot = input('which lines from Temot do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []'); %put the lines of the table Temot that you wan to remove in the commandline
+    for ii = 2:length(removeTrialsEmot) %check none were entered wrong
+        if ii == length(removeTrialsEmot)
+            if removeTrialsEmot(ii) < removeTrialsEmot(ii-1)
+                warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+            end
+        elseif removeTrialsEmot(ii) < removeTrialsEmot(ii-1) || removeTrialsEmot(ii) > removeTrialsEmot(ii+1)
+            warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
         end
-    elseif removeTrialsEmot(ii) < removeTrialsEmot(ii-1) || removeTrialsEmot(ii) > removeTrialsEmot(ii+1)
-        warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+    end
+elseif fastRun == true
+    [Temot, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(emotionTaskLFP, ...
+     'taskNameSel', 1, 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1', 'savePlot', false, 'flaggedplotNoiseCheck', false);
+     for ii = 2:length(removeTrialsEmot) %check none were entered wrong
+        if ii == length(removeTrialsEmot)
+            if removeTrialsEmot(ii) < removeTrialsEmot(ii-1)
+                warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+            end
+        elseif removeTrialsEmot(ii) < removeTrialsEmot(ii-1) || removeTrialsEmot(ii) > removeTrialsEmot(ii+1)
+            warning(['line ', num2str(removeTrialsEmot(ii)), 'is not ordered right and is next to ', num2str(removeTrialsEmot(ii-1))])
+        end
     end
 end
 %put the row of the ones you actually want to remove here.
@@ -31,18 +47,34 @@ emotionTaskLFP = Analysis.emuEmot.noiseRemoval(emotionTaskLFP, Temot, removeTria
 TNoise = Temot;
 allChannelMean = allChannelMeanTemp;
 %remove bad trials on identity
-[Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
-     'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
+if fastRun == false
+    [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
+        'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1');
-dbstop
-removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
-for ii = 2:length(removeTrialsId) %check none were entered wrong
-    if ii == length(removeTrialsId)
-        if removeTrialsId(ii) < removeTrialsId(ii-1)
-                    warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+    dbstop
+    removeTrialsId = input('which lines from Tident do you want to remove. if no worrisome noise enter [], or if no figures output, means none crossed the threshold, so enter []');  %put the lines of the table Tident that you wan to remove in the commandline
+    for ii = 2:length(removeTrialsId) %check none were entered wrong
+        if ii == length(removeTrialsId)
+            if removeTrialsId(ii) < removeTrialsId(ii-1)
+                warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+            end
+        elseif removeTrialsId(ii) < removeTrialsId(ii-1) || removeTrialsId(ii) > removeTrialsId(ii+1)
+            warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
         end
-    elseif removeTrialsId(ii) < removeTrialsId(ii-1) || removeTrialsId(ii) > removeTrialsId(ii+1)
-        warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+    end
+elseif fastRun == true
+    [Tident, allChannelMeanTemp] = proc.signalEval.noiseTestEmuNback(identityTaskLFP, ...
+        'taskNameSel', 2, 'sessionName', sessionName, 'subjName', subjName, ...
+        'versionNum', 'v1',  'savePlot', false, 'flaggedplotNoiseCheck', false);
+
+    for ii = 2:length(removeTrialsId) %check none were entered wrong
+        if ii == length(removeTrialsId)
+            if removeTrialsId(ii) < removeTrialsId(ii-1)
+                warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+            end
+        elseif removeTrialsId(ii) < removeTrialsId(ii-1) || removeTrialsId(ii) > removeTrialsId(ii+1)
+            warning(['line ', num2str(removeTrialsId(ii)), 'is not ordered right and is next to ', num2str(removeTrialsId(ii-1))])
+        end
     end
 end
 identityTaskLFP = Analysis.emuEmot.noiseRemoval(identityTaskLFP, Tident, removeTrialsId, 'trialType', 1);
@@ -88,5 +120,5 @@ channelNameFinal = channelName;
 % %    channelNameFinal(42:47) = [];
 % end
 % %%
-% next section  Analysis.emuEmot.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.M
+edit Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT
  

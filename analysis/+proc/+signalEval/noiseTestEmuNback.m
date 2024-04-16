@@ -57,7 +57,7 @@ for cc = 1:length(channelName)
         sdSline(1:length(tplotBP)) = sdSall;
         tempFltrials = [];
         idxTemp = 1;
-        for ii = 1:size(dataLFP.(task{taskType}).(channelName{cc}).presentedEmId{jj},1)
+        for ii = 1:size(sAll,1)
             mx= max(sAll(ii,:));
             mn = min(sAll(ii,:));
             if mx >= (meanSall + (stdAbove*sdSall)) || mn <= (meanSall - (stdAbove*sdSall))

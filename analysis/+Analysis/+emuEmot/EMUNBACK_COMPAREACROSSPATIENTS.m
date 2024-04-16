@@ -79,7 +79,7 @@ Gc.FontSize = 22;
 L.FontSize = 22;
 L.LineWidth = 4;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Sig Cluster stats
+%% Sig Cluster stats FOR STRUCTURES NOT BROKEN INTO TASKS
 %Group stats
 
 %Cut and paste it into the file MWallForLoading, then import as a table to
@@ -107,10 +107,17 @@ colorTempLR = [C(12,:); C(11,:); C(9,:); C(8,:); C(7, :); C(6,:)];
 
 
 clmns = MWallForLoading.Properties.VariableNames;
-clmnNum = 16; %pick the column number here.
-nameTable = {'Cluster Centroid By Time '};
-varTested = {'Time (S)'};
+
+% clmnNum = 16; %pick the column number here.
+% nameTable = {'Cluster Centroid By Time '};
+% varTested = {'Time (S)'};
+% testDone = {'Kruskall Wallis'};
+
+clmnNum = 15; %pick the column number here.
+nameTable = {'Tstat total '};
+varTested = {'tstat sum'};
 testDone = {'Kruskall Wallis'};
+
 
 xx = []; %load with stats of whatever category (say Amygdala centroid time)
 yy = []; %load with stats of whatever is the second category (say Hippo)
@@ -274,6 +281,189 @@ ax.FontSize = 13;
 ax.FontWeight = 'bold';
 ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
 open tbleTempLR
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%Group stats CLUSTER FOR EMOTION VS IDENTITY
+
+%Cut and paste it into the file MWallForLoading, then import as a table to
+%have it all as a table.
+
+%Run:
+%   First look at ones when you are looking at the all trial summary stats
+%       centroid by time
+%       centroid by frequency
+%       bounding box by time (plot this? maybe take the length and height?)
+%       bounding box by frequency(plot this?)
+%   Second look at the by trial summary stats
+%   by structure
+%     centroid by time
+%     cluster centroid by frequency
+%     centroid
+
+%darker
+%colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = [C(3,:); C(4,:); C(2,:); C(12,:); C(11, :); C(10,:)];
+
+%lighter
+colorTempTest = {'#fee327', '#fdca54', '#f6a570', '#f1969b', '#f08ab1', '#c78dbd', '#927db6', '#5da0d7', '#00b3e1', '#50bcbf', '#65bda5', '#87bf54' };
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = [C(12,:); C(11,:); C(9,:); C(8,:); C(7, :); C(6,:)];
+
+%colorTempLR = [C(12,:); C(11,:); C(9,:); C(8,:); C(7, :); C(6,:)];
+
+
+clmns = MWallForLoading.Properties.VariableNames;
+
+% Time:
+clmnNum = 16; %pick the column number here.
+nameTable = {'Cluster Centroid By Time '};
+varTested = {'Time (S)'};
+testDone = {'Kruskall Wallis'};
+
+% clmnNum = 15; %pick the column number here.
+% nameTable = {'Tstat total '};
+% varTested = {'tstat sum'};
+% testDone = {'Kruskall Wallis'};
+
+xxEm = []; %load with stats of whatever category (say Amygdala centroid time)
+yyEm = []; %load with stats of whatever is the second category (say Hippo)
+zzEm = []; %load with stats of the third category
+RamyEm = [];
+LamyEm = [];
+RAhipEm= [];
+LAhipEm= [];
+RPhipEm= [];
+LPhipEm= [];
+xxId = []; %load with stats of whatever category (say Amygdala centroid time)
+yyId = []; %load with stats of whatever is the second category (say Hippo)
+zzId = []; %load with stats of the third category
+RamyId = [];
+LamyId= [];
+RAhipId= [];
+LAhipId= [];
+RPhipId= [];
+LPhipID= [];
+
+%pull out the areas you want
+
+idxX = 1; idxY = 1; idxZ = 1;
+%
+RamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'emotionTask'"); 
+LamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'emotionTask'");
+xxEm = vertcat(RamyEm, LamyEm);
+RAhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'"); 
+LAhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+yyEm = vertcat(RAhipEm, LAhipEm);
+RPhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'"); 
+LPhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+zzEm = vertcat(RPhipEm, LPhipEm);
+
+RamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'identityTask'"); 
+LamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'identityTask'");
+xxId = vertcat(RamyId, LamyId);
+RAhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'"); 
+LAhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+yyId = vertcat(RAhipId, LAhipId);
+RPhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'"); 
+LPhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+zzId = vertcat(RPhipId, LPhipId);
+
+for ii = 1:length(xxEm); nameXXEm{ii,1} = 'Amygdala Emotion'; end
+for ii = 1:length(yyEm); nameYYEm{ii,1} = 'Anterior Hippocampus Emotion'; end
+for ii = 1:length(zzEm); nameZZEm{ii,1} = 'Posterior Hippocampus Emotion'; end
+
+
+for ii = 1:length(RamyEm); nameRamyEm{ii,1} = 'Right Amygdala Emotion'; end
+for ii = 1:length(RAhipEm); nameRAhipEm{ii,1} = 'Right Anterior Hippocampus Emotion'; end
+for ii = 1:length(RPhipEm); nameRPhipEm{ii,1} = 'Right Posterior Hippocampus Emotion'; end
+for ii = 1:length(LamyEm); nameLamyEm{ii,1} = 'Left Amygdala Emotion'; end
+for ii = 1:length(LAhipEm); nameLAhipEm{ii,1} = 'Left Anterior Hippocampus Emotion'; end
+for ii = 1:length(LPhipEm); nameLPhipEm{ii,1} = 'Left Posterior Hippocampus Emotion'; end
+
+for ii = 1:length(xxId); nameXXId{ii,1} = 'Amygdala Identity'; end
+for ii = 1:length(yyId); nameYYId{ii,1} = 'Anterior Hippocampus Identity'; end
+for ii = 1:length(zzId); nameZZId{ii,1} = 'Posterior Hippocampus Identity'; end
+
+for ii = 1:length(RamyId); nameRamyId{ii,1} = 'Right Amygdala Identity'; end
+for ii = 1:length(RAhipId); nameRAhipId{ii,1} = 'Right Anterior Hippocampus Identity'; end
+for ii = 1:length(RPhipId); nameRPhipId{ii,1} = 'Right Posterior Hippocampus Identity'; end
+for ii = 1:length(LamyId); nameLamyId{ii,1} = 'Left Amygdala Identity'; end
+for ii = 1:length(LAhipId); nameLAhipId{ii,1} = 'Left Anterior Hippocampus Identity'; end
+for ii = 1:length(LPhipId); nameLPhipId{ii,1} = 'Left Posterior Hippocampus Identity'; end
+
+
+%no inputs needed from here below (unless more variables needed, add
+%accordingly)
+xxx= vertcat(xxEm,yyEm,zzEm, xxId,yyId,zzId);
+xxxN = vertcat(nameXXEm,nameYYEm, nameZZEm, nameXXId,nameYYId, nameZZId);
+figure
+[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+multC = multcompare(stats);
+meanXXEm = nanmean(xxEm);
+meanYYEm = nanmean(yyEm);
+meanZZEm = nanmean(zzEm);
+medianXXEm = nanmedian(xxEm);
+medianYYEm = nanmedian(yyEm);
+medianZZEm = nanmedian(zzEm);
+stdXXEm = nanstd(xxEm);
+stdYYEm = nanstd(yyEm);
+stdZZEm = nanstd(zzEm);
+meanXXId = nanmean(xxId);
+meanYYId = nanmean(yyId);
+meanZZId = nanmean(zzId);
+medianXXId = nanmedian(xxId);
+medianYYId = nanmedian(yyId);
+medianZZId = nanmedian(zzId);
+stdXXId = nanstd(xxId);
+stdYYId = nanstd(yyId);
+stdZZId = nanstd(zzId);
+TstTempKW = table(nameTable, meanXXEm, stdXXEm, meanXXId, stdXXId, meanYYEm, stdYYEm,  meanYYId, stdYYId, meanZZEm, stdZZEm, meanZZId, stdZZId, pvalue, testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+figure
+title(nameTable);
+wdth = 1;
+x1 = ones(1,length(xxEm));
+x2 = 2*wdth*ones(1,length(xxId));
+x3 = 3*wdth*ones(1,length(yyEm));
+x4 = 4*wdth*ones(1,length(yyId));
+x5 = 5*wdth*ones(1,length(zzEm));
+x6 = 6*wdth*ones(1,length(zzId));
+S1 = swarmchart(x1,xxEm,  5,colorTemp(1,:), 'filled');
+hold on
+S2 = swarmchart(x2,xxId,5, colorTemp(2,:), 'filled');
+S3 = swarmchart(x3,yyEm,5, colorTemp(3,:), 'filled');
+S4 = swarmchart(x4,yyId,5, colorTemp(4,:), 'filled');
+S5 = swarmchart(x5,zzEm,5, colorTemp(5,:), 'filled');
+S6 = swarmchart(x6,zzId,5, colorTemp(6,:), 'filled');
+
+p1=plot([0.75,0.75+(wdth/2)],[meanXXEm,meanXXEm],'LineWidth',4, 'Color', colorTemp(1,:));
+p2=plot([0.75+1,0.75+1+(wdth/2)],[meanXXId,meanXXId],'LineWidth',4, 'Color',colorTemp(2,:));
+p3=plot([0.75+2,0.75+2+(wdth/2)],[meanYYEm,meanYYEm],'LineWidth',4, 'Color',colorTemp(3,:));
+p4=plot([0.75+3,0.75+3+(wdth/2)],[meanYYId,meanYYId],'LineWidth',4, 'Color', colorTemp(4,:));
+p5=plot([0.75+4,0.75+4+(wdth/2)],[meanZZEm,meanZZEm],'LineWidth',4, 'Color',colorTemp(5,:));
+p6=plot([0.75+5,0.75+5+(wdth/2)],[meanZZId,meanZZId],'LineWidth',4, 'Color',colorTemp(6,:));
+%legend([p1 p2 p3],{'Mean 1', 'Mean 2', 'Mean 3'})
+ax=gca;
+ax.XTick = [1,2,3,4,5,6];
+% ax.YLim = [0:1.5];
+% ax.YTick = [0:0.2:1.50];
+ax.XTickLabel = {nameXXEm{1}, nameXXId{1}, nameYYEm{1}, nameYYId{1}, nameZZEm{1}, nameZZId{1}};
+ax.FontSize = 13;
+ax.FontWeight = 'bold';
+ylabel(varTested, 'FontSize', 18, 'FontWeight','bold')
+open tbleTemp
+
+xxx=[];
+xxxN=[];
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

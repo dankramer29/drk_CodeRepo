@@ -215,6 +215,7 @@ fastRun = false;
 
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
 %chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
+
 %MW16 CAN UNCOMMENT THIS AND RUN IT.
 % fileVariation = 3;
 % sessionName = 'MW_16';

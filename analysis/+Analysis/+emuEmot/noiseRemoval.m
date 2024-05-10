@@ -74,7 +74,7 @@ for ii = 1:size(Tremove,1)
             trialAdj = 1; %start the count back at 1
         end
     end
-    if size(dataLFP.(task{trialType}).(ch{ii}).image.specD{variant(ii)},3) < trial(ii)
+    if trial(ii) < 1 || size(dataLFP.(task{trialType}).(ch{ii}).image.specD{variant(ii)},3) < trial(ii)
         warning(['not as many trial in ', ch{ii}, ' variant ', num2str(variant(ii))] );
         continue
     end

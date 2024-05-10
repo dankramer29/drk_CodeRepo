@@ -1,4 +1,4 @@
-function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, thresholds ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
+function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, boundingBox, allClusterNumbers, thresholds ] = cluster_permutation_Ttest_gpu3d( data1, data2, varargin )
 %USE THIS ONE
 % 
 % shuffle_stats shuffles the data between two data sets takes the mean and
@@ -81,7 +81,8 @@ end
 tstat_maxP = tstat_max; tstat_maxN = tstat_max;
 %difftot=zeros(size(data1,1), size(data1,2), xshuffles);
 est_p=struct;
-centroid = []; centroidPos = []; centroidNeg = [];
+centroid = []; centroidPos = []; centroidNeg = []; boundingBox = []; boundingBoxPos = []; boundingBoxNeg = [];
+allClusterNumbers = []; allClusterNumbersPos = []; allClusterNumbersNeg = []; 
 
 %if the iti is not as large as the trial length, add a mirrored end to the iti.
 if size(data2,2)<size(data1,2)
@@ -331,7 +332,7 @@ if splitPosNeg
             xx(cii) = cii;
         end
     end
-    cl_keepPos=find(cl_aRPos>50); %get the ones with an area >100 pixels
+    cl_keepPos=find(cl_aRPos>50); %get the ones with an area >50 pixels
     idxc=1; idxd=1;
     tstat_sumsP = []; tstat_sumsN = [];
     for ii=1:length(cl_keepPos)
@@ -342,6 +343,8 @@ if splitPosNeg
         if tstat_sumsPos(ii)>threshP %save the ones that are over the thresh
             sigclustPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=idxd;
             centroidPos(idxc,1:2) = clRPos(cl_keepPos(ii)).Centroid;
+            boundingBoxPos(idxc,1:4) = clRPos(cl_keepPos(ii)).BoundingBox;
+            allClusterNumbersPos{idxc,1} = clRPos(cl_keepPos(ii));
             tstat_sumsP(idxc,1) = tstat_sumsPos(ii);
             idxc=idxc+1; idxd=idxd+1;
         end
@@ -377,6 +380,8 @@ if splitPosNeg
         if tstat_sumsNeg(ii)>threshN %save the ones that are over the thresh
             sigclustNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=idxd;
             centroidNeg(idxc,1:2) = clRNeg(cl_keepNeg(ii)).Centroid;
+            boundingBoxNeg(idxc,1:4) = clRNeg(cl_keepNeg(ii)).BoundingBox;
+            allClusterNumbersNeg{idxc,1} = clRNeg(cl_keepNeg(ii));
             tstat_sumsN(idxc,1) = tstat_sumsNeg(ii);
             idxc=idxc+1; idxd=idxd+1;
         end
@@ -384,6 +389,8 @@ if splitPosNeg
     centroid = vertcat(centroidPos, centroidNeg);
     tstatSum = vertcat(tstat_sumsP, tstat_sumsN);
     sigclust = sigclustPos + sigclustNeg;
+    boundingBox = vertcat(boundingBoxPos, boundingBoxNeg);
+    allClusterNumbers = vertcat(allClusterNumbersPos, allClusterNumbersNeg);
     
 else
     if isempty(histogramBuiltThresholds)
@@ -414,6 +421,8 @@ else
         if tstat_sums(ii)>thresh %save the ones that are over the thresh
             sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;
             centroid(idxc,1:2) = clR(cl_keep(ii)).Centroid;
+            boundingBox(idxc,1:4) = clR(cl_keep(ii)).BoundingBox;
+            allClusterNumbers{idcx,1} =  clR(cl_keepNeg(ii));
             tstatSum(idxc,1) = tstat_sums(ii);
             idxc=idxc+1;
         end

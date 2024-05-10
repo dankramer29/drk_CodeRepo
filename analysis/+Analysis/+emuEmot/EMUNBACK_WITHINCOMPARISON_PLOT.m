@@ -126,7 +126,7 @@ end
 %%%%
 MWX.channelName =  channelName; %this is so you can paste in the ID/EM Kept
 MWX.channelLocation = chLocationName';
-MW_9 = MWX;
+MW_16 = MWX;
 %%%%
 
 %% for saving any variables

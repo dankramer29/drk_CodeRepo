@@ -135,40 +135,40 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
             %an EvKey
 
 %% if running for the first time uncomment out this section and comment out the parts below this
-fileVariation = 1;
-
-sessionName = 'MW_9';
-subjName = 'MW_9';
-    %MWX - remember to change the name in the within subject processing!!
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %REMEMBER TO CHANGE THE CHANNELS BELOW
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-matNameId = 'NBack_IDENTITY_2022_1_7.16_56_59'; 
-matNameEm = 'NBack_EMOTION_2022_1_7.17_29_54'; 
-
-switch fileVariation
-    case {1, 3, 4, 6}
-        identityFilter = 'JM_MW9_Session_12_filter.nwb'; %does NOT need to be placed in a folder
-        emotionFilter = 'JM_MW9_Session_13_filter.nwb';
-    case  2
-        emotionidentityFilter = 'MW2_Session_7_filter.nwb'; %if they are one file
-end
-%For the hex code shenaningans
-switch fileVariation
-    case {1,  3}
-        %earlier is identity task
-        load JM_MW9_Session_12_EventKey.mat
-        EvKeyId = EvKey;
-        load JM_MW9_Session_13_EventKey.mat
-        %EvKeyCodes 629 = Image_Shown and 649 = Response_Made
-        EvKeyEm = EvKey;
-    case 2
-        load MW2_Session_7_EventKey.mat       
-    case {4, 5, 6}
-        EvKeyEm = [];
-        EvKeyId = [];
-end
-fastRun = false;
+% fileVariation = 1;
+% 
+% sessionName = 'MW_9';
+% subjName = 'MW_9';
+%     %MWX - remember to change the name in the within subject processing!!
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %REMEMBER TO CHANGE THE CHANNELS BELOW
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% matNameId = 'NBack_IDENTITY_2022_1_7.16_56_59'; 
+% matNameEm = 'NBack_EMOTION_2022_1_7.17_29_54'; 
+% 
+% switch fileVariation
+%     case {1, 3, 4, 6}
+%         identityFilter = 'JM_MW9_Session_12_filter.nwb'; %does NOT need to be placed in a folder
+%         emotionFilter = 'JM_MW9_Session_13_filter.nwb';
+%     case  2
+%         emotionidentityFilter = 'MW2_Session_7_filter.nwb'; %if they are one file
+% end
+% %For the hex code shenaningans
+% switch fileVariation
+%     case {1,  3}
+%         %earlier is identity task
+%         load JM_MW9_Session_12_EventKey.mat
+%         EvKeyId = EvKey;
+%         load JM_MW9_Session_13_EventKey.mat
+%         %EvKeyCodes 629 = Image_Shown and 649 = Response_Made
+%         EvKeyEm = EvKey;
+%     case 2
+%         load MW2_Session_7_EventKey.mat       
+%     case {4, 5, 6}
+%         EvKeyEm = [];
+%         EvKeyId = [];
+% end
+% fastRun = false;
 %%
 %THIS IS SET UP TO JUST COMMENT IN EACH SUBJECT TO MAKE THIS FASTER IN THE
 %FUTRE IF NEEDED. IT IMPLIES THAT YOU ALREADY KNOW THE NOISE AND DON'T NEED
@@ -217,21 +217,21 @@ fastRun = false;
 %chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
 
 %MW16 CAN UNCOMMENT THIS AND RUN IT.
-% fileVariation = 3;
-% sessionName = 'MW_16';
-% subjName = 'MW_16';
-% matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; 
-% matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; 
-% identityFilter = 'JM_MW16_Session_1_filter.nwb'; %does NOT need to be placed in a folder
-% emotionFilter = 'JM_MW16_Session_3_filter.nwb';
-% load JM_MW16_Session_1_EventKey.mat
-% EvKeyId = EvKey;
-% load JM_MW16_Session_3_EventKey.mat
-% EvKeyEm = EvKey;
-% chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
-% removeTrialsEmot = [1,2, 4:6, 8:13, 16:28, 30:37, 39, 41:44, 47:49, 51:53, 55:58, 60, 62, 64:66, 69:95, 99:100, 102:109, 116, 118, 120, 122:123, 126:127, 129, 131:223];
-% removeTrialsId = [1:10, 13:38,40:43,46:49, 55:56, 58:59, 62, 64:69, 71:75, 77:83,85:89,91:227];
-% fastRun = true;
+fileVariation = 3;
+sessionName = 'MW_16';
+subjName = 'MW_16';
+matNameId = 'NBack_IDENTITY_2022_08_29.16_54_54'; 
+matNameEm = 'NBack_EMOTION_2022_08_30.14_37_58'; 
+identityFilter = 'JM_MW16_Session_1_filter.nwb'; %does NOT need to be placed in a folder
+emotionFilter = 'JM_MW16_Session_3_filter.nwb';
+load JM_MW16_Session_1_EventKey.mat
+EvKeyId = EvKey;
+load JM_MW16_Session_3_EventKey.mat
+EvKeyEm = EvKey;
+chInterestActual = [1,2,3,9,10,11,12,13,14,25,26,27,28,39,40,41,42,54,55,66,67,68];
+removeTrialsEmot = [1,2, 4:6, 8:13, 16:28, 30:37, 39, 41:44, 47:49, 51:53, 55:58, 60, 62, 64:66, 69:95, 99:100, 102:109, 116, 118, 120, 122:123, 126:127, 129, 131:223];
+removeTrialsId = [1:10, 13:38,40:43,46:49, 55:56, 58:59, 62, 64:69, 71:75, 77:83,85:89,91:227];
+fastRun = true;
 
 %MW23 channels
 %chInterestActual = [46:48,54:57,68:70,145:147,154:158];
@@ -317,7 +317,7 @@ fastRun = false;
 
 %MW9
 
-chInterestActual = [117:120];
+%chInterestActual = [117:120];
 
 
 %% setup details of the processing
@@ -488,7 +488,7 @@ end
 %% change channels here %
 %%%%%%%%%%%%%%%%%%%%%%%%%
 open TableChannel
-dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
+%dbstop %this is not how to stop, but it does the trick of breaking it! adjust the channels here.
 %%
 chInterest=chInterestActual;
 

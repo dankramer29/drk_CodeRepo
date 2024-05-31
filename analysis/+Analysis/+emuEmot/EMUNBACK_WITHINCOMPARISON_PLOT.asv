@@ -74,7 +74,7 @@ end
 plotForManuscript = 0;
 chNumLocationName = [];
 if plotForManuscript
-    chNumName = {'ch9695'};
+    chNumName = {'ch5049', 'ch5857', 'ch6665'};
     %clear chNumLocationName
     for jj = 1:length(chNumName)
         for ii = 1:length(channelNameFinal)
@@ -102,7 +102,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [25,26,53];
+    nS = [1,2,5,6,7,8,];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -126,7 +126,13 @@ end
 %%%%
 MWX.channelName =  channelName; %this is so you can paste in the ID/EM Kept
 MWX.channelLocation = chLocationName';
-MW_19 = MWX;
+MW_13 = MWX;
+
+for ii = 1:length(channelName)
+    itiRealShuffledTimes.emotionTask.(channelName{ii}) = itiDataReal.EmotionTask.RandomTimeIti.(channelName{ii}).RandomTimesInSec;
+    itiRealShuffledTimes.identityTask.(channelName{ii}) = itiDataReal.EmotionTask.RandomTimeIti.(channelName{ii}).RandomTimesInSec;
+
+end
 %%%%
 
 %% for saving any variables
@@ -140,15 +146,19 @@ if saveSelectFile
     end
     % fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
     % fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
-    % fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    % tTot = tic; %takes 47 minutes... so going to just save the time points of the random data
+    % fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName, '-v7.3');
+    % toc(tTot)
+    tTot = tic;
+    fileName = [folder_name, '\', 'itiRealShuffledTimes', '.mat'];  save(fileName);
+    toc(tTot)
 
-
-    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
-    %CHANGE MW BELOW!!!
-    fileName = [folder_name, '\', 'MW24', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
+    % %CHANGE MW BELOW!!!
+    % fileName = [folder_name, '\', 'MW16', '.mat'];    save(fileName);
 
     
 end

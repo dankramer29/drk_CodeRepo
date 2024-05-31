@@ -60,14 +60,14 @@ end
 for ii = 1:length(chName)
     idx1 = 1;
     idx2 = 1;
-    S1 = nbackCompare.(chName{ii}).(conditionName{4}).(resultNameAll{3});%iidentity task all identities
+    S1 = nbackCompare.(chName{ii}).(conditionName{4}).identityTaskMean;%iidentity task all identities
     S1 = normalize(S1, 2);
-    sigClustIDTask = nbackCompare.(chName{ii}).(conditionName{4}).(resultNameAll{5});
+    sigClustIDTask = nbackCompare.(chName{ii}).(conditionName{4}).identityTasksigclust;
     mx(idx1) = max(max(S1)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
     mn(idx2) = min(min(S1)); idx2 = idx2+1;
-    S2 = nbackCompare.(chName{ii}).(conditionName{8}).(resultNameAll{8});%emotion task  all emotions
+    S2 = nbackCompare.(chName{ii}).(conditionName{8}).emotionTaskMean;%emotion task  all emotions
     S2 = normalize(S2, 2);
-    sigClustEmTask = nbackCompare.(chName{ii}).(conditionName{8}).(resultNameAll{10});
+    sigClustEmTask = nbackCompare.(chName{ii}).(conditionName{8}).emotionTasksigclust;
     mx(idx1) = max(max(S2)); idx1 = idx1+1; %this is to get the colorbars to be equal across figures.
     mn(idx2) = min(min(S2)); idx2 = idx2+1;
 

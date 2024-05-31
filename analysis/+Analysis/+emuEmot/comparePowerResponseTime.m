@@ -328,16 +328,17 @@ for cc = 1:length(chNum)
             for ii = 1:size(nback.(chNum{cc}).(conditionName{4}).identityTaskcentroid,1)
                 %check the centroid is in the high gamma range in the
                 %region after image presentation
+                bData = []; %must clear it so it doesn't start over with the next centroid
                 centA = []; bData = []; sData =[];
                 cent = nback.(chNum{cc}).(conditionName{4}).identityTaskcentroid(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{4}).identityTaskMean,2);
-                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).allIdentities.identityTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
                     bData = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                     sData = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
                     sData = normalize(sData,2);
                     allVsingle = 0;
-                    TxChannel.AllEmSigRegionOfInterest(cc) = 1;                                  
+                    TxChannel.AllIdSigRegionOfInterest(cc) = 1;                                  
                     idxCl = idxCl + 1;
                 end
 
@@ -505,11 +506,12 @@ for cc = 1:length(chNum)
             for ii = 1:size(nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid,1)
                 %check the centroid is in the high gamma range in the
                 %region after image presentation
+                bData = []; %must clear it so it doesn't start over with the next centroid
                 centA = []; bData = []; sData =[];
                 cent = nback.(chNum{cc}).(conditionName{8}).emotionTaskcentroid(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{8}).emotionTaskMean,2);
-                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{8}).emotionTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).allEmotions.emotionTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
                     bData = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                     sData = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
                     sData = normalize(sData,2);
@@ -691,13 +693,14 @@ for cc = 1:length(chNum)
             for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).(resultName{4}),1)
                 %check the centroid is in the high gamma range in the
                 %region after image presentation
+                bData = []; %must clear it so it doesn't start over with the next centroid
                 cent = nback.(chNum{cc}).(conditionName{nn}).(resultName{4})(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).(resultName{1}),2);
                 %check that it's between the frequencies desired and is a
                 %positive deflection, then go trial by trial to get trial
                 %specific statistics.
-                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).(resultName{3}))))>0 %second part to make sure it's positive (or negative, can change here)
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2) && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).identityTasksigclust)))>0 %second part to make sure it's positive (or negative, can change here)
                     bData = identityTaskLFP.byidentity.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                     sData = identityTaskLFP.byidentity.(chNum{cc}).image.specD{idx2};
                     sData = normalize(sData,2);
@@ -883,14 +886,17 @@ for cc = 1:length(chNum)
             end
             for ii = 1:size(nback.(chNum{cc}).(conditionName{nn}).emotionTaskcentroid,1)
                 %check the centroid is in the high gamma range in the
-                %region after image presentation
+                %region after image presentation 
+                bData = []; %must clear it so it doesn't start over with the next centroid
+                %OK NEED TO GO THROUGH THIS CAREFULLY AGAIN. IT'S STILL NOT
+                %RECORDING SOME OF THE CLUSTERS. 8887
                 cent = nback.(chNum{cc}).(conditionName{nn}).emotionTaskcentroid(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{nn}).emotionTaskMean,2);
                 %check that it's between the frequencies desired and is a
                 %positive deflection, then go trial by trial to get trial
                 %specific statistics.
-                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2)  && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).(resultName{8}))))>0
+                if centA(2)>=freqMinMax(1) && centA(2)<=freqMinMax(2) && centA(1) >= timeMinMax(1) && centA(1) <= timeMinMax(2)  && sum(normS1(logical(nback.(chNum{cc}).(conditionName{nn}).emotionTasksigclust)))>0
                     bData = emotionTaskLFP.byemotion.(chNum{cc}).image.bandPassed.(bandNames{bandPassedFreq}){idx2};
                     sData = emotionTaskLFP.byemotion.(chNum{cc}).image.specD{idx2};
                     sData = normalize(sData,2);
@@ -915,13 +921,18 @@ for cc = 1:length(chNum)
                         sDataTemp = sData(:,:,jj); %take the normalized data
 
                         mask = sDataTemp>sdThreshold;
+                       
                         cl_keepPos = [];
-                        %clustP=bwconncomp(mask,8);
-                        % clRPos=regionprops(clustP, 'all'); %get the region properties
-                        % cl_aRPos=[clRPos.Area];
-                        % cl_keepPos=find(cl_aRPos>100); %only keep reasonably large ones
-                        trTrue = 0;
-                        centKeep = []; arKeep = []; BBTemp = []; BB = [];
+                            % clustP=bwconncomp(mask,8);
+                            % clRPos=regionprops(clustP, 'all'); %get the region properties
+                            % cl_aRPos=[clRPos.Area];
+                            % cl_keepPos=find(cl_aRPos>100); %only keep reasonably large ones
+                        trTrue = 0;centKeep = []; arKeep = []; BBTemp = []; BB = []; BBt = []; BBTempT =[];
+                        BBTempT = nback.(chNum{cc}).(conditionName{nn}).emotionTaskBoundingBox(ii,:);
+                        BBt(1,1) =  tt(round(BBTempT(1,1)));
+                        BBt(1,3) = BBt(1,1) + ((tt(2)-tt(1))*BBTempT(1,3));
+                        BBt(1,2) = ff(round(BBTempT(1,2)));
+                        BBt(1,4) = BBt(1,2) + ((ff(2)-ff(1))*BBTempT(1,4));
                         for kk=1:length(cl_keepPos)
                             centr = clRPos(cl_keepPos(kk)).Centroid;
                             centrR(1) = tt(round(centr(1))); centrR(2) = ff(round(centr(2)));
@@ -987,12 +998,10 @@ for cc = 1:length(chNum)
 
                         end
                     end
-
+                    %this part only happens if you have a positive cluster
                     T1 = table(PatientName, RecordingLocation, ChannelNumber, TrialType, AllImagesSignificantAnywhere, ClusterNumber, ImageType, TrialNumber, TimeMinMax, FreqMinMax,  ClusterCenter,...
                         TstatCluster, BoundingBoxTimeRange, BoundingBoxFreqRange, ByTrialCentroid, ByTrialArea, ByTrialBoundingBoxTimeRange, ByTrialBoundingBoxFreqRange, MaxValue, TimeofMax,...
                         CorrectResponse, ResponseTime);
-
-
                     T2 = [T2; T1];%this will combine if there is more than 1 cluster
                 end
 

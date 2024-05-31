@@ -74,7 +74,7 @@ end
 plotForManuscript = 0;
 chNumLocationName = [];
 if plotForManuscript
-    chNumName = {'ch5655', 'ch6968', 'ch7069'};
+    chNumName = {'ch21', 'ch1110', 'ch1817', 'ch1918', 'ch9594', 'ch9695'};
     %clear chNumLocationName
     for jj = 1:length(chNumName)
         for ii = 1:length(channelNameFinal)
@@ -102,7 +102,7 @@ end
 
 savePlotSpecificMat = false;
 if savePlotSpecificMat
-    nS = [7,8,11,12,13,14,53,54,55];
+    nS = [1,2,5,6,7,8,9,10,11,12,25,26,53,54,55,56,57,58];
     plt.save_plots(nS, 'sessionName', sessionName, 'subjName', subjName, ...
         'versionNum', 'v1', 'plotType', 'm');
 end
@@ -114,7 +114,7 @@ end
 %compared 2sd and 1.5 and 1.5 is a better capture of what we are looking
 %for. probably will want a few examples for supp mats.
 [MWX.SigClusterSummStats, MWX.SigClusterSummStatsIndividEmId, MWX.SigClusterChannelCount] = Analysis.emuEmot.comparePowerResponseTime(nbackCompareImageOn, ...
-    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [50 150],...
+    identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [40 150],...
     'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 1.5);
 
 
@@ -126,11 +126,17 @@ end
 %%%%
 MWX.channelName =  channelName; %this is so you can paste in the ID/EM Kept
 MWX.channelLocation = chLocationName';
-MW_16 = MWX;
+%MW_13 = MWX;
+
+for ii = 1:length(channelName)
+    itiRealShuffledTimes.emotionTask.(channelName{ii}) = itiDataReal.EmotionTask.RandomTimeIti.(channelName{ii}).RandomTimesInSec;
+    itiRealShuffledTimes.identityTask.(channelName{ii}) = itiDataReal.EmotionTask.RandomTimeIti.(channelName{ii}).RandomTimesInSec;
+
+end
 %%%%
 
 %% for saving any variables
-saveSelectFile = false;
+saveSelectFile = true;
 if saveSelectFile
     folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', mat2str(chInterest), '_', date);  
@@ -140,15 +146,19 @@ if saveSelectFile
     end
     % fileName = [folder_name, '\', 'itiDataFiltIdentity', '.mat'];    save(fileName);
     % fileName = [folder_name, '\', 'itiDataFiltEmotion', '.mat'];    save(fileName);    
-    fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
-    % fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'emotionTaskLFP', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'identityTaskLFP', '.mat'];    save(fileName);
+    % tTot = tic; %takes 47 minutes... so going to just save the time points of the random data
+    % fileName = [folder_name, '\', 'itiDataReal', '.mat'];    save(fileName, '-v7.3');
+    % toc(tTot)
+    tTot = tic;
+    fileName = [folder_name, '\', 'itiRealShuffledTimes', '.mat'];  save(fileName);
+    toc(tTot)
 
-
-    fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
-    fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
-    %CHANGE MW BELOW!!!
-    fileName = [folder_name, '\', 'MW24', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'nbackCompareImageOn', '.mat'];    save(fileName);
+    % fileName = [folder_name, '\', 'nbackCompareResponse', '.mat'];    save(fileName);
+    % %CHANGE MW BELOW!!!
+    % fileName = [folder_name, '\', 'MW16', '.mat'];    save(fileName);
 
     
 end

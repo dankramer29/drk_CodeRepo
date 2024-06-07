@@ -346,8 +346,8 @@ postTimeRes = 0.5;
 % then smoothing it.
 multiTaperWindow = .2; % in seconds, what window you are doing on this run for multitapering spectrograms (mtspectrogramc, also option to do pspectrum, but haven't used it)
 xshuffles = 1000; %change the number of shuffles. 100 is a nice number to test data with, 500 or 1000 when it's ready for running completed.
-DoPlot = 1; %toggle plotting on or off
-savePlot = 1; %toggle on if you want to save the plots up front, doesn't close them so ok to save them. saves as jpg. in that script you can save them as individual mat files for the paper.
+DoPlot = 0; %toggle plotting on or off
+savePlot = 0; %toggle on if you want to save the plots up front, doesn't close them so ok to save them. saves as jpg. in that script you can save them as individual mat files for the paper.
 saveSelectFile = 0; %toggle on if you want to save select files as mat
 timeCheck = 0; %toggle on if you want to check the clock for neural data and that for behavioral data (right now off by 6 hours as of 11/15/2023 for unknown reasons)
 referenceStrategy = 3;  %case switch 1 is CAR with all electrodes, 2 is with just the ones you are using and,3 is bipolar

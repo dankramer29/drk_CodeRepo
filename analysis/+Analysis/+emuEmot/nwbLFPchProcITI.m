@@ -10,7 +10,6 @@ function [Filtered] = nwbLFPchProcITI(data,varargin)
 [varargin, filtData] = util.argkeyval('filtData',varargin, []); %for speed, if you want to load in processed data instead of running it each time
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %enter the channels
 [varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %window to do spectrogram in with multitaper window in seconds
-[varargin, multiTaperWindow] = util.argkeyval('multiTaperWindow',varargin, .2); %window to do spectrogram in with multitaper window in seconds
 
 
 if isempty(chNum)

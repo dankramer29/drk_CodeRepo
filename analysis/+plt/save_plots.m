@@ -10,7 +10,9 @@ function save_plots( figs, varargin )
 %TO DO FIX IF THE INPUTS AREN'T ENTERED, RIGHT NOW THEY ARE NEEDED REALLY
 %%
 %find if task and folder was entered
+[varargin, folderName, ~, found]=util.argkeyval('folderName', varargin, 'Z:\KramerEmotionID_2023\Data\EMU_nBack');
 [varargin, sessionName, ~, found]=util.argkeyval('sessionName', varargin, []);
+
 %Save the figures. Currently as jpg because the fig files are huge.
 %make it be a cell array
 [varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
@@ -24,7 +26,7 @@ else
 end
 
 if ~isempty(subjName)
-    folder_create=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName);    
+    folder_create=strcat(folderName, '\', sessionName);    
     folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
     %make the directory folder
 

@@ -215,3 +215,21 @@ bb.FaceColor = 'flat';
 for ii = 1:length(C)
     bb.CData(ii,:) = C(ii,:);
 end
+
+%% dark version colors for blue green purple
+%just three
+
+colorTempTest = { '#274e13ff', '#153465ff','#691060ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+
+figure
+X = repmat(10,1,length(C));
+Y = 1:length(C);
+bb = bar(Y,X);
+bb.FaceColor = 'flat';
+for ii = 1:length(C)
+    bb.CData(ii,:) = C(ii,:);
+end

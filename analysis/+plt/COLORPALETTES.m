@@ -233,3 +233,20 @@ bb.FaceColor = 'flat';
 for ii = 1:length(C)
     bb.CData(ii,:) = C(ii,:);
 end
+
+% sunset
+
+colorTempTest = { '#240002', '#6f0100', '#a53005', '#d97d0c', '#fec135'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+
+figure
+X = repmat(10,1,length(C));
+Y = 1:length(C);
+bb = bar(Y,X);
+bb.FaceColor = 'flat';
+for ii = 1:length(C)
+    bb.CData(ii,:) = C(ii,:);
+end

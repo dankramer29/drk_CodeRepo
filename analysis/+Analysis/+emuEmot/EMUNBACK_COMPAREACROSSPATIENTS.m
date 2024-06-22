@@ -21,7 +21,12 @@
 
 % RUN CLUSTER SIZE AND MAYBE CENTROID BASED ON CORRECT VS INCORRECT AND
 % RESPONSE TIME BOUNDING BOX?
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%start by doing this section
+tbleMultCompare = [];
+tbleStatsKW = [];
+tbleMultCompareLR = [];
+tbleStatsKWLR = [];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Sig Cluster stats FOR STRUCTURES AND SIDES, NOT BROKEN INTO TASKS (SO AMYGDALA VS HIPPOCAMPUS, NOT EMOTION VS IDENTITY)
 %Group stats
@@ -41,9 +46,10 @@
 %     cluster centroid by frequency
 %     centroid
 
-clearvars -except MWallForLoading
-meanCluster = true;
-yLimChange = false;
+clearvars -except MWallForLoading tbleMultCompare tbleStatsKW tbleMultCompareLR tbleStatsKWLR
+
+yLimChange = 0;
+homeLaptop = false;%if using home laptop, make 1, if work desktop make 0
 
 
 colorTempTest = {'#228E2C', '#64D413', '#0072BD', '#4DBEEE', '#7E2F8E', '#FF13A6'};
@@ -58,6 +64,15 @@ for ii = 1:length(colorTempTest)
     C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
 colorTemp  = [C(12,:); C(9,:); C(6,:)];
+
+clear colorTempTest2
+clear C2
+colorTempTest2 = { '#274e13ff', '#153465ff','#691060ff'};
+for ii = 1:length(colorTempTest2)
+    str = colorTempTest2{ii};
+    C2(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTempDark = C2;
 
 clmns = MWallForLoading.Properties.VariableNames;
 
@@ -77,7 +92,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % timeFig = 0;
 % meanCluster = true;
 
-% % 
+% % % 
 % clmnNum = 15; %pick the column number here.
 % nameTable = {'Tstat total '};
 % varTested = {'Tstat sum'};
@@ -85,7 +100,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % timeFig = 0;
 % meanCluster = true;
 
-
+% 
 % clmnNum = 16; %pick the column number here.
 % nameTable = {'Cluster Bounding Box Time Onset'};
 % varTested = {'Time (S)'};
@@ -107,7 +122,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % varTested = {'Frequency (Hz)'};
 % testDone = {'Kruskall Wallis'};
 % timeFig = 0;
-% meanCluster = false; %so run it across the clusters
+% meanCluster = true; %so run it across the clusters
 
 %Probably not helpful
 % clmnNum = 19; %pick the column number here. 
@@ -115,9 +130,9 @@ clmns = MWallForLoading.Properties.VariableNames;
 % varTested = {'Frequency (Hz)'};
 % testDone = {'Kruskall Wallis'};
 % timeFig = 0;
-% meanCluster = false; %so run it across the clusters
+% meanCluster = true; %so run it across the clusters
 
-% 
+
 % clmnNum = 27; %pick the column number here.
 % nameTable = {'Peak Power in High Gamma '}; %The max of the bandpassed data 50-150 (I THINK!) in the HG band
 % varTested = {'Power A.U.'};
@@ -125,12 +140,12 @@ clmns = MWallForLoading.Properties.VariableNames;
 % timeFig = 0;
 % meanCluster = false; %so run it across the clusters
 
-% clmnNum = 28; %pick the column number here.
-% nameTable = {'Time of High Gamma Power Max '}; %time of the peak band
-% varTested = {'Time (S)'};
-% testDone = {'Kruskall Wallis'};
-% timeFig = 1;
-% meanCluster = false; %so run it across the cluster
+clmnNum = 28; %pick the column number here.
+nameTable = {'Time of High Gamma Power Max '}; %time of the peak band
+varTested = {'Time (S)'};
+testDone = {'Kruskall Wallis'};
+timeFig = 1;
+meanCluster = false; %so run it across the cluster
 
 
 xx = []; %load with stats of whatever category (say Amygdala centroid time)
@@ -204,35 +219,100 @@ stdYY = nanstd(yy);
 stdZZ = nanstd(zz);
 TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
 tbleTemp = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
-figure
-title(nameTable);
+tbleTemp.("nameTable") = repmat(nameTable,height(tbleTemp),1);
+
+tbleMultCompare = [tbleMultCompare; tbleTemp];
+tbleStatsKW = vertcat(tbleStatsKW, TstTempKW);
+
 xxxT{1} = xx;
 xxxT{2} = yy;
 xxxT{3} = zz;
-h = daviolinplot(xxxT,'violin', 'full', 'colors', colorTemp, 'outlier', 0, 'violinalpha', 0.75, 'xtlabels', {(nameXX{1}); (nameYY{1}); (nameZZ{1})});
-for ii = 1:length(h.ds)
-h.ds(ii).LineWidth = 2;
-h.ds(ii).EdgeColor = 'k';
+
+%just swarm chart
+FigType = 'SwarmTwoColumn';
+spaceBetData = 0.2; %space between the paired data
+f = figure('Name', nameTable{:});
+%f.WindowState = 'maximized';
+title(nameTable);
+fNames = unique(xxxN);
+idx = 1;
+for cci = 1:width(xxxT)
+
+    hold on
+
+    xDataAt = xxxT{cci};
+    xDataA = xDataAt(~isnan(xDataAt)); 
+
+
+    yDataA = (ones(size(xDataA))*idx);
+
+    sA = scatter(yDataA,xDataA,470,colorTemp(cci,:),'filled');
+    sA.XJitter = "density";
+    sA.XJitterWidth = 0.3;
+    sA.MarkerFaceAlpha = 0.4;
+    sA.MarkerEdgeAlpha = 0.4;
+
+    hold on
+    tmpMedianA = median(xDataA);
+    sAM = scatter(yDataA(1),tmpMedianA,900,colorTemp(cci,:),'filled');
+    % sAM.MarkerEdgeColor = 'k';
+    % sAM.LineWidth = 1;
+   
+
+    idx = idx +1;
+
 end
+
 Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT)/2)+0.5];
 Gc.FontSize = 20;
 Gc.YLabel.String = varTested;
 Gc.YLabel.FontSize = 24;
-%Gc.XTickLabel = {(nameXXEm{1}); (nameXXId{1}); (nameYYEm{1}); (nameYYId{1}); (nameZZEm{1}); (nameZZId{1})};
+Gc.XTick = [1:width(xxxT)];
+Gc.XTickLabel = {(nameXX{1}); (nameYY{1}); (nameZZ{1})};
 Gc.XTickLabelRotation = 45;
 Gc.Title.String = (nameTable{:}); %gives a supertitle
 Gc.Title.FontSize = 28;
 if yLimChange
-Gc.YLim = [-1 3];
+    Gc.YLim = [0 1.2];
 end
-if timeFig  
-Gc.View =  [90 90];
-Gc.Position = [0.1365    0.1    0.7685    0.8];
+if timeFig
+    Gc.View =  [90 90];
+    f.WindowState = 'maximized';
+else
+    %Gc.OuterPosition = [0 0 1 1];
+    f.Position = [1.8000   49.8000  766.4000  732.8000]; %to change position just put it where you want then return f.Position and paste it in here.
+    f.WindowState = 'maximized';
+
 end
-open tbleTemp
+
+
+% h = daviolinplot(xxxT,'violin', 'full', 'colors', colorTemp, 'outlier', 0, 'violinalpha', 0.75, 'xtlabels', {(nameXX{1}); (nameYY{1}); (nameZZ{1})});
+% for ii = 1:length(h.ds)
+% h.ds(ii).LineWidth = 2;
+% h.ds(ii).EdgeColor = 'k';
+% end
+% Gc = gca;
+% Gc.FontSize = 20;
+% Gc.YLabel.String = varTested;
+% Gc.YLabel.FontSize = 24;
+% %Gc.XTickLabel = {(nameXXEm{1}); (nameXXId{1}); (nameYYEm{1}); (nameYYId{1}); (nameZZEm{1}); (nameZZId{1})};
+% Gc.XTickLabelRotation = 45;
+% Gc.Title.String = (nameTable{:}); %gives a supertitle
+% Gc.Title.FontSize = 28;
+% if yLimChange
+% Gc.YLim = [-1 3];
+% end
+% if timeFig  
+% Gc.View =  [90 90];
+% Gc.Position = [0.1365    0.1    0.7685    0.8];
+% end
+% open tbleTemp
 
 xxx=[];
 xxxN=[];
+nameTable{1} = strcat(nameTable{1}, ' Left vs Right');
+
 
 %no inputs needed from here below (unless more variables needed, add
 %accordingly)
@@ -261,35 +341,131 @@ stdYYL = nanstd(LAhip);
 stdZZL = nanstd(LPhip);
 TstTempKWLR = table(nameTable, meanXXR, stdXXR, meanXXL, stdXXL, meanYYR, stdYYR,  meanYYL, stdYYL, meanZZR, stdZZR, meanZZL, stdZZL, pvalue,  testDone);
 tbleTempLR = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
-figure
-title(nameTable);
+tbleTempLR.("nameTable") = repmat(nameTable,height(tbleTempLR),1);
+
+tbleMultCompareLR = [tbleMultCompareLR; tbleTempLR];
+tbleStatsKWLR = vertcat(tbleStatsKWLR, TstTempKWLR);
+
 xxxT{1} = Ramy;
 xxxT{2} = Lamy;
 xxxT{3} = RAhip;
 xxxT{4} = LAhip;
 xxxT{5} = RPhip;
 xxxT{6} = LPhip;
-h = daviolinplot(xxxT,'violin', 'full', 'colors', colorTempLR, 'outlier', 0, 'violinalpha', 0.75, 'xtlabels', {(nameRamy{1}); (nameLamy{1}); (nameRAhip{1}); (nameLAhip{1}); (nameRPhip{1}); (nameLPhip{1})});
-for ii = 1:length(h.ds)
-h.ds(ii).LineWidth = 2;
-h.ds(ii).EdgeColor = 'k';
+
+%just swarm chart
+FigType = 'SwarmTwoColumn';
+spaceBetData = 0.4; %space between the paired data
+f = figure('Name', nameTable{:});
+%f.WindowState = 'maximized';
+title(nameTable);
+fNames = unique(xxxN);
+idx = 1; idx1 = 1;
+for cci = 1:2:width(xxxT)
+
+    hold on
+
+    xDataAt = xxxT{cci};
+    xDataA = xDataAt(~isnan(xDataAt));
+    xDataBt = xxxT{cci+1};
+    xDataB = xDataBt(~isnan(xDataBt));
+
+
+    yDataA = (ones(size(xDataA))*idx) - spaceBetData;
+    yDataB = (ones(size(xDataB))*idx) + spaceBetData;
+
+    sA = scatter(yDataA,xDataA,270,colorTempLR(cci,:),'filled');
+    sA.XJitter = "density";
+    sA.XJitterWidth = 0.3;
+    sA.MarkerFaceAlpha = 0.4;
+    sA.MarkerEdgeAlpha = 0.4;
+
+    hold on
+
+    sB = scatter(yDataB,xDataB,270,colorTempLR(cci+1,:),'filled');
+    sB.XJitter = "density";
+    sB.XJitterWidth = 0.3;
+    sB.MarkerFaceAlpha = 0.4;
+    sB.MarkerEdgeAlpha = 0.4;
+
+    tmpMedianA = median(xDataA);
+    sAM = scatter(yDataA(1),tmpMedianA,500,colorTempLR(cci,:),'filled');
+
+    tmpMedianB = median(xDataB);
+    sBM = scatter(yDataB(1),tmpMedianB,500,colorTempLR(cci+1,:),'filled');
+
+    line([yDataA(1) yDataB(1)],[tmpMedianA tmpMedianB],'Color',colorTempDark(idx1,:), 'LineWidth', 3)
+    idx = idx +2; idx1 = idx1 + 1;
+
 end
+
+idx2 = 1;
+for jj = 1:2:(width(xxxT)) %this should always work because you have paired data
+    xtickcenter(idx2) = jj-spaceBetData;
+    idx2 = idx2+1;
+    xtickcenter(idx2) = jj+spaceBetData;
+    idx2 = idx2+1;
+end
+
 Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT)/2)+0.5];
 Gc.FontSize = 20;
 Gc.YLabel.String = varTested;
 Gc.YLabel.FontSize = 24;
-%Gc.XTickLabel = {(nameXXEm{1}); (nameXXId{1}); (nameYYEm{1}); (nameYYId{1}); (nameZZEm{1}); (nameZZId{1})};
+Gc.XTick = xtickcenter; 
+Gc.XTickLabel = {(nameRamy{1}); (nameLamy{1}); (nameRAhip{1}); (nameLAhip{1}); (nameRPhip{1}); (nameLPhip{1})};
 Gc.XTickLabelRotation = 45;
 Gc.Title.String = (nameTable{:}); %gives a supertitle
 Gc.Title.FontSize = 28;
 if yLimChange
-Gc.YLim = [-1 3];
+    Gc.YLim = [0 1.2];
 end
-if timeFig  
-Gc.View =  [90 90];
-Gc.Position = [0.1365    0.1    0.7685    0.8];
+if timeFig
+    Gc.View =  [90 90];
+    f.WindowState = 'maximized';
+else
+    %Gc.OuterPosition = [0 0 1 1];
+    f.Position = [1	1001 960 957.6];
 end
-open tbleTempLR
+
+
+hh =  findobj('type','figure'); 
+nh = length(hh);
+if homeLaptop %if using home laptop, make 1, if work desktop make 0
+plt.save_plots([1:nh], 'folderName', 'C:\Users\kramdani\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'AnatomicStructure', ...
+        'versionNum', 'v1', 'plotType', 'png');
+plt.save_plots([2], 'folderName', 'C:\Users\kramdani\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'AnatomicStructure', ...
+        'versionNum', 'v1', 'plotType', 'svg');
+else
+plt.save_plots([1:nh], 'folderName', 'C:\Users\dankr\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'AnatomicStructure', ...
+        'versionNum', 'v1', 'plotType', 'png');
+plt.save_plots([2,4], 'folderName', 'C:\Users\dankr\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'AnatomicStructure', ...
+        'versionNum', 'v1', 'plotType', 'svg');
+
+end
+close all
+
+% h = daviolinplot(xxxT,'violin', 'full', 'colors', colorTempLR, 'outlier', 0, 'violinalpha', 0.75, 'xtlabels', {(nameRamy{1}); (nameLamy{1}); (nameRAhip{1}); (nameLAhip{1}); (nameRPhip{1}); (nameLPhip{1})});
+% for ii = 1:length(h.ds)
+% h.ds(ii).LineWidth = 2;
+% h.ds(ii).EdgeColor = 'k';
+% end
+% Gc = gca;
+% Gc.FontSize = 20;
+% Gc.YLabel.String = varTested;
+% Gc.YLabel.FontSize = 24;
+% %Gc.XTickLabel = {(nameXXEm{1}); (nameXXId{1}); (nameYYEm{1}); (nameYYId{1}); (nameZZEm{1}); (nameZZId{1})};
+% Gc.XTickLabelRotation = 45;
+% Gc.Title.String = (nameTable{:}); %gives a supertitle
+% Gc.Title.FontSize = 28;
+% if yLimChange
+% Gc.YLim = [-1 3];
+% end
+% if timeFig  
+% Gc.View =  [90 90];
+% Gc.Position = [0.1365    0.1    0.7685    0.8];
+% end
+% open tbleTempLR
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,6 +493,7 @@ tbleStatsKW = [];
 
 clearvars -except MWallForLoading tbleMultCompare tbleStatsKW
 yLimChange = 0;
+homeLaptop = false%if using home laptop, make 1, if work desktop make 0
 
 %darker
 % colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -401,9 +578,9 @@ clmns = MWallForLoading.Properties.VariableNames;
 % varTested = {'Time (S)'};
 % testDone = {'Kruskall Wallis'};
 % timeFig = 1;
-%PlotType = 3; %double swarm chart
-% meanCluster = false; %so run it across the clusters
-
+% PlotType = 3; %double swarm chart
+% meanCluster = true;
+% 
 % clmnNum = 17; %pick the column number here.
 % nameTable = {'Cluster Bounding Box Time Offset  '};
 % varTested = {'Time (S)'};
@@ -418,7 +595,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % testDone = {'Kruskall Wallis'};
 % timeFig = 0;
 % meanCluster = false; %so run it across the clusters
-%PlotType = 3; %double swarm chart
+% PlotType = 3; %double swarm chart
 
 
 % clmnNum = 19; %pick the column number here.
@@ -427,7 +604,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % testDone = {'Kruskall Wallis'};
 % timeFig = 0;
 % meanCluster = false; %so run it across the clusters
-%PlotType = 3; %double swarm chart
+% PlotType = 3; %double swarm chart
 
 % clmnNum = 27; %pick the column number here.
 % nameTable = {'Peak Power in High Gamma '}; %The max of the bandpassed data 50-150 (I THINK!) in the HG band
@@ -443,7 +620,7 @@ clmns = MWallForLoading.Properties.VariableNames;
 % testDone = {'Kruskall Wallis'};
 % timeFig = 1;
 % meanCluster = false; %so run it across the clusters
-%PlotType = 3; %double swarm chart
+% PlotType = 3; %double swarm chart
 
 %pull out the areas you want
 idxX = 1; idxY = 1; idxZ = 1;
@@ -717,13 +894,120 @@ end
 
 hh =  findobj('type','figure'); 
 nh = length(hh);
+if homeLaptop %if using home laptop, make 1, if work desktop make 0
 plt.save_plots([1:nh], 'folderName', 'C:\Users\kramdani\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'EmvId', ...
         'versionNum', 'v1', 'plotType', 'png');
 plt.save_plots([2], 'folderName', 'C:\Users\kramdani\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'EmvId', ...
         'versionNum', 'v1', 'plotType', 'svg');
-%close all
+else
+plt.save_plots([1:nh], 'folderName', 'C:\Users\dankr\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'EmvId', ...
+        'versionNum', 'v1', 'plotType', 'png');
+plt.save_plots([2], 'folderName', 'C:\Users\dankr\Dropbox\Attending\Projects\Amygdala BF\LFP_nBack\Figs', 'sessionName', FigType, 'subjName', 'EmvId', ...
+        'versionNum', 'v1', 'plotType', 'svg');
+
+end
+close all
 
 
+%% channels with matched significance
+
+clear colorTempTest
+clear C
+colorTempTest = {'#38761dff', '#93c47dff', '#0b5394ff', '#6d9eebff', '#9c1eb0ff', '#a587c9ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = C;
+
+% Sample data for the colors of the squares
+% Each cell represents a color for a square in a pair of bars
+% 1 represents color1, 2 represents color2
+pairedChannels = {
+    Amy,  % Pair 1 (6 squares)
+    Ahip,  % Pair 2 (8 squares)
+    APhip  % Pair 3 (6 squares)
+};
+
+% Colors for the squares
+color1 = [0 0.4470 0.7410];  % Blue
+color2 = [0.8500 0.3250 0.0980];  % Red
+
+% Create the figure
+figure;
+hold on;
+
+% Parameters
+squareSize = 0.9;  % Size of each square
+barWidth = 0.4;  % Width of each bar
+smallGap = 0.5;  % Small gap between paired bars
+largeGap = 2;  % Large gap between pairs of bars
+
+% Loop through each pair of bars
+idx = 1; idx2 = 1;
+for i = 1:length(pairedChannels)
+    color1 = colorTemp(idx,:);
+    idx = idx+1;
+    color2 = colorTemp(idx,:);
+    idx = idx+1;
+    for j = 1:2
+        % Get the colors for the squares in the current bar
+        chTemp = pairedChannels{i}(j, :);
+        if j==1
+            color = color1;
+        elseif j == 2
+            color = color2;
+        end
+        % Plot each square
+        for k = 1:length(chTemp)
+            
+            if chTemp(k) == 1
+                mask = 1;
+            else
+                mask = 0.2;
+            end
+            
+            % Calculate position
+            x = (2*i - 2 + j) * (barWidth + smallGap) + (i - 1) * (largeGap - smallGap);
+            xtickLoc(idx2,1) = x;
+            idx2 = idx2 + 1;
+            y = k - 1;
+            
+            % Define the vertices of the square
+            vertices = [x, y; x+squareSize, y; x+squareSize, y+squareSize; x, y+squareSize];
+            
+            % Plot the square
+            patch('Vertices', vertices, 'Faces', [1 2 3 4], 'FaceColor', color, 'EdgeColor', 'none', 'FaceAlpha', mask);
+        end
+    end
+end
+
+xtickLoct = unique(xtickLoc);
+
+tickLabel ={'Amygdala Emotion'
+'Amygdala Identity'
+'Anterior Hippocampus Emotion'
+'Anterior Hippocampus Identity'
+'Posterior Hippocampus Emotion'
+'Posterior Hippocampus Identity'};
+
+% Set the x-axis labels
+set(gca, 'XTick', xtickLoct, 'XTickLabel', tickLabel);
+
+% Add labels and title
+ylabel('Electrode Count');
+title('Electrodes with High Gamma Activity During Each Task');
+
+% Adjust the limits
+xlim([0 (2*length(pairedChannels)) * (barWidth + gap)+2]);
+ylim([0 max(cellfun(@(x) size(x, 2), pairedChannels)) + 2]);
+
+hold off;
+
+Gc = gca;
+Gc.FontSize = 22;
+Gc.XTickLabelRotation = 45;
+Gc.Title.FontSize = 26;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% for doing the groups of say time (meaning do like the bounding box and centroid
@@ -927,20 +1211,9 @@ open tbleTemp
 xxx=[];
 xxxN=[];
 
-%% channels with matched significance
-
-figure
-meshgrid(1:11)
-
-
-colorTempTest = {'#228E2C', '#64D413', '#0072BD', '#4DBEEE', '#7E2F8E', '#FF13A6'};
-for ii = 1:length(colorTempTest)
-    str = colorTempTest{ii};
-    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
-end
-colorTemp = C;
 
 %%
+
 
 %Unused swarmchart, in favor of violin plots
 wdth = 1;

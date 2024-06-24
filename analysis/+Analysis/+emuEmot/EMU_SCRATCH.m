@@ -1,6 +1,39 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
+% data in a cell array 
+data1{1} = randn([30,1]);   % Humans
+data1{2} = randn([40,1]);   % Dogs
+data1{3} = randn([50,1]);   % God
+% data in a matrix (+ grouping indices)
+data2 = [randn([30,4]); randn([30,4]);...
+         randn([30,4]); randn([30,4])];
+group_inx = [ones(1,30), 2.*ones(1,30) 3.*ones(1,30) 4.*ones(1,30)];
+% new data in a cell array with group differences 
+data3{1} = randn([20,3]) + (0:0.5:1);    % Humans
+data3{2} = randn([20,3]) - (2:2:6);      % Dogs
+group_names = {'Humans', 'Dogs' , 'God', 'Potato'};
+condition_names = {'Water', 'Land', 'Moon', 'Hyperspace'};
+% an alternative color scheme for some plots
+c =  [0.45, 0.80, 0.69;...
+      0.98, 0.40, 0.35;...
+      0.55, 0.60, 0.79;...
+      0.90, 0.70, 0.30]; 
+  
+figure('Name', 'daviolinplot_demo','WindowStyle','docked');
+% default half-violin + boxplots for three groups and one condition 
+subplot(3,3,1)
+h = daviolinplot(data2(:,1),'groups',group_inx(1:90));
+% adding jittered scattered data same color boxplots for 2x2 data
+subplot(3,3,2)
+h = daviolinplot(data2(:,1:2),'groups',group_inx(1:60),'outsymbol','k+',...
+    'boxcolors','same','scatter',1,'jitter',1,'xtlabels', condition_names,...
+    'legend',group_names(1:2));
+ylabel('Performance');
+xl = xlim; xlim([xl(1)-0.1, xl(2)+0.2]); % make more space for the legend
+set(gca,'FontSize',10);
+
+%%
 emotionTaskLFP = emotionTaskLFP_noNoiseRemoval;
 
 SS1 = emotionTaskLFP.byemotion.ch3433.image.specD{1};

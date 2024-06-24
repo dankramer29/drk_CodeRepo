@@ -21,6 +21,106 @@
 
 % RUN CLUSTER SIZE AND MAYBE CENTROID BASED ON CORRECT VS INCORRECT AND
 % RESPONSE TIME BOUNDING BOX?
+
+%%
+%%%%%
+%correct vs incorrect
+% REMEMBER TO PASTE BIPALLPATIENTSBEHAVIORAL INSTEAD OF THE USUAL
+clmns = MWallForLoading.Properties.VariableNames;
+
+
+colorTempTest = {'#90eaeaff', '#f49ac0ff', '#2d5999ff', '#fa7361ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = [C(1,:); C(2,:); C(3,:); C(4,:)];
+colorTemp2 = [C(3,:); C(4,:)];
+
+clmnNum = 6; %correct response
+
+%pull the correct trials for the total
+EmotTaskTot = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" ); 
+IdTaskTot = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'");
+corEmT = nnz(EmotTaskTot);
+corIdT = nnz(IdTaskTot);
+perCorEmIdT(1,1) = corEmT/length(EmotTaskTot);
+perCorEmIdT(1,2) = corIdT/length(IdTaskTot);
+
+ptNameT = MWallForLoading.PatientName;
+ptName = unique(ptNameT);
+for ii = 1:length(ptName)
+    EmotTask = []; IdTask = [];
+    %collect emotion task and id task by patient
+    EmotTask = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" &  MWallForLoading.PatientName == ptName(ii));
+    IdTask = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'" &  MWallForLoading.PatientName == ptName(ii));
+    corEm = nnz(EmotTask);
+    corId = nnz(IdTask);
+    perCorEmId(ii,1) = corEm/length(EmotTask); %this is in numerical order so MW2 is first
+    perCorEmId(ii,2) = corId/length(IdTask);
+end
+
+perCorEmIdTall = vertcat(perCorEmIdT,perCorEmId); 
+
+figure
+
+b=bar(perCorEmIdTall*100);
+b(1).BarWidth = 1;
+b(2).BarWidth = 1;
+b(1).FaceColor = colorTemp(1,:);
+b(2).FaceColor = colorTemp(2,:);
+
+Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT)/2)+0.5];
+Gc.FontSize = 24;
+Gc.YLabel.String = 'Percent Correct';
+Gc.YLabel.FontSize = 28;
+Gc.XTickLabel = {'All'; 'MW2'; 'MW5'; 'MW9'; 'MW13'; 'MW16'; 'MW18'; 'MW19'; 'MW21'; 'MW22'; 'MW23'; 'MW24'};
+Gc.XTickLabelRotation = 45;
+Gc.Title.String = (nameTable{:}); %gives a supertitle
+Gc.Title.FontSize = 28;
+Gc.Title.String = 'Percent Correct By Participant'; %gives a supertitle
+legend('Emotion Task', 'Identity Task')
+
+%%
+clmnNum = 7; %correct response
+
+%pull the correct trials for the total
+EmIdRt(:,1) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" ); 
+EmIdRt(:,2) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'");
+
+f=figure;
+subplot (2, 1, 1)
+h = daviolinplot(EmIdRt,'violin', 'full', 'colors', colorTemp2, 'outlier', 0, 'violinalpha', 0.75, 'xtlabels', ["Emotion Task"; "Identity Task"]);
+for ii = 1:length(h.ds)
+    h.ds(ii).LineWidth = 1;
+    h.ds(ii).EdgeColor = 'k';
+    h.ds(2).FaceColor = colorTemp2(2,:);
+end
+
+Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT)/2)+0.5];
+Gc.FontSize = 24;
+Gc.YLabel.String = 'Reaction time';
+Gc.YLabel.FontSize = 28;
+Gc.XTickLabel = {'All'};
+%Gc.XTickLabelRotation = 45;
+Gc.Title.String = 'Reaction time all and per participant'; %gives a supertitle
+Gc.Title.FontSize = 28;
+legend('Emotion Task', 'Identity Task')
+Gc.View =  [90 90];
+f.WindowState = 'maximized';
+
+
+    rtEmId(ii,1) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'");
+    rtEmId(ii,2) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'" );
+    nameEmId = MWallForLoading.PatientName;
+   
+
+
+
+ {'MW2'; 'MW5'; 'MW9'; 'MW13'; 'MW16'; 'MW18'; 'MW19'; 'MW21'; 'MW22'; 'MW23'; 'MW24'};
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %start by doing this section
 tbleMultCompare = [];

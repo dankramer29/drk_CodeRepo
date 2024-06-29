@@ -2,6 +2,15 @@
 %%
 % EMUNBACK_PROC
 
+% Image 1 - 2 seconds
+% Blue cross - ~ 5 seconds
+% Image 2 - 2 seconds
+% White cross - 2 seconds (response)
+% Blue cross - ~ 5 seconds
+% Image 3 - 2 seconds
+% White cross - 2 seconds (response)
+% Blue cross - ~ 5 seconds
+
 %MW13 9 is identity, 10 is emotion
 %MW16 has hexcode but all hexs are 255. has 167 ttls x2 which is 334, but
 %actually has 332. 

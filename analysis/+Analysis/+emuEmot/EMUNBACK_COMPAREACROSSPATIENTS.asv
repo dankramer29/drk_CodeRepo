@@ -913,6 +913,355 @@ end
 close all
 
 
+%% channels with matched significance (the boxes)
+
+clear colorTempTest
+clear C
+colorTempTest = {'#38761dff', '#93c47dff', '#0b5394ff', '#6d9eebff', '#9c1eb0ff', '#a587c9ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = C;
+
+% Sample data for the colors of the squares
+% Each cell represents a color for a square in a pair of bars
+% 1 represents color1, 2 represents color2
+pairedChannels = {
+    Amy,  % Pair 1 (6 squares)
+    Ahip,  % Pair 2 (8 squares)
+    APhip  % Pair 3 (6 squares)
+};
+
+% Colors for the squares
+color1 = [0 0.4470 0.7410];  % Blue
+color2 = [0.8500 0.3250 0.0980];  % Red
+
+% Create the figure
+figure;
+hold on;
+
+% Parameters
+squareSize = 0.9;  % Size of each square
+barWidth = 0.4;  % Width of each bar
+smallGap = 0.5;  % Small gap between paired bars
+largeGap = 2;  % Large gap between pairs of bars
+
+% Loop through each pair of bars
+idx = 1; idx2 = 1;
+for i = 1:length(pairedChannels)
+    color1 = colorTemp(idx,:);
+    idx = idx+1;
+    color2 = colorTemp(idx,:);
+    idx = idx+1;
+    for j = 1:2
+        % Get the colors for the squares in the current bar
+        chTemp = pairedChannels{i}(j, :);
+        if j==1
+            color = color1;
+        elseif j == 2
+            color = color2;
+        end
+        % Plot each square
+        for k = 1:length(chTemp)
+            
+            if chTemp(k) == 1
+                mask = 1;
+            else
+                mask = 0.2;
+            end
+            
+            % Calculate position
+            x = (2*i - 2 + j) * (barWidth + smallGap) + (i - 1) * (largeGap - smallGap);
+            xtickLoc(idx2,1) = x;
+            idx2 = idx2 + 1;
+            y = k - 1;
+            
+            % Define the vertices of the square
+            vertices = [x, y; x+squareSize, y; x+squareSize, y+squareSize; x, y+squareSize];
+            
+            % Plot the square
+            patch('Vertices', vertices, 'Faces', [1 2 3 4], 'FaceColor', color, 'EdgeColor', 'none', 'FaceAlpha', mask);
+        end
+    end
+end
+
+xtickLoct = unique(xtickLoc);
+
+tickLabel ={'Amygdala Emotion'
+'Amygdala Identity'
+'Anterior Hippocampus Emotion'
+'Anterior Hippocampus Identity'
+'Posterior Hippocampus Emotion'
+'Posterior Hippocampus Identity'};
+
+% Set the x-axis labels
+set(gca, 'XTick', xtickLoct, 'XTickLabel', tickLabel);
+
+% Add labels and title
+ylabel('Electrode Count');
+title('Electrodes with High Gamma Activity During Each Task');
+
+% Adjust the limits
+xlim([0 (2*length(pairedChannels)) * (barWidth + gap)+2]);
+ylim([0 max(cellfun(@(x) size(x, 2), pairedChannels)) + 2]);
+
+hold off;
+
+Gc = gca;
+Gc.FontSize = 22;
+Gc.XTickLabelRotation = 45;
+Gc.Title.FontSize = 26;
+
+%%
+%trying to make the boxes different sizes based on tstat
+clmns = MWallForLoading.Properties.VariableNames;
+% for ii = 1:height(MWallForLoading)
+%     tempCh = 
+%     if MWallForLoading(ii).ChannelNumber
+AmyEm(ii,1) = MWallForLoading.(clmns{15})(MWallForLoading.RecordingLocation == "'Amygdala'" & MWallForLoading.TrialType == "'emotionTask'"); 
+
+clear colorTempTest
+clear C
+colorTempTest = {'#38761dff', '#93c47dff', '#0b5394ff', '#6d9eebff', '#9c1eb0ff', '#a587c9ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = C;
+
+% Sample data for the colors of the squares
+% Each cell represents a color for a square in a pair of bars
+% 1 represents color1, 2 represents color2
+pairedChannels = {
+    Amy,  % Pair 1 (6 squares)
+    Ahip,  % Pair 2 (8 squares)
+    APhip  % Pair 3 (6 squares)
+};
+
+% Colors for the squares
+color1 = [0 0.4470 0.7410];  % Blue
+color2 = [0.8500 0.3250 0.0980];  % Red
+
+% Create the figure
+figure;
+hold on;
+
+% Parameters
+squareSize = 0.9;  % Size of each square
+barWidth = 0.4;  % Width of each bar
+smallGap = 0.5;  % Small gap between paired bars
+largeGap = 2;  % Large gap between pairs of bars
+
+% Loop through each pair of bars
+idx = 1; idx2 = 1;
+for i = 1:length(pairedChannels)
+    color1 = colorTemp(idx,:);
+    idx = idx+1;
+    color2 = colorTemp(idx,:);
+    idx = idx+1;
+    for j = 1:2
+        % Get the colors for the squares in the current bar
+        chTemp = pairedChannels{i}(j, :);
+        if j==1
+            color = color1;
+        elseif j == 2
+            color = color2;
+        end
+        % Plot each square
+        for k = 1:length(chTemp)
+            
+            if chTemp(k) == 1
+                mask = 1;
+            else
+                mask = 0.2;
+            end
+            
+            % Calculate position
+            x = (2*i - 2 + j) * (barWidth + smallGap) + (i - 1) * (largeGap - smallGap);
+            xtickLoc(idx2,1) = x;
+            idx2 = idx2 + 1;
+            y = k - 1;
+            
+            % Define the vertices of the square
+            vertices = [x, y; x+squareSize, y; x+squareSize, y+squareSize; x, y+squareSize];
+            
+            % Plot the square
+            patch('Vertices', vertices, 'Faces', [1 2 3 4], 'FaceColor', color, 'EdgeColor', 'none', 'FaceAlpha', mask);
+        end
+    end
+end
+
+xtickLoct = unique(xtickLoc);
+
+tickLabel ={'Amygdala Emotion'
+'Amygdala Identity'
+'Anterior Hippocampus Emotion'
+'Anterior Hippocampus Identity'
+'Posterior Hippocampus Emotion'
+'Posterior Hippocampus Identity'};
+
+% Set the x-axis labels
+set(gca, 'XTick', xtickLoct, 'XTickLabel', tickLabel);
+
+% Add labels and title
+ylabel('Electrode Count');
+title('Electrodes with High Gamma Activity During Each Task');
+
+% Adjust the limits
+xlim([0 (2*length(pairedChannels)) * (barWidth + gap)+2]);
+ylim([0 max(cellfun(@(x) size(x, 2), pairedChannels)) + 2]);
+
+hold off;
+
+Gc = gca;
+Gc.FontSize = 22;
+Gc.XTickLabelRotation = 45;
+Gc.Title.FontSize = 26;
+
+%%
+%%%%%
+%correct vs incorrect
+% REMEMBER TO PASTE BIPALLPATIENTSBEHAVIORAL INSTEAD OF THE USUAL
+clmns = MWallForLoading.Properties.VariableNames;
+
+
+colorTempTest = {'#90eaeaff', '#f49ac0ff', '#2d5999ff', '#fa7361ff', '#113d79ff'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+colorTemp = [C(1,:); C(2,:); C(3,:); C(4,:)];
+colorTemp2 = [C(3,:); C(4,:); C(5,:)];
+
+ptNameT = MWallForLoading.PatientName;
+ptName = unique(ptNameT);
+
+%
+
+clmnNum = 6; %correct response
+
+%pull the correct trials for the total
+EmotTaskTot = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" ); 
+IdTaskTot = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'");
+corEmT = nnz(EmotTaskTot);
+corIdT = nnz(IdTaskTot);
+perCorEmIdT(1,1) = corEmT/length(EmotTaskTot);
+perCorEmIdT(1,2) = corIdT/length(IdTaskTot);
+
+
+for ii = 1:length(ptName)
+    EmotTask = []; IdTask = [];
+    %collect emotion task and id task by patient
+    EmotTask = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" &  MWallForLoading.PatientName == ptName(ii));
+    IdTask = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'" &  MWallForLoading.PatientName == ptName(ii));
+    corEm = nnz(EmotTask);
+    corId = nnz(IdTask);
+    perCorEmId(ii,1) = corEm/length(EmotTask); %this is in numerical order so MW2 is first
+    perCorEmId(ii,2) = corId/length(IdTask);
+end
+
+mn1 = mean(perCorEmId,1);
+[sorted, size]
+
+perCorEmId = sort(perCorEmI)
+
+perCorEmIdTall = vertcat(perCorEmIdT,perCorEmId); 
+%SORT THEM
+perCorEmIdTall = sort
+
+
+figure
+
+b=bar(perCorEmIdTall*100);
+b(1).BarWidth = 1;
+b(2).BarWidth = 1;
+b(1).FaceColor = colorTemp(1,:);
+b(2).FaceColor = colorTemp(2,:);
+
+Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT)/2)+0.5];
+Gc.FontSize = 24;
+Gc.YLabel.String = 'Percent Correct';
+Gc.YLabel.FontSize = 28;
+Gc.XTickLabel = {'All'; 'MW2'; 'MW5'; 'MW9'; 'MW13'; 'MW16'; 'MW18'; 'MW19'; 'MW21'; 'MW22'; 'MW23'; 'MW24'};
+Gc.XTickLabelRotation = 45;
+Gc.Title.String = (nameTable{:}); %gives a supertitle
+Gc.Title.FontSize = 28;
+Gc.Title.String = 'Percent Correct By Participant'; %gives a supertitle
+legend('Emotion Task', 'Identity Task')
+
+%%
+clmnNum = 7; %correct response
+
+%pull the correct trials for the total
+xxxT{1}(:,1) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'" ); 
+xxxT{1}(:,2) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'" );
+for ii = 1:length(ptName)
+xxxT{ii+1}(:,1) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'emotionTask'"  &  MWallForLoading.PatientName == ptName(ii)); 
+xxxT{ii+1}(:,2) = MWallForLoading.(clmns{clmnNum})(MWallForLoading.TrialType == "'identityTask'"  &  MWallForLoading.PatientName == ptName(ii));
+end
+
+FigType = 'SwarmTwoColumn';
+spaceBetData = 0.2; %space between the paired data
+f = figure('Name', 'Reaction Times');
+%f.WindowState = 'maximized';
+title('Reaction Times');
+
+idx = 1;
+for cci = 1:width(xxxT)
+
+    hold on
+
+    xDataAt = xxxT{cci}(:,1);
+    xDataA = xDataAt(~isnan(xDataAt));
+    xDataBt = xxxT{cci}(:,2);
+    xDataB = xDataBt(~isnan(xDataBt));
+
+
+    yDataA = (ones(size(xDataA))*idx) - spaceBetData;
+    yDataB = (ones(size(xDataB))*idx) + spaceBetData;
+
+    sA = scatter(yDataA,xDataA,140,colorTemp2(1,:),'filled');
+    sA.XJitter = "density";
+    sA.XJitterWidth = 0.2;
+    sA.MarkerFaceAlpha = 0.3;
+    sA.MarkerEdgeAlpha = 0.3;
+
+    hold on
+
+    sB = scatter(yDataB,xDataB,140,colorTemp2(2,:),'filled');
+    sB.XJitter = "density";
+    sB.XJitterWidth = 0.2;
+    sB.MarkerFaceAlpha = 0.3;
+    sB.MarkerEdgeAlpha = 0.3;
+
+    tmpMedianA = median(xDataA);
+    sAM = scatter(yDataA(1),tmpMedianA,300,colorTemp2(1,:),'filled');
+    sAM.MarkerEdgeColor = 'k';
+    sAM.LineWidth = 2;
+
+    tmpMedianB = median(xDataB);
+    sBM = scatter(yDataB(1),tmpMedianB,300,colorTemp2(2,:),'filled');
+    sBM.MarkerEdgeColor = 'k';
+    sBM.LineWidth = 2;
+
+    line([yDataA(1) yDataB(1)],[tmpMedianA tmpMedianB],'Color',colorTemp2(3,:), 'LineWidth', 3)
+    idx = idx +1;
+
+end
+
+Gc = gca;
+%Gc.XLim = [0.5 (width(xxxT))+0.5];
+Gc.FontSize = 20;
+Gc.YLabel.String = 'Reaction Time (S)';
+Gc.YLabel.FontSize = 24;
+Gc.XTick = [1:width(xxxT)];
+Gc.XTickLabel = {'All'; 'MW2'; 'MW5'; 'MW9'; 'MW13'; 'MW16'; 'MW18'; 'MW19'; 'MW21'; 'MW22'; 'MW23'; 'MW24'};
+Gc.XTickLabelRotation = 45;
+Gc.Title.FontSize = 28;
+    Gc.View =  [90 90];
+legend('Emotion Task', 'Identity Task');
 
 
 

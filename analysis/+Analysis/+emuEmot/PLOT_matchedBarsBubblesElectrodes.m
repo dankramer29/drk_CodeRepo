@@ -103,7 +103,7 @@ Gc.Title.FontSize = 26;
 %THIS IS WITH BUBBLES
 %first, i made a separate excel with only 'PatientName'	'RecordingLocation'	'ChannelNumber'	'TrialType'	'AllImagesSignificantAnywhere'	'ClusterNumber'	'TstatCluster'
 %GAVE UP AND HAND SORTED IN EXCEL
-clmns = MWallForLoading2.Properties.VariableNames;
+%clmns = MWallForLoading2.Properties.VariableNames;
 
 AmyClusterSum =[1790.49309100000	0
 3073.00035200000	2996.49985200000

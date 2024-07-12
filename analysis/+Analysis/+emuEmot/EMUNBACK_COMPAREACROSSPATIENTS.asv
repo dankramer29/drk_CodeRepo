@@ -497,10 +497,8 @@ tbleStatsKW = [];
 %     centroid
 
 clearvars -except MWallForLoading tbleMultCompare tbleStatsKW
-closePlots = 0;
 yLimChange = 0;
 homeLaptop = false;%if using home laptop, make 1, if work desktop make 0
-
 
 %darker
 % colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -552,13 +550,13 @@ colorTempDark = C2;
 clmns = MWallForLoading.Properties.VariableNames;
 
 % % % 
-clmnNum = 15; %pick the column number here.
-nameTable = {'Tstat total '};
-varTested = {'Tstat sum'};
-testDone = {'Kruskall Wallis'};
-timeFig = 0;
-meanCluster = true;
-PlotType = 3; %double swarm chart
+% clmnNum = 15; %pick the column number here.
+% nameTable = {'Tstat total '};
+% varTested = {'Tstat sum'};
+% testDone = {'Kruskall Wallis'};
+% timeFig = 0;
+% meanCluster = true;
+% PlotType = 3; %double swarm chart
 
 % Time:
 % clmnNum = 13; %pick the column number here.
@@ -894,11 +892,7 @@ switch PlotType
             f.WindowState = 'maximized';
         else
             %Gc.OuterPosition = [0 0 1 1];
-            if homeLaptop
-                f.Position = [1	1001 960 957.6];
-            else
-                f.Position = [1.8000   49.8000  766.4000  732.8000];
-            end
+            f.Position = [1	1001 960 957.6];
         end      
 
 end
@@ -917,9 +911,8 @@ plt.save_plots([2], 'folderName', 'C:\Users\dankr\Dropbox\Attending\Projects\Amy
         'versionNum', 'v1', 'plotType', 'svg');
 
 end
-if closePlots
 close all
-end
+
 
 
 

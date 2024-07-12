@@ -29,6 +29,7 @@ colorTemp2 = [C(3,:); C(4,:); C(5,:)];
 
 ptNameT = MWallForLoading3.PatientName;
 ptName = unique(ptNameT);
+ptName(isnan(ptName))=[];
 
 %
 
@@ -78,7 +79,6 @@ nmsortt = nmsort(sI);
 nmsorttF = vertcat('All', nmsortt);
 Gc.XTickLabel = nmsorttF;
 Gc.XTickLabelRotation = 45;
-Gc.Title.String = (nameTable{:}); %gives a supertitle
 Gc.Title.FontSize = 28;
 Gc.Title.String = 'Percent Correct By Participant'; %gives a supertitle
 legend('Emotion Task', 'Identity Task')

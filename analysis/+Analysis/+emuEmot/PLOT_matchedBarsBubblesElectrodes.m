@@ -157,6 +157,42 @@ PHipClusterSum = [2961.29438400000	0
 clusterSum{1} = AmyClusterSum;
 clusterSum{2} = AHipClusterSum;
 clusterSum{3} = PHipClusterSum;
+
+clusterSumT = AmyClusterSum(:,1);
+clusterSumT = vertcat(clusterSumT, AHipClusterSum(:,1));
+clusterSumT = vertcat(clusterSumT,PHipClusterSum(:,1));
+clusterSumT = vertcat(clusterSumT,AmyClusterSum(:,2));
+clusterSumT = vertcat(clusterSumT,AHipClusterSum(:,2));
+clusterSumT = vertcat(clusterSumT,PHipClusterSum(:,2));
+xxx= clusterSumT;
+for ii = 1:length(AmyClusterSum(:,1)); nameXXEm{ii,1} = 'Amygdala Emotion'; end
+for ii = 1:length(AHipClusterSum); nameYYEm{ii,1} = 'Anterior Hippocampus Emotion'; end
+for ii = 1:length(PHipClusterSum); nameZZEm{ii,1} = 'Posterior Hippocampus Emotion'; end
+for ii = 1:length(AmyClusterSum); nameXXId{ii,1} = 'Amygdala Identity'; end
+for ii = 1:length(AHipClusterSum); nameYYId{ii,1} = 'Anterior Hippocampus Identity'; end
+for ii = 1:length(PHipClusterSum); nameZZId{ii,1} = 'Posterior Hippocampus Identity'; end
+xxxN = vertcat(nameXXEm, nameXXId, nameYYEm, nameYYId, nameZZEm, nameZZId);
+xxx(xxx==0) = [];
+xxxN(xxx==0) = [];
+figure
+[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+multC = multcompare(stats);
+meanXX = nanmean(xx);
+meanYY = nanmean(yy);
+meanZZ = nanmean(zz);
+medianXX = nanmedian(xx);
+medianYY = nanmedian(yy);
+medianZZ = nanmedian(zz);
+stdXX = nanstd(xx);
+stdYY = nanstd(yy);
+stdZZ = nanstd(zz);
+TstTempKW = table(nameTable, meanXX, stdXX, meanYY, stdYY, meanZZ, stdZZ, pvalue,  testDone);
+tbleTemp = array2table(multC, "VariableNames", ["Category 1", "Category 2", "Lower Limit", "A-B", "Upper Limit", "P-value"]);
+tbleTemp.("nameTable") = repmat(nameTable,height(tbleTemp),1);
+
+tbleMultCompare = [tbleMultCompare; tbleTemp];
+tbleStatsKW = vertcat(tbleStatsKW, TstTempKW);
+
 clear colorTempTest xtickLoc xtickLoct
 clear C
 colorTempTest = {'#38761dff', '#93c47dff', '#0b5394ff', '#6d9eebff', '#9c1eb0ff', '#a587c9ff'};

@@ -4,60 +4,60 @@
 %toy data for Nick 
 %MW18 channel 161160
 
-filterNum = fields(identityTaskLFP.byidentity.ch3938.image.bandPassed);
+filterNum = fields(identityTaskLFP.byidentity.ch161160.image.bandPassed);
 
 for ii = 1:length(filterNum)
     clear temp1 temp2 temp3
-temp1 = identityTaskLFP.byidentity.ch3938.image.bandPassed.(filterNum{ii}){1};
-temp2 = identityTaskLFP.byidentity.ch3938.image.bandPassed.(filterNum{ii}){2};
-temp3 = identityTaskLFP.byidentity.ch3938.image.bandPassed.(filterNum{ii}){3};
-MW18ch3938.identity.bandpassed.(filterNum{ii}) = cat(1,temp1, temp2, temp3);
+temp1 = identityTaskLFP.byidentity.ch161160.image.bandPassed.(filterNum{ii}){1};
+temp2 = identityTaskLFP.byidentity.ch161160.image.bandPassed.(filterNum{ii}){2};
+temp3 = identityTaskLFP.byidentity.ch161160.image.bandPassed.(filterNum{ii}){3};
+MW18ch161160.identity.bandpassed.(filterNum{ii}) = cat(1,temp1, temp2, temp3);
 end
 clear temp1 temp2 temp3
-temp1 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Power{1};
-temp2 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Power{2};
-temp3 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Power{3};
-MW18ch3938.identity.Hilbert.Power = cat(3,temp1, temp2, temp3);
+temp1 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Power{1};
+temp2 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Power{2};
+temp3 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Power{3};
+MW18ch161160.identity.Hilbert.Power = cat(3,temp1, temp2, temp3);
 clear temp1 temp2 temp3
-temp1 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Angle{1};
-temp2 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Angle{2};
-temp3 = identityTaskLFP.byidentity.ch3938.image.Hilbert.Angle{3};
-MW18ch3938.identity.Hilbert.Angle = cat(3,temp1, temp2, temp3);
+temp1 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Angle{1};
+temp2 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Angle{2};
+temp3 = identityTaskLFP.byidentity.ch161160.image.Hilbert.Angle{3};
+MW18ch161160.identity.Hilbert.Angle = cat(3,temp1, temp2, temp3);
 clear temp1 temp2 temp3
-temp1 = identityTaskLFP.byidentity.ch3938.image.specD{1};
-temp2 = identityTaskLFP.byidentity.ch3938.image.specD{2};
-temp3 = identityTaskLFP.byidentity.ch3938.image.specD{3};
-MW18ch3938.identity.specD = cat(3,temp1, temp2, temp3);
+temp1 = identityTaskLFP.byidentity.ch161160.image.specD{1};
+temp2 = identityTaskLFP.byidentity.ch161160.image.specD{2};
+temp3 = identityTaskLFP.byidentity.ch161160.image.specD{3};
+MW18ch161160.identity.specD = cat(3,temp1, temp2, temp3);
 
 
 for ii = 1:length(filterNum)
     clear temp1 temp2 temp3
-temp1 = emotionTaskLFP.byemotion.ch3938.image.bandPassed.(filterNum{ii}){1};
-temp2 = emotionTaskLFP.byemotion.ch3938.image.bandPassed.(filterNum{ii}){2};
-temp3 = emotionTaskLFP.byemotion.ch3938.image.bandPassed.(filterNum{ii}){3};
-MW18ch3938.emotion.bandpassed.(filterNum{ii}) = cat(1,temp1, temp2, temp3);
+temp1 = emotionTaskLFP.byemotion.ch161160.image.bandPassed.(filterNum{ii}){1};
+temp2 = emotionTaskLFP.byemotion.ch161160.image.bandPassed.(filterNum{ii}){2};
+temp3 = emotionTaskLFP.byemotion.ch161160.image.bandPassed.(filterNum{ii}){3};
+MW18ch161160.emotion.bandpassed.(filterNum{ii}) = cat(1,temp1, temp2, temp3);
 end
 clear temp1 temp2 temp3
-temp1 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Power{1};
-temp2 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Power{2};
-temp3 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Power{3};
-MW18ch3938.emotion.Hilbert.Power = cat(3,temp1, temp2, temp3);
+temp1 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Power{1};
+temp2 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Power{2};
+temp3 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Power{3};
+MW18ch161160.emotion.Hilbert.Power = cat(3,temp1, temp2, temp3);
 clear temp1 temp2 temp3
-temp1 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Angle{1};
-temp2 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Angle{2};
-temp3 = emotionTaskLFP.byemotion.ch3938.image.Hilbert.Angle{3};
-MW18ch3938.emotion.Hilbert.Angle = cat(3,temp1, temp2, temp3);
+temp1 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Angle{1};
+temp2 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Angle{2};
+temp3 = emotionTaskLFP.byemotion.ch161160.image.Hilbert.Angle{3};
+MW18ch161160.emotion.Hilbert.Angle = cat(3,temp1, temp2, temp3);
 clear temp1 temp2 temp3
-temp1 = emotionTaskLFP.byemotion.ch3938.image.specD{1};
-temp2 = emotionTaskLFP.byemotion.ch3938.image.specD{2};
-temp3 = emotionTaskLFP.byemotion.ch3938.image.specD{3};
-MW18ch3938.emotion.specD = cat(3,temp1, temp2, temp3);
+temp1 = emotionTaskLFP.byemotion.ch161160.image.specD{1};
+temp2 = emotionTaskLFP.byemotion.ch161160.image.specD{2};
+temp3 = emotionTaskLFP.byemotion.ch161160.image.specD{3};
+MW18ch161160.emotion.specD = cat(3,temp1, temp2, temp3);
 
-MW18ch3938.specDTime = identityTaskLFP.tPlotImage;
-MW18ch3938.specDFreq = identityTaskLFP.freq;
-MW18ch3938.hilbertTime = identityTaskLFP.tPlotImageBandPass;
-MW18ch3938.hilbertFreq = identityTaskLFP.freqHilbert;
-MW18ch3938.bandpassedTime = identityTaskLFP.tPlotImageBandPass;
+MW18ch161160.specDTime = identityTaskLFP.tPlotImage;
+MW18ch161160.specDFreq = identityTaskLFP.freq;
+MW18ch161160.hilbertTime = identityTaskLFP.tplotImageBandPass;
+MW18ch161160.hilbertFreq = identityTaskLFP.freqHilbert;
+MW18ch161160.bandpassed = identityTaskLFP.freq;
 
 
 %%

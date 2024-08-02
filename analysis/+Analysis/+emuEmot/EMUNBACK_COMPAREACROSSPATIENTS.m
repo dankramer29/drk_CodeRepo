@@ -167,22 +167,112 @@ LPhip= [];
 idxX = 1; idxY = 1; idxZ = 1;
 %
 %delete the category and then tab through to the one you want below
-Ramy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" ); 
-Lamy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'");
-RAhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
-LAhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
-RPhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
-LPhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
+%for combining multiple clusters COMMENT OUT IF YOU WANT TO RUN 15 TSTAT
+%WITHOUT COMBINING CLUSTERS
+if clmnNum == 15 %for tstat only
+    Ramy = [858.9132583
+        1192.011589
+        4014.954034
+        1892.868625
+        3003.532911
+        3700.016866];
+    Lamy = [8101.388613
+        2996.499852
+        3073.000352
+        1790.493091
+        4967.578241
+        925.2818105
+        4339.36064
+        19538.53772
+        14048.92154
+        5387.24807];
+    RAhip = [833.6640765
+        1700.362278
+        1118.11802
+        1216.779713
+        1636.87578
+        2346.440204
+        3167.320156
+        3496.592544
+        3141.302399
+        3292.397784
+        4614.45693
+        4344.246043
+        7683.055399];
+    LAhip = [1410.611857
+        983.6756167
+        1096.154971
+        3498.982882
+        1397.19422
+        1397.663405
+        1670.172981
+        1887.804942
+        5174.677582
+        5355.28411
+        10371.44916
+        24187.334];
+    RPhip = [2263.179679
+        3049.311268
+        3560.361602
+        7870.247688
+        10145.54392
+        11575.63296
+        16186.02404
+        16850.37263
+        39616.07625];
+    LPhip = [1049.12496
+        1287.979923
+        1324.765048
+        1477.434387
+        1748.710047
+        2961.294384
+        5728.419612
+        7100.563933
+        10256.85299
+        12914.90445
+        15834.60306
+        23674.73003
+        31491.77001
+        34205.80996];
+else
+    Ramy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" );
+    Lamy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'");
+    RAhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'");
+    LAhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
+    RPhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'");
+    LPhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
 
-if meanCluster
-Ramy = unique(Ramy);
-Lamy = unique(Lamy);
-RAhip = unique(RAhip);
-LAhip = unique(LAhip);
-RPhip = unique(RPhip);
-LPhip = unique(LPhip);
+    if meanCluster
+        Ramy = unique(Ramy);
+        Lamy = unique(Lamy);
+        RAhip = unique(RAhip);
+        LAhip = unique(LAhip);
+        RPhip = unique(RPhip);
+        LPhip = unique(LPhip);
 
+    end
 end
+
+% Ramy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" );
+% Lamy = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'");
+% RAhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
+% LAhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
+% RPhip = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
+% LPhip =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
+% %now 
+% Ramy(:,2) = MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation == "'R Amygdala'" );
+% Lamy(:,2) = MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation == "'L Amygdala'");
+% RAhip(:,2) = MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'"); 
+% LAhip(:,2) =  MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'");
+% RPhip(:,2) = MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'"); 
+% LPhip(:,2) =  MWallForLoading.(clmns{6})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'");
+% end
+%EASIEST TO THEN COMBINE BY HAND
+%do unique then combine the ones that are 2s or 3s to the one above it in
+%excel.
+
+
+
 
 xx = vertcat(Ramy, Lamy);
 yy = vertcat(RAhip, LAhip);
@@ -632,63 +722,140 @@ PlotType = 3; %double swarm chart
 %pull out the areas you want
 idxX = 1; idxY = 1; idxZ = 1;
 %
-RamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'emotionTask'"); 
-LamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'emotionTask'");
-RAhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'"); 
-LAhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
-RPhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'"); 
-LPhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+if clmnNum == 15 %for tstat to combine 
+    %did this by hand for ease of combining t stats across clusters for the
+    %same electrode
 
-RamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'identityTask'"); 
-LamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'identityTask'");
-RAhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'"); 
-LAhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
-RPhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'"); 
-LPhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
-if meanCluster
-    RamyEm = unique(RamyEm);
-    LamyEm = unique(LamyEm);
-    RAhipEm = unique(RAhipEm);
-    LAhipEm = unique(LAhipEm);
-    RPhipEm = unique(RPhipEm);
-    LPhipEm = unique(LPhipEm);
-    RamyId = unique(RamyId);
-    LamyId = unique(LamyId);
-    RAhipId = unique(RAhipId);
-    LAhipId = unique(LAhipId);
-    RPhipId = unique(RPhipId);
-    LPhipId = unique(LPhipId);
+    xxEm = [1790.49309100000
+        3073.00035200000
+        4339.36064000000
+        19538.5377200000
+        14048.9215400000
+        8101.38861300000
+        5387.24807000000
+        3700.01686600000
+        4014.95403400000
+        858.913258300000];
+
+    xxId = [2996.49985200000
+        4967.57824100000
+        925.281810500000
+        1892.86862500000
+        1192.01158900000
+        3003.53291100000];
+
+    yyEm = [1397.66340500000
+        1887.80494200000
+        1096.15497100000
+        10371.4491600000
+        1670.17298100000
+        1397.19422000000
+        24187.3340000000
+        5355.28411000000
+        5174.67758200000
+        1700.36227800000
+        833.664076500000
+        4344.24604300000
+        7183.01656700000
+        3141.30239900000
+        1216.77971300000
+        4614.45693000000
+        3667.35898800000];
+
+    yyId = [983.675616700000
+        1410.61185700000
+        2901.57667600000
+        1118.11802000000
+        2346.44020400000
+        3496.59254400000
+        1636.87578000000
+        3292.39778400000];
+
+    zzEm = [2961.29438400000
+        31491.7700100000
+        23674.7300300000
+        15834.6030600000
+        1477.43438700000
+        1049.12496000000
+        1748.71004700000
+        5728.41961200000
+        10256.8529900000
+        39616.0762500000
+        3560.36160200000
+        16186.0240400000
+        7870.24768800000];
+
+    zzId = [34205.8099600000
+        12914.9044500000
+        1324.76504800000
+        1287.97992300000
+        7100.56393300000
+        2263.17967900000
+        16850.3726300000
+        3049.31126800000
+        11575.6329600000
+        10145.5439200000];
+else
+    %
+    RamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'emotionTask'");
+    LamyEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'emotionTask'");
+    RAhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+    LAhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+    RPhipEm = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+    LPhipEm =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'emotionTask'");
+
+    RamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Amygdala'" & MWallForLoading.TrialType == "'identityTask'");
+    LamyId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Amygdala'" & MWallForLoading.TrialType == "'identityTask'");
+    RAhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'R Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+    LAhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation ==  "'L Anterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+    RPhipId = MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'R Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+    LPhipId =  MWallForLoading.(clmns{clmnNum})(MWallForLoading.RecordingLocation == "'L Posterior Hippocampus'" & MWallForLoading.TrialType == "'identityTask'");
+
+    if meanCluster
+        RamyEm = unique(RamyEm);
+        LamyEm = unique(LamyEm);
+        RAhipEm = unique(RAhipEm);
+        LAhipEm = unique(LAhipEm);
+        RPhipEm = unique(RPhipEm);
+        LPhipEm = unique(LPhipEm);
+        RamyId = unique(RamyId);
+        LamyId = unique(LamyId);
+        RAhipId = unique(RAhipId);
+        LAhipId = unique(LAhipId);
+        RPhipId = unique(RPhipId);
+        LPhipId = unique(LPhipId);
+    end
+
+    xxEm = vertcat(RamyEm, LamyEm);
+    yyEm = vertcat(RAhipEm, LAhipEm);
+    zzEm = vertcat(RPhipEm, LPhipEm);
+    xxId = vertcat(RamyId, LamyId);
+    yyId = vertcat(RAhipId, LAhipId);
+    zzId = vertcat(RPhipId, LPhipId);
 end
-
-xxEm = vertcat(RamyEm, LamyEm);
-yyEm = vertcat(RAhipEm, LAhipEm);
-zzEm = vertcat(RPhipEm, LPhipEm);
-xxId = vertcat(RamyId, LamyId);
-yyId = vertcat(RAhipId, LAhipId);
-zzId = vertcat(RPhipId, LPhipId);
 
 for ii = 1:length(xxEm); nameXXEm{ii,1} = 'Amygdala Emotion'; end
 for ii = 1:length(yyEm); nameYYEm{ii,1} = 'Anterior Hippocampus Emotion'; end
 for ii = 1:length(zzEm); nameZZEm{ii,1} = 'Posterior Hippocampus Emotion'; end
 
-
-for ii = 1:length(RamyEm); nameRamyEm{ii,1} = 'Right Amygdala Emotion'; end
-for ii = 1:length(RAhipEm); nameRAhipEm{ii,1} = 'Right Anterior Hippocampus Emotion'; end
-for ii = 1:length(RPhipEm); nameRPhipEm{ii,1} = 'Right Posterior Hippocampus Emotion'; end
-for ii = 1:length(LamyEm); nameLamyEm{ii,1} = 'Left Amygdala Emotion'; end
-for ii = 1:length(LAhipEm); nameLAhipEm{ii,1} = 'Left Anterior Hippocampus Emotion'; end
-for ii = 1:length(LPhipEm); nameLPhipEm{ii,1} = 'Left Posterior Hippocampus Emotion'; end
+% 
+% for ii = 1:length(RamyEm); nameRamyEm{ii,1} = 'Right Amygdala Emotion'; end
+% for ii = 1:length(RAhipEm); nameRAhipEm{ii,1} = 'Right Anterior Hippocampus Emotion'; end
+% for ii = 1:length(RPhipEm); nameRPhipEm{ii,1} = 'Right Posterior Hippocampus Emotion'; end
+% for ii = 1:length(LamyEm); nameLamyEm{ii,1} = 'Left Amygdala Emotion'; end
+% for ii = 1:length(LAhipEm); nameLAhipEm{ii,1} = 'Left Anterior Hippocampus Emotion'; end
+% for ii = 1:length(LPhipEm); nameLPhipEm{ii,1} = 'Left Posterior Hippocampus Emotion'; end
 
 for ii = 1:length(xxId); nameXXId{ii,1} = 'Amygdala Identity'; end
 for ii = 1:length(yyId); nameYYId{ii,1} = 'Anterior Hippocampus Identity'; end
 for ii = 1:length(zzId); nameZZId{ii,1} = 'Posterior Hippocampus Identity'; end
 
-for ii = 1:length(RamyId); nameRamyId{ii,1} = 'Right Amygdala Identity'; end
-for ii = 1:length(RAhipId); nameRAhipId{ii,1} = 'Right Anterior Hippocampus Identity'; end
-for ii = 1:length(RPhipId); nameRPhipId{ii,1} = 'Right Posterior Hippocampus Identity'; end
-for ii = 1:length(LamyId); nameLamyId{ii,1} = 'Left Amygdala Identity'; end
-for ii = 1:length(LAhipId); nameLAhipId{ii,1} = 'Left Anterior Hippocampus Identity'; end
-for ii = 1:length(LPhipId); nameLPhipId{ii,1} = 'Left Posterior Hippocampus Identity'; end
+% for ii = 1:length(RamyId); nameRamyId{ii,1} = 'Right Amygdala Identity'; end
+% for ii = 1:length(RAhipId); nameRAhipId{ii,1} = 'Right Anterior Hippocampus Identity'; end
+% for ii = 1:length(RPhipId); nameRPhipId{ii,1} = 'Right Posterior Hippocampus Identity'; end
+% for ii = 1:length(LamyId); nameLamyId{ii,1} = 'Left Amygdala Identity'; end
+% for ii = 1:length(LAhipId); nameLAhipId{ii,1} = 'Left Anterior Hippocampus Identity'; end
+% for ii = 1:length(LPhipId); nameLPhipId{ii,1} = 'Left Posterior Hippocampus Identity'; end
 
 
 %no inputs needed from here below (unless more variables needed, add

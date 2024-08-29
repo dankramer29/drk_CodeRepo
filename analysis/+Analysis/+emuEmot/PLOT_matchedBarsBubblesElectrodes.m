@@ -165,6 +165,7 @@ clusterSumT = vertcat(clusterSumT,AmyClusterSum(:,2));
 clusterSumT = vertcat(clusterSumT,AHipClusterSum(:,2));
 clusterSumT = vertcat(clusterSumT,PHipClusterSum(:,2));
 xxx= clusterSumT;
+xxxT = xxx;
 for ii = 1:length(AmyClusterSum(:,1)); nameXXEm{ii,1} = 'Amygdala Emotion'; end
 for ii = 1:length(AHipClusterSum); nameYYEm{ii,1} = 'Anterior Hippocampus Emotion'; end
 for ii = 1:length(PHipClusterSum); nameZZEm{ii,1} = 'Posterior Hippocampus Emotion'; end
@@ -172,10 +173,10 @@ for ii = 1:length(AmyClusterSum); nameXXId{ii,1} = 'Amygdala Identity'; end
 for ii = 1:length(AHipClusterSum); nameYYId{ii,1} = 'Anterior Hippocampus Identity'; end
 for ii = 1:length(PHipClusterSum); nameZZId{ii,1} = 'Posterior Hippocampus Identity'; end
 xxxN = vertcat(nameXXEm, nameXXId, nameYYEm, nameYYId, nameZZEm, nameZZId);
-xxx(xxx==0) = [];
+xxxT(xxx==0) = [];
 xxxN(xxx==0) = [];
 figure
-[pvalue, tbl, stats] = kruskalwallis(xxx, xxxN, 'off');
+[pvalue, tbl, stats] = kruskalwallis(xxxT, xxxN, 'off');
 multC = multcompare(stats);
 meanXX = nanmean(xx);
 meanYY = nanmean(yy);

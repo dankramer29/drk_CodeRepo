@@ -81,12 +81,14 @@ colorTempDark = C2;
 clmns = MWallForLoading.Properties.VariableNames;
 
 % Time:
-% clmnNum = 13; %pick the column number here.
-% nameTable = {'Cluster Centroid By Time '};
-% varTested = {'Time (S)'};
-% testDone = {'Kruskall Wallis'};
-% timeFig = 1;
-% meanCluster = true;
+clmnNum = 13; %pick the column number here.
+nameTable = {'Cluster Centroid By Time '};
+varTested = {'Time After Stimulus Onset (sec)'};
+testDone = {'Kruskall Wallis'};
+timeFig = 1;
+meanCluster = true;
+yLimChange = 1;
+
 
 % %This one is probably not helpful:
 % clmnNum = 14; %pick the column number here.
@@ -97,12 +99,12 @@ clmns = MWallForLoading.Properties.VariableNames;
 % meanCluster = true;
 
 % % % 
-clmnNum = 15; %pick the column number here.
-nameTable = {'Tstat total '};
-varTested = {'Tstat sum'};
-testDone = {'Kruskall Wallis'};
-timeFig = 0;
-meanCluster = true;
+% clmnNum = 15; %pick the column number here.
+% nameTable = {'Tstat total '};
+% varTested = {'Tstat sum'};
+% testDone = {'Kruskall Wallis'};
+% timeFig = 0;
+% meanCluster = true;
 
 % 
 % clmnNum = 16; %pick the column number here.
@@ -368,7 +370,7 @@ Gc.XTickLabelRotation = 45;
 Gc.Title.String = (nameTable{:}); %gives a supertitle
 Gc.Title.FontSize = 28;
 if yLimChange
-    Gc.YLim = [0 1.2];
+    Gc.YLim = [0 0.9];
 end
 if timeFig
     Gc.View =  [90 90];
@@ -405,7 +407,7 @@ end
 
 xxx=[];
 xxxN=[];
-nameTable{1} = strcat(nameTable{1}, ' Left vs Right');
+nameTable{1} = strcat(nameTable{1}, ' by Laterality');
 
 
 %no inputs needed from here below (unless more variables needed, add
@@ -512,7 +514,7 @@ Gc.XTickLabelRotation = 45;
 Gc.Title.String = (nameTable{:}); %gives a supertitle
 Gc.Title.FontSize = 28;
 if yLimChange
-    Gc.YLim = [0 1.2];
+    Gc.YLim = [0 0.9];
 end
 if timeFig
     Gc.View =  [90 90];
@@ -642,22 +644,24 @@ colorTempDark = C2;
 clmns = MWallForLoading.Properties.VariableNames;
 
 % % % 
-clmnNum = 15; %pick the column number here.
-nameTable = {'Tstat total '};
-varTested = {'Tstat sum'};
-testDone = {'Kruskall Wallis'};
-timeFig = 0;
-meanCluster = true;
-PlotType = 3; %double swarm chart
-
-% Time:
-% clmnNum = 13; %pick the column number here.
-% nameTable = {'Cluster Centroid By Time '};
-% varTested = {'Time (S)'};
+% clmnNum = 15; %pick the column number here.
+% nameTable = {'Tstat total '};
+% varTested = {'Tstat sum'};
 % testDone = {'Kruskall Wallis'};
-% timeFig = 1;
+% timeFig = 0;
 % meanCluster = true;
 % PlotType = 3; %double swarm chart
+
+% Time:
+clmnNum = 13; %pick the column number here.
+nameTable = {'Cluster Centroid By Time '};
+varTested = {'Time After Stimulus Onset (sec)'};
+testDone = {'Kruskall Wallis'};
+timeFig = 1;
+meanCluster = true;
+yLimChange = 1;
+PlotType = 3;
+
 
 
 %This one is probably not helpful:
@@ -1054,7 +1058,7 @@ switch PlotType
         Gc.Title.String = (nameTable{:}); %gives a supertitle
         Gc.Title.FontSize = 28;
         if yLimChange
-            Gc.YLim = [0 1.2];
+            Gc.YLim = [0 0.9];
         end
         if timeFig
             Gc.View =  [90 90];      

@@ -343,6 +343,8 @@ fastRun = true;
 
 %chInterestActual = [117:120];
 
+folderNameEmotion=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', emotionFilter);
+folderNameIdentity=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', identityFilter);
 
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
@@ -400,8 +402,8 @@ end
 %Emotion
 switch fileVariation
     case {1, 3, 4,6}
-        testfileEm = nwbRead(emotionFilter);
-        testfileId = nwbRead(identityFilter);
+        testfileEm = nwbRead(folderNameEmotion); %[ugh
+        testfileId = nwbRead(folderNameIdentity);
     case 2 %add any single NWB file cases here. MW5
         testfileEmId = nwbRead(emotionidentityFilter);
 end

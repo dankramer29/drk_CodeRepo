@@ -343,6 +343,10 @@ fastRun = true;
 
 %chInterestActual = [117:120];
 
+
+
+%for unclear reasons, at some point, it needed the full file name, so this
+%creates it
 folderNameEmotion=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', emotionFilter);
 folderNameIdentity=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', sessionName, '\', identityFilter);
 

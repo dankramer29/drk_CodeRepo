@@ -1,6 +1,12 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
+%working on the 3d stats AGAIN
+figure; imagesc(mnd2); axis xy;
+figure; imagesc(mnd1); axis xy;
+figure; imagesc(thresh_binaryRPos); axis xy;
+
+
 %toy data for Nick 
 %MW18 channel 161160
 

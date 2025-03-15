@@ -81,7 +81,7 @@ else
     tstat_max=zeros(xshuffles,1, 'single');
 end
 
-tstat_maxP = tstat_max; tstat_maxN = tstat_max;
+%tstat1_maxP = tstat_max; tstat1_maxN = tstat_max; tstat2_maxP = tstat_max; tstat2_maxN = tstat_max;
 %difftot=zeros(size(data1,1), size(data1,2), xshuffles);
 est_p=struct;
 centroid = []; centroidPos = []; centroidNeg = []; boundingBox = []; boundingBoxPos = []; boundingBoxNeg = [];
@@ -187,8 +187,7 @@ if gpuOn
     data2 = gpuArray(data2T);
     data2iti_temp = gpuArray(data2itiT);
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%THIS IS WHERE I STOPPED CHANGING STUFF
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%AND ADDING DATA2S
+
 profile on
 %%
 no_sig=0;
@@ -229,7 +228,7 @@ if isempty(histogramBuiltThresholds)
             sp=sqrt(((L1-1)*std(totdata(:,:,1:L1),0,3).^2+(L1iti-1)*std(totdata(:,:,L1+1:end),0,3).^2)./(L1+L1iti-2));
             tstat_res(:,:, ii)=(mean1-mean2)./(sp*sqrt(1/L1+1/L1iti));
         end
-   
+
         tsr_pNeg=2*tcdf((tstat_res(:,:,ii)), (L1+L1iti-2)); %get the p values for adjustment, for just negative deflections
         tsr_pPos=2*tcdf(-(tstat_res(:,:,ii)), (L1+L1iti-2)); %get the p values for adjustment, for just positive deflections
         tsr_p=2*tcdf(-abs(tstat_res(:,:,ii)), (L1+L1iti-2)); %if want to combine, do abs because it won't matter here whether + or -
@@ -265,7 +264,7 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
                     max_matP=false(size(thresh_binarydP));
                     max_matP(clustP.PixelIdxList{max_idxP})=true;
-                    tstat_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
+                    tstat1_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
                     %for test plotting
                     % mean1n = normalize(mean1,2);
                     % mean2n = normalize(mean2,2);
@@ -283,7 +282,7 @@ if isempty(histogramBuiltThresholds)
                     %put a stop just below here and open tstat_maxP to see how
                     %each fake cluster is falling.
                 else
-                    tstat_maxP(ii) = 1;
+                    tstat1_maxP(ii) = 1;
                 end
 
                 %cluster negative deflections separately
@@ -295,9 +294,9 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
                     max_matN=false(size(thresh_binarydN));
                     max_matN(clustN.PixelIdxList{max_idxN})=true;
-                    tstat_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
+                    tstat1_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
                 else
-                    tstat_maxN(ii) = 1;
+                    tstat1_maxN(ii) = 1;
                 end
             else
                 %cluster two tailed (both positive and negative) separately
@@ -309,14 +308,142 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idx]=max(cl_a); %get the index of the largest cluster
                     max_mat=false(size(thresh_binaryd));
                     max_mat(clust.PixelIdxList{max_idx})=true;
-                    tstat_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
+                    tstat1_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
                 else
                     tstat_max(ii) = 1;
                 end
             end
         end
+        %% do this again for data 2
+        clear rct
+        clear rct_d
+        clear clust_sum
+        %combine the data
+        %shuffle it randomly
+        totdata2=cat(3, data2, data2iti_temp);
+        totdata2=totdata2(:,:,randperm(size(totdata2,3)));
+        %flip half of the data around to really mix it up
+        if flipData
+            for rr = 1:size(totdata2,3)/2
+                kk = randi(size(totdata2,3));
+                totdata2(:,:,kk) = flip(totdata2(:,:,kk),2);
+            end
+        end
+        %take the means
+        mean1=nanmean(totdata2(:,:,1:L2),3);
+        mean2=nanmean(totdata2(:,:,L2+1:end),3);
+        %option to smear across time so fluctuations in the iti data don't
+        %alter the primary data clusters.
+        if timeSmearMean
+            mean2temp = nanmean(mean2,2);
+            mean2All = repmat(mean2temp, 1, size(mean2,2));
+            stdev1 = std(totdata2(:,:,1:L2),0,3);
+            stdev2 = std(totdata2(:,:,L2+1:end),0,3);
+            stdev2temp = std(stdev2, 0, 2);
+            stdev2All = repmat(stdev2temp, 1, size(stdev2,2));
+            sp=sqrt(((L2-1)*stdev1.^2+(L2iti-1)*stdev2All.^2)./(L2+L2iti-2));
+            tstat_res(:,:, ii)=(mean1-mean2All)./(sp*sqrt(1/L2+1/L2iti));
+        else
+            %run the guts of a ttest2 (much faster than the built in function)
+            sp=sqrt(((L2-1)*std(totdata2(:,:,1:L2),0,3).^2+(L2iti-1)*std(totdata2(:,:,L2+1:end),0,3).^2)./(L2+L2iti-2));
+            tstat_res(:,:, ii)=(mean1-mean2)./(sp*sqrt(1/L2+1/L2iti));
+        end
+
+        tsr_pNeg=2*tcdf((tstat_res(:,:,ii)), (L2+L2iti-2)); %get the p values for adjustment, for just negative deflections
+        tsr_pPos=2*tcdf(-(tstat_res(:,:,ii)), (L2+L2iti-2)); %get the p values for adjustment, for just positive deflections
+        tsr_p=2*tcdf(-abs(tstat_res(:,:,ii)), (L2+L2iti-2)); %if want to combine, do abs because it won't matter here whether + or -
+
+        %% find the max t stat mass (meaning the sum of the t stats in the max area using image recognition using bwconncomp)
+        thresh_binaryN = tsr_pNeg<alph/2; %finds the negative deflections
+        thresh_binaryP = tsr_pPos<alph/2; %finds the positive deflections
+        thresh_binary=tsr_p<alph; %this is where it counts how many shuffled chunks are large enough to meet criteria
+
+        if nnz(thresh_binary)==0
+            no_sig=no_sig+1; %count how many times no significant t stats show up
+            continue
+        else
+            tstat_temp=gather(tstat_res(:,:,ii));
+            thresh_binaryd=gather(thresh_binary);%there is a gpu version that is not as fast or as good.
+            thresh_binarydP=gather(thresh_binaryP);
+            thresh_binarydN=gather(thresh_binaryN);
+            
+
+            if splitPosNeg
+                %cluster positive deflections separately
+                clustP=bwconncomp(thresh_binarydP,8);
+                if clustP.NumObjects>=1
+                    clP=regionprops(clustP); %get the region properties
+                    cl_aP=[clP.Area];
+                    cl_aP(cl_aP>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+                    for cii = 1:size(clP)
+                        if clP(cii).Centroid(1,2)<20 %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+                            cl_aP(cii) = 1;
+                            xx(cii) = cii;
+                        end
+                    end
+                    [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
+                    max_matP=false(size(thresh_binarydP));
+                    max_matP(clustP.PixelIdxList{max_idxP})=true;
+                    tstat2_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
+                    %for test plotting
+                    mean1n = normalize(mean1,2);
+                    mean2n = normalize(mean2,2);
+                    if ii == 1
+                        figure
+                    end
+                    subplot(4,1,1)
+                    imagesc(mean1n); axis xy;
+                    subplot(4,1,2)
+                    imagesc(mean2n); axis xy;
+                    subplot(4,1,3)
+                    imagesc(thresh_binaryP); axis xy;
+                    subplot(4,1,4)
+                    imagesc(max_matP); axis xy;
+                    %put a stop just below here and open tstat_maxP to see how
+                    %each fake cluster is falling.
+                else
+                    tstat2_maxP(ii) = 1;
+                end
+                %do the subtraction of the two cluster sizes
+                tstat_maxPDiff(ii) = tstat1_maxP(ii)- tstat2_maxP(ii);
+
+                %cluster negative deflections separately
+                clustN=bwconncomp(thresh_binarydN,8);
+                if clustN.NumObjects>=1
+                    clN=regionprops(clustN); %get the region properties
+                    cl_aN=[clN.Area];
+                    cl_aN(cl_aN>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+                    [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
+                    max_matN=false(size(thresh_binarydN));
+                    max_matN(clustN.PixelIdxList{max_idxN})=true;
+                    tstat2_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
+
+
+                else
+                    tstat2_maxN(ii) = 1;
+                end
+                %do the subtraction of the two cluster sizes
+                tstat_maxNDiff(ii) = tstat1_maxN(ii)- tstat2_maxN(ii);
+            else
+                %cluster two tailed (both positive and negative) separately
+                if clust.NumObjects>=1
+                    clust=bwconncomp(thresh_binaryd,8);
+                    cl=regionprops(clust); %get the region properties
+                    cl_a=[cl.Area];
+                    cl_a(cl_a>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+                    [~,max_idx]=max(cl_a); %get the index of the largest cluster
+                    max_mat=false(size(thresh_binaryd));
+                    max_mat(clust.PixelIdxList{max_idx})=true;
+                    tstat2_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
+                else
+                    tstat2_max(ii) = 1;
+                end
+                %do the subtraction of the two cluster sizes
+                tstat_maxDiff(ii) = tstat1_max(ii)- tstat2_max(ii);
+            end
+        end
     end
-    toc(tt)
+        toc(tt)
 end
 
 %% HAVE NOT CHANGED DATA2 TO DATA1ITI DOWN HERE YET

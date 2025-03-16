@@ -1,4 +1,4 @@
-function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, boundingBox, allClusterNumbers, thresholds ] = cluster_permutation_Ttest_gpu3d( data1, data1iti, data2, data2iti, varargin )
+function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, boundingBox, allClusterNumbers, tstatDiff, dataLargerPos, dataLargerNeg thresholds] = cluster_permutation_Ttest_gpu3d( data1, data1iti, data2, data2iti, varargin )
 %USE THIS ONE
 % 
 % shuffle_stats shuffles the data between two data sets takes the mean and
@@ -15,8 +15,17 @@ function [ mnd1, mnd2, sd1, sd2, sigclust, centroid, tstatSum, boundingBox, allC
 % %OUTPUT:
 %     mn- the mean of data1 and data2 
 %     sd- the std of data1 and data2 
-%     est_p-the percentage of the distribution that is farther out than yours
-%     with the assumption that if it's less than 0.05, it's significant
+%     sigclust- the mask of the significant clusters (the largest cluster)
+%     centroid- the centroid of the largest clusters
+%     tstatSum- the sum of the tstat in the largest cluster
+%     boundingBox - bounding box of the largest cluster
+%     allClusterNumbers- 
+%     tstatDiff- the subtraction of the tstat of the largest clusters for
+%     data 1 and data 2
+%     dataLargerPos/Neg- says whether data1 or data2 is larger for the
+%     positive and the negative clusters
+%     thresholds- if you make a single threshold from the iti data and want
+%     to return that to be used for future iterations.
 
 
 [varargin, plt]=util.argkeyval('plt', varargin, false); %option to plot the historgram
@@ -498,7 +507,7 @@ if splitPosNeg
     clRPos1=regionprops(clustRPos1, 'all'); %get the region properties
     cl_aRPos1=[clRPos1.Area];
     cl_aRPos1(cl_aRPos1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    for cii = 1:size(clRPos1)
+    for cii = 1:height(clRPos1)
         if clRPos1(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
             cl_aRPos1(cii) = 1;
             xx(cii) = cii;
@@ -515,13 +524,13 @@ if splitPosNeg
     end
     %% for plotting if you want
     figure
-    subplot(4,1,1)
+    subplot(5,2,1)
     imagesc(normalize(mnd1,2)); axis xy;
-    subplot(4,1,2)
+    subplot(5,2,3)
     imagesc(normalize(mnd2,2)); axis xy;
-    subplot(4,1,3)
+    subplot(5,2,5)
     imagesc(thresh_binaryRPos); axis xy;
-    subplot(4,1,4)
+    subplot(5,2,7)
     imagesc(matPos); axis xy;
 
     clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
@@ -561,7 +570,7 @@ else
     clR1=regionprops(clustR1); %get the region properties
     cl_aR1=[clR1.Area];
     cl_aR1(cl_aR1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    for cii = 1:size(clR1)
+    for cii = 1:height(clR1)
         if clR1(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
             cl_aR1(cii) = 1;
             xx(cii) = cii;
@@ -657,7 +666,7 @@ if splitPosNeg
     end
     cl_keepPos2=find(cl_aRPos2>50); %get the ones with an area >50 pixels
     idxc=1; idxd=1;
-    for ii=1:height(cl_keepPos2)
+    for ii=1:length(cl_keepPos2)
         matPos=false(size(thresh_binaryRPos));
         matPos(clustRPos2.PixelIdxList{cl_keepPos2(ii)})=true;
         tstat2_sumsPos(ii,1)=sum(abs(tstat_R(matPos)));        
@@ -666,20 +675,35 @@ if splitPosNeg
     %%cluster here. 
     [maxP1, maxP1i] = max(tstat1_sumsPos);
     [maxP2, maxP2i] = max(tstat2_sumsPos);
+    %for testing, comment out when not in use
+    % figure
+    % subplot(2,1,1)
+    % matPosT=false(size(thresh_binaryRPos));
+    % matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
+    % imagesc(matPosT), axis xy;
+    % subplot(2,1,2)
+    % matPosT2=false(size(thresh_binaryRPos));
+    % matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
+    % imagesc(matPosT2), axis xy;
+
+
     tstatDiff_Pos = max(tstat1_sumsPos) - max(tstat2_sumsPos);
     if tstatDiff_Pos>threshP1 %save if over the thresh for data 1 (tail of data1>data2)
-        sigclustPos(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=idxd;
+        sigclustPos(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=idxd; %the idxd here is an option to do more than one cluster (start it at 1 and change as you go)
         centroidPos(1,1:2) = clRPos1(cl_keepPos1(maxP1i)).Centroid;
         boundingBoxPos(1,1:4) = clRPos1(cl_keepPos1(maxP1i)).BoundingBox;
         allClusterNumbersPos{1,1} = clRPos1(cl_keepPos1(maxP1i));
-        tstat_sumsP(1,1) = tstat1_sumsPos1(maxP1i);
-        %idxc=idxc+1; idxd=idxd+1;
+        tstat_sumsP(1,1) = tstat1_sumsPos(maxP1i);
+        tstat_sumsP(1,2) = 1; %mark whether it's data 1 that is positive or data 2
+        idxd=idxd+1;
     elseif tstatDiff_Pos<threshP2 %save if over the thresh for data 2 (tail of data1<data2)
         sigclustPos(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=idxd;
         centroidPos(1,1:2) = clRPos2(cl_keepPos2(maxP2i)).Centroid;
         boundingBoxPos(1,1:4) = clRPos2(cl_keepPos2(maxP2i)).BoundingBox;
         allClusterNumbersPos{1,1} = clRPos2(cl_keepPos1(maxP2i));
-        tstat_sumsP(1,1) = tstat1_sumsPos(maxP2i);
+        tstat_sumsP(1,1) = tstat2_sumsPos(maxP2i);
+        tstat_sumsP(1,2) = 2;
+        idxd=idxd+1;
     end
     %% for plotting if you want
     % figure
@@ -690,7 +714,27 @@ if splitPosNeg
     % subplot(4,1,3)
     % imagesc(thresh_binaryRPos); axis xy;
     % subplot(4,1,4)
-    % imagesc(matPos); axis xy;
+    % imagesc(matPos); axis xy;\
+    %this is another plotting strategy that will show the data1 left and
+    %data2 right
+    subplot(5,2,2)
+    imagesc(normalize(mnd1,2)); axis xy;
+    subplot(5,2,4)
+    imagesc(normalize(mnd2,2)); axis xy;
+    subplot(5,2,6)
+    imagesc(thresh_binaryRPos); axis xy;
+    subplot(5,2,8)
+    imagesc(matPos); axis xy;
+    %the biggest clusters
+    subplot(5,2,9)
+    matPosT=false(size(thresh_binaryRPos));
+    matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
+    imagesc(matPosT), axis xy;
+    subplot(5,2,10)
+    matPosT2=false(size(thresh_binaryRPos));
+    matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
+    imagesc(matPosT2), axis xy;
+
 
     clustRNeg2=bwconncomp(thresh_binaryRNeg,8);
     clRNeg2=regionprops(clustRNeg2); %get the region properties
@@ -711,29 +755,45 @@ if splitPosNeg
     end
     [maxN1, maxN1i] = max(tstat1_sumsNeg);
     [maxN2, maxN2i] = max(tstat2_sumsNeg);
-    tstatDiff_Neg = max(tstat1_sumsNeg) - max(tstat2_sumsNeg); %DOUBLE CHECK THIS NEEDS TO BE ABS OR NOT. I THINK NOW
+    tstatDiff_Neg = max(tstat1_sumsNeg) - max(tstat2_sumsNeg); %DOUBLE CHECK THIS NEEDS TO BE ABS OR NOT. I THINK NOT
+    %TO DO, SAVE ALL BIGGEST CLUSTERS, WHETHER OR NOT THEY ARE POSITIVE SO
+    %YOU CAN GROUP THEM ALL LATER. ALSO BUILD IN TO MAKE THE CLUST DIFF
+    %JUST THE ITI
     if tstatDiff_Neg>threshN1 %save if over the thresh for data 1 (tail of data1>data2)
         sigclustNeg(clustRNeg1.PixelIdxList{cl_keepNeg1(maxN1i)})=idxd;
         centroidNeg(1,1:2) = clRNeg1(cl_keepNeg1(maxN1i)).Centroid;
         boundingBoxNeg(1,1:4) = clRNeg1(cl_keepNeg1(maxN1i)).BoundingBox;
         allClusterNumbersNeg{1,1} = clRNeg1(cl_keepNeg1(maxN1i));
         tstat_sumsN(1,1) = tstat1_sumsNeg(maxN1i);
-        %idxc=idxc+1; idxd=idxd+1;
+        tstat_sumsN(1,2) = 1; %mark whether it's data 1 that is positive or data 2
+        idxd=idxd+1;
     elseif tstatDiff_Neg<threshN2 %save if over the thresh for data 2 (tail of data1<data2)
         sigclustNeg(clustRNeg2.PixelIdxList{cl_keepNeg2(maxN2i)})=idxd;
         centroidNeg(1,1:2) = clRNeg2(cl_keepNeg2(maxN2i)).Centroid;
         boundingBoxNeg(1,1:4) = clRNeg2(cl_keepNeg2(maxN2i)).BoundingBox;
         allClusterNumbersNeg{1,1} = clRNeg2(cl_keepNeg2(maxN2i));
         tstat_sumsN(1,1) = tstat2_sumsNeg(maxN2i);
+        tstat_sumsN(1,2) = 2;
     end
     %STOPPED CHANGING ANYTHING HERE
     centroid = vertcat(centroidPos, centroidNeg);
-    tstatSum = vertcat(tstat_sumsP, tstat_sumsN);
+    tstatSum = vertcat(tstat_sumsP, tstat_sumsN); %has a marker for data 1 or data 2 as the positive
+    tstatDiff = vertcat(tstatDiffPos, tstatDiff_Neg);
+    if tstat_sumsP(1,2) == 1 % this is redundant but makes it clear which one was larger
+        dataLargerPos = 'data1';
+    elseif tstat_sumsP(1,2) == 2
+        dataLargerPos = 'data2';
+    end
+     if tstat_sumsN(1,2) == 1
+        dataLargerNeg = 'data1';
+    elseif tstat_sumsN(1,2) == 2
+        dataLargerNeg = 'data2';
+    end
     sigclust = sigclustPos + sigclustNeg;
     boundingBox = vertcat(boundingBoxPos, boundingBoxNeg);
     allClusterNumbers = vertcat(allClusterNumbersPos, allClusterNumbersNeg);
     
-else
+else %have not fixed this! generally splitting positive and negative right now
     if isempty(histogramBuiltThresholds)
         tstat_max=gather(tstat_max);
         temp_tsm=sort(tstat_max);

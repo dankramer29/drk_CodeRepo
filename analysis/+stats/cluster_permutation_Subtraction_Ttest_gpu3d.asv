@@ -255,7 +255,7 @@ if isempty(histogramBuiltThresholds)
                     clP=regionprops(clustP); %get the region properties
                     cl_aP=[clP.Area];
                     cl_aP(cl_aP>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-                    for cii = 1:size(clP)
+                    for cii = 1:height(clP)
                         if clP(cii).Centroid(1,2)<20 %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
                             cl_aP(cii) = 1;
                             xx(cii) = cii;
@@ -294,9 +294,9 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
                     max_matN=false(size(thresh_binarydN));
                     max_matN(clustN.PixelIdxList{max_idxN})=true;
-                    tstat1_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
+                    tstat1_maxN(ii,1)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
                 else
-                    tstat1_maxN(ii) = 1;
+                    tstat1_maxN(ii,1) = 1;
                 end
             else
                 %cluster two tailed (both positive and negative) separately
@@ -375,7 +375,7 @@ if isempty(histogramBuiltThresholds)
                     clP=regionprops(clustP); %get the region properties
                     cl_aP=[clP.Area];
                     cl_aP(cl_aP>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-                    for cii = 1:size(clP)
+                    for cii = 1:height(clP)
                         if clP(cii).Centroid(1,2)<20 %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
                             cl_aP(cii) = 1;
                             xx(cii) = cii;
@@ -384,28 +384,28 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idxP]=max(cl_aP); %get the index of the largest cluster
                     max_matP=false(size(thresh_binarydP));
                     max_matP(clustP.PixelIdxList{max_idxP})=true;
-                    tstat2_maxP(ii)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
+                    tstat2_maxP(ii,1)=sum(abs(tstat_temp(max_matP))); %get the sum of the stats in that max area
                     %for test plotting
-                    mean1n = normalize(mean1,2);
-                    mean2n = normalize(mean2,2);
-                    if ii == 1
-                        figure
-                    end
-                    subplot(4,1,1)
-                    imagesc(mean1n); axis xy;
-                    subplot(4,1,2)
-                    imagesc(mean2n); axis xy;
-                    subplot(4,1,3)
-                    imagesc(thresh_binaryP); axis xy;
-                    subplot(4,1,4)
-                    imagesc(max_matP); axis xy;
+                    % mean1n = normalize(mean1,2);
+                    % mean2n = normalize(mean2,2);
+                    % if ii == 1
+                    %     figure
+                    % end
+                    % subplot(4,1,1)
+                    % imagesc(mean1n); axis xy;
+                    % subplot(4,1,2)
+                    % imagesc(mean2n); axis xy;
+                    % subplot(4,1,3)
+                    % imagesc(thresh_binaryP); axis xy;
+                    % subplot(4,1,4)
+                    % imagesc(max_matP); axis xy;
                     %put a stop just below here and open tstat_maxP to see how
                     %each fake cluster is falling.
                 else
-                    tstat2_maxP(ii) = 1;
+                    tstat2_maxP(ii,1) = 1;
                 end
                 %do the subtraction of the two cluster sizes
-                tstat_maxPDiff(ii) = tstat1_maxP(ii)- tstat2_maxP(ii);
+                tstat_maxPDiff(ii,1) = tstat1_maxP(ii)- tstat2_maxP(ii);
 
                 %cluster negative deflections separately
                 clustN=bwconncomp(thresh_binarydN,8);
@@ -416,14 +416,14 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idxN]=max(cl_aN); %get the index of the largest cluster
                     max_matN=false(size(thresh_binarydN));
                     max_matN(clustN.PixelIdxList{max_idxN})=true;
-                    tstat2_maxN(ii)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
+                    tstat2_maxN(ii,1)=sum(abs(tstat_temp(max_matN))); %get the sum of the stats in that max area
 
 
                 else
-                    tstat2_maxN(ii) = 1;
+                    tstat2_maxN(ii,1) = 1;
                 end
                 %do the subtraction of the two cluster sizes
-                tstat_maxNDiff(ii) = tstat1_maxN(ii)- tstat2_maxN(ii);
+                tstat_maxNDiff(ii,1) = tstat1_maxN(ii,1)- tstat2_maxN(ii,1);
             else
                 %cluster two tailed (both positive and negative) separately
                 if clust.NumObjects>=1
@@ -434,12 +434,12 @@ if isempty(histogramBuiltThresholds)
                     [~,max_idx]=max(cl_a); %get the index of the largest cluster
                     max_mat=false(size(thresh_binaryd));
                     max_mat(clust.PixelIdxList{max_idx})=true;
-                    tstat2_max(ii)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
+                    tstat2_max(ii,1)=sum(abs(tstat_temp(max_mat))); %get the sum of the stats in that max area
                 else
-                    tstat2_max(ii) = 1;
+                    tstat2_max(ii,1) = 1;
                 end
                 %do the subtraction of the two cluster sizes
-                tstat_maxDiff(ii) = tstat1_max(ii)- tstat2_max(ii);
+                tstat_maxDiff(ii,1) = tstat1_max(ii,1)- tstat2_max(ii,1);
             end
         end
     end
@@ -450,13 +450,13 @@ end
 %%
 %get the real mean difference and sd at each value
 %TAKING THE MEAN ACROSS EVERYTHING AND THE STD ACROSS EVERYTHING
-if timeSmearMean
+if timeSmearMean 
     mnd1=nanmean(data1,3);
-    mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
+    mnd2=nanmean(data1itiT,3); %includes the mirrored part if not the same size
     mean2temp = nanmean(mnd2,2);
     mean2All = repmat(mean2temp, 1, size(mnd2,2));
     sd1=std(data1,0,3);
-    sd2=std(data2_temp,0,3);
+    sd2=std(data1itiT,0,3);
     stdev2temp = std(sd2, 0, 2);
     std2All = repmat(stdev2temp, 1, size(sd2,2));
     sp=sqrt(((L1-1)*sd1.^2+(L1iti-1)*std2All.^2)./(L1+L1iti-2));
@@ -464,11 +464,149 @@ if timeSmearMean
     tstat_R=gather(tstat_R);
 else
     mnd1=nanmean(data1,3);
-    mnd2=nanmean(data2_temp,3); %includes the mirrored part if not the same size
+    mnd2=nanmean(data1itiT,3); %includes the mirrored part if not the same size
     sd1=std(data1,0,3);
-    sd2=std(data2_temp,0,3);
+    sd2=std(data1itiT,0,3);
     spR=sqrt(((L1-1)*sd1.^2+(L1iti-1)*sd2.^2)./(L1+L1iti-2));
     tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L1+1/L1iti));
+    tstat_R=gather(tstat_R);
+end
+%tstat_Rabs=abs(tstat_R); %take absolute for adjustment. makes negative deflections and positive deflections of equal value. don't do this if there is a difference between the degrees of positive and negative deflections
+
+
+
+%% find which clusters are sig
+%% first data set
+%allocate
+sigclust=zeros(size(tstat_R));
+%%
+if splitPosNeg
+    sigclustPos=zeros(size(tstat_R));
+    sigclustNeg=zeros(size(tstat_R));
+    tstat1_maxP=gather(tstat1_maxP);
+    tstat1_maxN=gather(tstat1_maxN);
+    r_pvalueNeg=2*tcdf((tstat_R), (L1+L1iti-2)); %Gets the p values for negative deflections (two tailed), straight from ttest
+    r_pvaluePos=2*tcdf(-(tstat_R), (L1+L1iti-2)); %Gets the p values for positive deflections (two tailed),
+
+    %%
+    %begin clustering with bwconncomp
+    thresh_binaryRPos=r_pvaluePos<alph/2;%find those less than set p value
+    thresh_binaryRNeg=r_pvalueNeg<alph/2;%find those less than set p value
+
+    %REPEAT THIS FOR EACH
+    clustRPos1=bwconncomp(thresh_binaryRPos,8);
+    clRPos1=regionprops(clustRPos1, 'all'); %get the region properties
+    cl_aRPos1=[clRPos1.Area];
+    cl_aRPos1(cl_aRPos1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:size(clRPos1)
+        if clRPos1(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
+            cl_aRPos1(cii) = 1;
+            xx(cii) = cii;
+        end
+    end
+    cl_keepPos1=find(cl_aRPos1>50); %get the ones with an area >50 pixels
+    idxc=1; idxd=1;
+    tstat_sumsP = []; tstat_sumsN = [];
+    for ii=1:length(cl_keepPos1)
+        matPos=false(size(thresh_binaryRPos));
+        matPos(clustRPos1.PixelIdxList{cl_keepPos1(ii)})=true;
+        tstat1_sumsPos(ii,1)=sum(abs(tstat_R(matPos)));
+
+    end
+    %% for plotting if you want
+    figure
+    subplot(4,1,1)
+    imagesc(normalize(mnd1,2)); axis xy;
+    subplot(4,1,2)
+    imagesc(normalize(mnd2,2)); axis xy;
+    subplot(4,1,3)
+    imagesc(thresh_binaryRPos); axis xy;
+    subplot(4,1,4)
+    imagesc(matPos); axis xy;
+
+    clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
+    clRNeg1=regionprops(clustRNeg1); %get the region properties
+    cl_aRNeg1=[clRNeg1.Area];
+    cl_aRNeg1(cl_aRNeg1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:height(clRNeg1)
+        if clRNeg1(cii).Centroid(1,2)<HzThresholdNeg %remove any that are below the a hz threshold
+            cl_aRNeg1(cii) = 1;
+            xx(cii) = cii;
+        end
+    end
+    cl_keepNeg1=find(cl_aRNeg1>50); %get the ones with an area >100 pixels
+    idxc=1;
+    for ii=1:length(cl_keepNeg1)
+        matNeg=false(size(thresh_binaryRNeg));
+        matNeg(clustRNeg1.PixelIdxList{cl_keepNeg1(ii)})=true;
+        tstat1_sumsNeg(ii,1)=sum(abs(tstat_R(matNeg)));
+
+    end
+    % centroid = vertcat(centroidPos, centroidNeg);
+    tstatSum1 = vertcat(tstat1_sumsPos, tstat1_sumsNeg);
+    % sigclust = sigclustPos + sigclustNeg;
+    % boundingBox = vertcat(boundingBoxPos, boundingBoxNeg);
+    % allClusterNumbers = vertcat(allClusterNumbersPos, allClusterNumbersNeg);
+    
+else
+    if isempty(histogramBuiltThresholds)
+        tstat1_max=gather(tstat1_max);
+        temp_tsm=sort(tstat1_max);
+        thresh=temp_tsm(round(size(tstat1_max,1)*alphaHistoAdj));
+    end
+    r_pvalue=2*tcdf(-abs(tstat_R), (L1+L1iti-2)); %get the p values for both adjustments (makes it one tailed), this formula is straight from ttest2
+
+    thresh_binaryR=r_pvalue<alph;%find those less than set p value
+    clustR1=bwconncomp(thresh_binaryR,8);
+    clR1=regionprops(clustR1); %get the region properties
+    cl_aR1=[clR1.Area];
+    cl_aR1(cl_aR1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:size(clR1)
+        if clR1(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
+            cl_aR1(cii) = 1;
+            xx(cii) = cii;
+        end
+    end
+    cl_keep1=find(cl_aR1>50); %get the ones with an area >100 pixels
+    idxc=1;
+    for ii=1:length(cl_keep1)
+        mat=false(size(thresh_binaryR));
+        mat(clustR1.PixelIdxList{cl_keep1(ii)})=true;
+        tstat_sums(ii)=sum(abs(tstat_R(mat)));
+
+        if tstat_sums(ii)>thresh %save the ones that are over the thresh
+            sigclust(clustR1.PixelIdxList{cl_keep1(ii)})=idxc;
+            centroid(idxc,1:2) = clR1(cl_keep1(ii)).Centroid;
+            boundingBox(idxc,1:4) = clR1(cl_keep1(ii)).BoundingBox;
+            allClusterNumbers{idcx,1} =  clR1(cl_keepNeg1(ii));
+            tstatSum(idxc,1) = tstat_sums(ii);
+            idxc=idxc+1;
+        end
+    end
+    thresholds = thresh;
+end
+
+%% second data set
+
+if timeSmearMean 
+    mnd1=nanmean(data2,3);
+    mnd2=nanmean(data2itiT,3); %includes the mirrored part if not the same size
+    mean2temp = nanmean(mnd2,2);
+    mean2All = repmat(mean2temp, 1, size(mnd2,2));
+    sd1=std(data2,0,3);
+    sd2=std(data2itiT,0,3);
+    stdev2temp = std(sd2, 0, 2);
+    std2All = repmat(stdev2temp, 1, size(sd2,2));
+    sp=sqrt(((L2-1)*sd1.^2+(L2iti-1)*std2All.^2)./(L2+L2iti-2));
+    tstat_R=(mnd1-mean2All)./(sp*sqrt(1/L2+1/L2iti));
+    tstat_R=gather(tstat_R);
+else
+    mnd1=nanmean(data2,3);
+    mnd2=nanmean(data2itiT,3); %includes the mirrored part if not the same size
+    sd1=std(data2,0,3);
+    sd2=std(data2itiT,0,3);
+    spR=sqrt(((L2-1)*sd1.^2+(L2iti-1)*sd2.^2)./(L2+L2iti-2));
+    tstat_R=(mnd1-mnd2)./(spR*sqrt(1/L2+1/L2iti));
     tstat_R=gather(tstat_R);
 end
 %tstat_Rabs=abs(tstat_R); %take absolute for adjustment. makes negative deflections and positive deflections of equal value. don't do this if there is a difference between the degrees of positive and negative deflections
@@ -479,21 +617,27 @@ sigclust=zeros(size(tstat_R));
 if splitPosNeg
     sigclustPos=zeros(size(tstat_R));
     sigclustNeg=zeros(size(tstat_R));
-    tstat_maxP=gather(tstat_maxP);
-    tstat_maxN=gather(tstat_maxN);
-    r_pvalueNeg=2*tcdf((tstat_R), (L1+L1iti-2)); %Gets the p values for negative deflections (two tailed), straight from ttest
-    r_pvaluePos=2*tcdf(-(tstat_R), (L1+L1iti-2)); %Gets the p values for positive deflections (two tailed),
+    tstat2_maxP=gather(tstat2_maxP);
+    tstat2_maxN=gather(tstat2_maxN);
+    r_pvalueNeg=2*tcdf((tstat_R), (L2+L2iti-2)); %Gets the p values for negative deflections (two tailed), straight from ttest
+    r_pvaluePos=2*tcdf(-(tstat_R), (L2+L2iti-2)); %Gets the p values for positive deflections (two tailed),
 
-    %% find the histogram alpha
+    %% find the histogram alpha of differences for each
     if isempty(histogramBuiltThresholds)
-        temp_tsmP=sort(tstat_maxP);
-        threshP=temp_tsmP(round(size(tstat_maxP,1)*alphaHistoHalf));
-        temp_tsmN=sort(tstat_maxN);
-        threshN=temp_tsmN(round(size(tstat_maxN,1)*alphaHistoHalf));
+        %this is for positive deflections and then can be either positive
+        %(data1>data2) or reverse 
+        temp_tsmP=sort(tstat_maxPDiff);
+        threshP1=temp_tsmP(round(size(tstat_maxPDiff,1)*alphaHistoHalf)); %this is positive so means data 1 is > data 2
+        threshP2=temp_tsmP(round(size(tstat_maxPDiff,1)*(1-alphaHistoHalf))); %this is negative so means data 1 is < data 2
+        %this is for negative deflections and then can be either positive
+        %(data1>data2) or reverse
+        temp_tsmN=sort(tstat_maxNDiff);        
+        threshN1=temp_tsmN(round(size(tstat_maxNDiff,1)*alphaHistoHalf));%this is positive so means data 1 is > data 2
+        threshN2=temp_tsmN(round(size(tstat_maxNDiff,1)*(1-alphaHistoHalf))); %this is negative so means data 1 is < data 2
     end
-    thresholds(1,1) = threshP;
-    thresholds(1,2) = threshN;
-    
+    thresholds(1,1) = threshP1; thresholds(1,2) = threshP2;
+    thresholds(2,1) = threshN1; thresholds(2,2) = threshN2;   
+  
 
     %%
     %begin clustering with bwconncomp
@@ -501,32 +645,41 @@ if splitPosNeg
     thresh_binaryRNeg=r_pvalueNeg<alph/2;%find those less than set p value
 
     %REPEAT THIS FOR EACH
-    clustRPos=bwconncomp(thresh_binaryRPos,8);
-    clRPos=regionprops(clustRPos, 'all'); %get the region properties
-    cl_aRPos=[clRPos.Area];
-    cl_aRPos(cl_aRPos>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    for cii = 1:size(clRPos)
-        if clRPos(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
-            cl_aRPos(cii) = 1;
+    clustRPos2=bwconncomp(thresh_binaryRPos,8);
+    clRPos2=regionprops(clustRPos2, 'all'); %get the region properties
+    cl_aRPos2=[clRPos2.Area];
+    cl_aRPos2(cl_aRPos2>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:height(clRPos2)
+        if clRPos2(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
+            cl_aRPos2(cii) = 1;
             xx(cii) = cii;
         end
     end
-    cl_keepPos=find(cl_aRPos>50); %get the ones with an area >50 pixels
+    cl_keepPos2=find(cl_aRPos2>50); %get the ones with an area >50 pixels
     idxc=1; idxd=1;
-    tstat_sumsP = []; tstat_sumsN = [];
-    for ii=1:length(cl_keepPos)
+    for ii=1:height(cl_keepPos2)
         matPos=false(size(thresh_binaryRPos));
-        matPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=true;
-        tstat_sumsPos(ii)=sum(abs(tstat_R(matPos)));
-
-        if tstat_sumsPos(ii)>threshP %save the ones that are over the thresh
-            sigclustPos(clustRPos.PixelIdxList{cl_keepPos(ii)})=idxd;
-            centroidPos(idxc,1:2) = clRPos(cl_keepPos(ii)).Centroid;
-            boundingBoxPos(idxc,1:4) = clRPos(cl_keepPos(ii)).BoundingBox;
-            allClusterNumbersPos{idxc,1} = clRPos(cl_keepPos(ii));
-            tstat_sumsP(idxc,1) = tstat_sumsPos(ii);
-            idxc=idxc+1; idxd=idxd+1;
-        end
+        matPos(clustRPos2.PixelIdxList{cl_keepPos2(ii)})=true;
+        tstat2_sumsPos(ii,1)=sum(abs(tstat_R(matPos)));        
+    end
+    %% will want to take the biggest cluster and subtract the biggest
+    %%cluster here. 
+    [maxP1, maxP1i] = max(tstat1_sumsPos);
+    [maxP2, maxP2i] = max(tstat2_sumsPos);
+    tstatDiff_Pos = max(tstat1_sumsPos) - max(tstat2_sumsPos);
+    if tstatDiff_Pos>threshP1 %save if over the thresh for data 1 (tail of data1>data2)
+        sigclustPos(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=idxd;
+        centroidPos(1,1:2) = clRPos1(cl_keepPos1(maxP1i)).Centroid;
+        boundingBoxPos(1,1:4) = clRPos1(cl_keepPos1(maxP1i)).BoundingBox;
+        allClusterNumbersPos{1,1} = clRPos1(cl_keepPos1(maxP1i));
+        tstat_sumsP(1,1) = tstat1_sumsPos1(maxP1i);
+        %idxc=idxc+1; idxd=idxd+1;
+    elseif tstatDiff_Pos<threshP2 %save if over the thresh for data 2 (tail of data1<data2)
+        sigclustPos(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=idxd;
+        centroidPos(1,1:2) = clRPos2(cl_keepPos2(maxP2i)).Centroid;
+        boundingBoxPos(1,1:4) = clRPos2(cl_keepPos2(maxP2i)).BoundingBox;
+        allClusterNumbersPos{1,1} = clRPos2(cl_keepPos1(maxP2i));
+        tstat_sumsP(1,1) = tstat1_sumsPos(maxP2i);
     end
     %% for plotting if you want
     % figure
@@ -539,31 +692,39 @@ if splitPosNeg
     % subplot(4,1,4)
     % imagesc(matPos); axis xy;
 
-    clustRNeg=bwconncomp(thresh_binaryRNeg,8);
-    clRNeg=regionprops(clustRNeg); %get the region properties
-    cl_aRNeg=[clRNeg.Area];
-    cl_aRNeg(cl_aRNeg>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    for cii = 1:size(clRNeg)
-        if clRNeg(cii).Centroid(1,2)<HzThresholdNeg %remove any that are below the a hz threshold
-            cl_aRNeg(cii) = 1;
+    clustRNeg2=bwconncomp(thresh_binaryRNeg,8);
+    clRNeg2=regionprops(clustRNeg2); %get the region properties
+    cl_aRNeg2=[clRNeg2.Area];
+    cl_aRNeg2(cl_aRNeg2>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:height(clRNeg2)
+        if clRNeg2(cii).Centroid(1,2)<HzThresholdNeg %remove any that are below the a hz threshold
+            cl_aRNeg2(cii) = 1;
             xx(cii) = cii;
         end
     end
-    cl_keepNeg=find(cl_aRNeg>50); %get the ones with an area >100 pixels
+    cl_keepNeg2=find(cl_aRNeg2>50); %get the ones with an area >100 pixels
     idxc=1;
-    for ii=1:length(cl_keepNeg)
+    for ii=1:length(cl_keepNeg2)
         matNeg=false(size(thresh_binaryRNeg));
-        matNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=true;
-        tstat_sumsNeg(ii)=sum(abs(tstat_R(matNeg)));
-
-        if tstat_sumsNeg(ii)>threshN %save the ones that are over the thresh
-            sigclustNeg(clustRNeg.PixelIdxList{cl_keepNeg(ii)})=idxd;
-            centroidNeg(idxc,1:2) = clRNeg(cl_keepNeg(ii)).Centroid;
-            boundingBoxNeg(idxc,1:4) = clRNeg(cl_keepNeg(ii)).BoundingBox;
-            allClusterNumbersNeg{idxc,1} = clRNeg(cl_keepNeg(ii));
-            tstat_sumsN(idxc,1) = tstat_sumsNeg(ii);
-            idxc=idxc+1; idxd=idxd+1;
-        end
+        matNeg(clustRNeg2.PixelIdxList{cl_keepNeg2(ii)})=true;
+        tstat2_sumsNeg(ii,1)=sum(abs(tstat_R(matNeg)));
+    end
+    [maxN1, maxN1i] = max(tstat1_sumsNeg);
+    [maxN2, maxN2i] = max(tstat2_sumsNeg);
+    tstatDiff_Neg = max(tstat1_sumsNeg) - max(tstat2_sumsNeg); %DOUBLE CHECK THIS NEEDS TO BE ABS OR NOT. I THINK NOW
+    if tstatDiff_Neg>threshN1 %save if over the thresh for data 1 (tail of data1>data2)
+        sigclustNeg(clustRNeg1.PixelIdxList{cl_keepNeg1(maxN1i)})=idxd;
+        centroidPos(1,1:2) = clRPos1(cl_keepNeg1(maxN1i)).Centroid;
+        boundingBoxPos(1,1:4) = clRPos1(cl_keepNeg1(maxN1i)).BoundingBox;
+        allClusterNumbersPos{1,1} = clRPos1(cl_keepNeg1(maxN1i));
+        tstat_sumsP(1,1) = tstat1_sumsPos1(maxP1i);
+        %idxc=idxc+1; idxd=idxd+1;
+    elseif tstatDiff_Pos<threshP2 %save if over the thresh for data 2 (tail of data1<data2)
+        sigclustPos(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=idxd;
+        centroidPos(1,1:2) = clRPos2(cl_keepPos2(maxP2i)).Centroid;
+        boundingBoxPos(1,1:4) = clRPos2(cl_keepPos2(maxP2i)).BoundingBox;
+        allClusterNumbersPos{1,1} = clRPos2(cl_keepPos1(maxP2i));
+        tstat_sumsP(1,1) = tstat1_sumsPos(maxP2i);
     end
     centroid = vertcat(centroidPos, centroidNeg);
     tstatSum = vertcat(tstat_sumsP, tstat_sumsN);
@@ -580,36 +741,34 @@ else
     r_pvalue=2*tcdf(-abs(tstat_R), (L1+L1iti-2)); %get the p values for both adjustments (makes it one tailed), this formula is straight from ttest2
 
     thresh_binaryR=r_pvalue<alph;%find those less than set p value
-    clustR=bwconncomp(thresh_binaryR,8);
-    clR=regionprops(clustR); %get the region properties
-    cl_aR=[clR.Area];
-    cl_aR(cl_aR>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
-    for cii = 1:size(clR)
-        if clR(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
-            cl_aR(cii) = 1;
+    clustR1=bwconncomp(thresh_binaryR,8);
+    clR1=regionprops(clustR1); %get the region properties
+    cl_aR1=[clR1.Area];
+    cl_aR1(cl_aR1>maxClusterPercentage) = 1; %remove any that are over the cluster max percentage (meaning not massive clusters that are the whole time frequency analysis)
+    for cii = 1:size(clR1)
+        if clR1(cii).Centroid(1,2)<HzThresholdPos %remove any that are below the 20hz threshold
+            cl_aR1(cii) = 1;
             xx(cii) = cii;
         end
     end
-    cl_keep=find(cl_aR>50); %get the ones with an area >100 pixels
+    cl_keep1=find(cl_aR1>50); %get the ones with an area >100 pixels
     idxc=1;
-    for ii=1:length(cl_keep)
+    for ii=1:length(cl_keep1)
         mat=false(size(thresh_binaryR));
-        mat(clustR.PixelIdxList{cl_keep(ii)})=true;
+        mat(clustR1.PixelIdxList{cl_keep1(ii)})=true;
         tstat_sums(ii)=sum(abs(tstat_R(mat)));
 
         if tstat_sums(ii)>thresh %save the ones that are over the thresh
-            sigclust(clustR.PixelIdxList{cl_keep(ii)})=idxc;
-            centroid(idxc,1:2) = clR(cl_keep(ii)).Centroid;
-            boundingBox(idxc,1:4) = clR(cl_keep(ii)).BoundingBox;
-            allClusterNumbers{idcx,1} =  clR(cl_keepNeg(ii));
+            sigclust(clustR1.PixelIdxList{cl_keep1(ii)})=idxc;
+            centroid(idxc,1:2) = clR1(cl_keep1(ii)).Centroid;
+            boundingBox(idxc,1:4) = clR1(cl_keep1(ii)).BoundingBox;
+            allClusterNumbers{idcx,1} =  clR1(cl_keepNeg1(ii));
             tstatSum(idxc,1) = tstat_sums(ii);
             idxc=idxc+1;
         end
     end
     thresholds = thresh;
 end
-
-
 
 
 %for testing

@@ -54,7 +54,7 @@ function [filtData, params, dataFinalCB, bandfilter, filterClassBand] = dataPrep
 
 [varargin, bandfilter] = util.argkeyval('bandfilter',varargin, []);  % check if filters already made so you don't have to keep making them each run
 [varargin, filterClassBand] = util.argkeyval('dataClassBand',varargin, []);  % check if classic broad filters already made so you don't have to keep making them each run
-[varargin, classicBandRange]= util.argkeyval('classicBandRange', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 150]); %filtered data classic
+[varargin, classicBandRange]= util.argkeyval('classicBandRange', varargin, [1 4; 4 8; 8 13; 13 30; 30 50; 50 60; 60 70; 70 80; 80 90; 90 100; 100 110; 110 120; 120 130; 130 140; 140 150]); %filtered data classic. the last 10 hz bands are to be normalized and then averaged together for 50-150
 
 %flip data if suspect it's in channels x data
 if size(data,1)<=size(data,2)
@@ -235,7 +235,7 @@ end
          %run the filters and make power
          tempMDh=filtfilt(bandfilter.(lblA{ii}), dataM);
          %run a hilbert to store the power and the angle
-         env_t=abs(hilbert(tempMDh)); %it's possible you need to ' this signal
+         env_t=abs(hilbert(tempMDh)); 
          angle_t=angle(hilbert(tempMDh));
          tempMDCenv(ii,:)=env_t; %build the filtered data into 3d matrix and make 3rd dimmension channels, so now freq x time x channels
          tempMDCang(ii,:)=angle_t; %build the filtered data into 3d matrix and make 3rd dimmension channels, so now freq x time x channels
@@ -277,6 +277,8 @@ if DoBandFilterCanonical
         tt=tic;
         for ii=1:length(lblB)
             %run the filters and make power
+            %NEED TO HANDLE THE 10 HZ BANDS IN HG AND AVERAGE THEM TOGETHER
+            %AFTER NORMALIZING THEM.
             tempClassicBand=filtfilt(filterClassBand.(lblB{ii}), dataM).^2;
             %lowpass to smooth the data.  This can be a variable pass, based on what "window" you want to smooth over
             tempClassicBandFF=filtfilt(lpFilt, tempClassicBand);

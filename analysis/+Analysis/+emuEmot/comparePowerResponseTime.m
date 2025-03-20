@@ -1,7 +1,7 @@
 function [summaryStatsSigTrials, summaryStatsSigIndividualEmId, TxChannel] = comparePowerResponseTime(nback, identityTaskLFP, emotionTaskLFP, varargin)
 %Primary function to pull out cluster descriptors and compare. creates a
 %table of information on clusters
-%   Detailed explanation goes here
+
 %   Currently recording the cluster for AllID/AllEM if it is a cluster between timeMinMax and FreqMinMax and then going through
 %   each trial to pull anything over a sdThreshold that is 100 clustered
 %   points or more.
@@ -329,7 +329,7 @@ for cc = 1:length(chNum)
                 %check the centroid is in the high gamma range in the
                 %region after image presentation
                 bData = []; %must clear it so it doesn't start over with the next centroid
-                centA = []; bData = []; sData =[];
+                centA = [];  sData =[];
                 cent = nback.(chNum{cc}).(conditionName{4}).identityTaskcentroid(ii,:);
                 centA(1) = tt(round(cent(1))); centA(2) = ff(round(cent(2)));
                 normS1 = normalize(nback.(chNum{cc}).(conditionName{4}).identityTaskMean,2);
@@ -422,7 +422,7 @@ for cc = 1:length(chNum)
                                 TstatCluster(jj,1) = nback.(chNum{cc}).(conditionName{nn}).identityTasktstatSum(ii,1); %if it's gamma, grab that tstat
                             end
                             ImageType{jj,1} = (conditionName{nn}); %should this be idx2? STOPPED LOOKING HERE.
-                            [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand).^2);
+                            [MaxValue(jj,1), pkIndex] = max(bData(jj,tMinBand:tMaxBand));
                             TimeofMax(jj,1) = (pkIndex + tMinBand)/1000; %get the peak time of the filtered and adjust to ms
                             if length(identityTaskLFP.byidentity.(chNum{cc}).correctTrial{idx2}) < jj
                                 CorrectResponse(jj,1) = 0;

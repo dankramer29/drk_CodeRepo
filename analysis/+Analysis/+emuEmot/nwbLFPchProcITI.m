@@ -47,7 +47,7 @@ for cc = 1:length(chNum) %channels
         %Filtered.iti.(chName{cc}).specDzscore(:,:,ii) = filtDataTemp.dataSpec.dataZ;
         Filtered.iti.(chName{cc}).specD(:,:,ii) = filtDataTemp.dataSpec.data;
         Filtered.iti.(chName{cc}).bandPassed = filtDataTemp.ClassicBand.Power;
-        Filtered.iti.(chName{cc}).bandPassed.filter1to200 = data(:,cc); %this has already been made by broad bandpassing
+        Filtered.iti.(chName{cc}).bandPassed.filter1to200 = data(:,cc); %this has already been made by broad bandpassing SO THE FILTERED DATA 1 to 200 is unaltered and hasn't been squared or smoothed.
         Filtered.iti.(chName{cc}).Hilbert = filtDataTemp.Hilbert;
     end
 end

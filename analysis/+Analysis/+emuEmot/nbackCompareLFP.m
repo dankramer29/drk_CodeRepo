@@ -14,6 +14,10 @@ function [nback,significantComparisons] = nbackCompareLFP(identityTaskLFP,emotio
 [varargin, eventChoice]=util.argkeyval('eventChoice', varargin, 1); %1 is when the image comes on, 2 is the response
 [varargin, itiOptions]=util.argkeyval('itiOptions', varargin, 1); %case swithc for 3 options, option 1 and 2 generate 1 threshold for each channel. 1 is do the iti with the iti between images. 2 is iti from random 1 second intervals, and 3 is just run it between conditions with a new threshold each time
 [varargin, comparedToSubtractionITI]=util.argkeyval('comparedToSubtractionITI', varargin,1); %run the iti difference comparison (subtract data 1 from data 2 and shuffle compare that difference)
+%for the bandpass analysis
+[varargin, freqOfInterest]=util.argkeyval('freqOfInterest', varargin,[50 150]); %find the frequency of interest for the band passed analysis
+[varargin, fs]=util.argkeyval('fs', varargin, 500); %sampling frequency
+[varargin, bandpassRange]=util.argkeyval('bandpassRange', varargin,5); %how big do we want the frequency range to be
 
 if comparedToITI ==1
     if isempty(itiDataFilt)
@@ -102,7 +106,75 @@ if comparedToSubtractionITI == 1
         end
         nback.(chName{ii}).allIdentities.identityTaskData = dataIdentityTaskAllIdentities; %store the data in case you want to evaluate it later
         nback.(chName{ii}).allIdentities.emotionTaskData = dataEmotionTaskAllIdentities;
-       
+
+        %handle the bandpassed frequency localization. finds the peak
+        %frequency in the spectrogram
+        %find the row for the frequency band of interest in the frequency
+        %range
+        [freqRow, freqRowI] = find(identityTaskLFP.freq>freqOfInterest(1,1) & identityTaskLFP.freq<freqOfInterest(1,2) );
+        freqRowIlow = freqRowI(1);
+        freqRowIhigh = freqRowI(end);
+        %normalize the spectrogram
+        IdMeanNorm = normalize(mean(dataIdentityTaskAllIdentities,3),2);         
+        [mxV, mxVi] = max(IdMeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
+        [mxViR, mxViC] = ind2sub(size(IdMeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
+        freqPeak = identityTaskLFP.freq(freqRowIlow-1+mxViR); %finds the peak frequency
+        bandfilterId = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+        IdFreqPeakBP = filtfilt(bandfilterId, dataIdentityTaskAllIdentitiesBP');
+        IdFreqPeakBP = IdFreqPeakBP';
+        IdFreqPeakBPs = IdFreqPeakBP.^2; %turn to power
+      
+        IdFreqPeakBPsdb=10*log10(IdFreqPeakBPs); %consider not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+        [IdFreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(IdFreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
+        [IdFreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(IdFreqPeakBPsdb, 60, fs);
+        IdFreqPeakBPsSm = IdFreqPeakBPsSm';
+        IdFreqPeakBPsdbSm = IdFreqPeakBPsdbSm'; 
+        %since it's different frequencies, probably want to normalize it.
+        IdFreqPeakmn = mean(normalize(IdFreqPeakBPsSm,2));
+        IdFreqPeaksem = std(normalize(IdFreqPeakBPsSm,2), [], 1) / sqrt(size(IdFreqPeakBPsSm,1));
+        
+        %normalize the spectrogram
+        EmMeanNorm = normalize(mean(dataEmotionTaskAllIdentities,3),2);         
+        [mxV, mxVi] = max(EmMeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
+        [mxViR, mxViC] = ind2sub(size(EmMeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
+        freqPeak = identityTaskLFP.freq(freqRowIlow-1+mxViR); %finds the peak frequency
+        bandfilterEm = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+        EmFreqPeakBP = filtfilt(bandfilterEm, dataEmotionTaskAllIdentitiesBP');
+        EmFreqPeakBP = EmFreqPeakBP';
+        EmFreqPeakBPs = EmFreqPeakBP.^2; %turn to power
+      
+        EmFreqPeakBPsdb=10*log10(EmFreqPeakBPs); %consider not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+        [EmFreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(EmFreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
+        [EmFreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(EmFreqPeakBPsdb, 60, fs);
+        EmFreqPeakBPsSm = EmFreqPeakBPsSm';
+        EmFreqPeakBPsdbSm = EmFreqPeakBPsdbSm'; 
+        
+        EmFreqPeakmn = mean(normalize(EmFreqPeakBPsSm,2));
+        EmFreqPeaksem = std(normalize(EmFreqPeakBPsSm,2), [], 1) / sqrt(size(EmFreqPeakBPsSm,1));
+        
+        %optional plotting
+        figure
+        colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
+        for ii = 1:length(colorTempTest)
+            str = colorTempTest{ii};
+            C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+        end
+        H = shadedErrorBar([],IdFreqPeakmn,IdFreqPeaksem,'lineprops', {'-b'});
+        H.mainLine.LineWidth=4;
+        H.patch.FaceColor=C(5,:);
+        H.patch.EdgeColor=C(6,:);
+        H.mainLine.Color=C(6,:);
+        H.edge(1).Color=C(6,:);
+        H.edge(2).Color=C(6,:);
+        hold on
+        H = shadedErrorBar([],EmFreqPeakmn,EmFreqPeaksem,'lineprops', {'-b'});
+        H.mainLine.LineWidth=4;
+        H.patch.FaceColor=C(11,:);
+        H.patch.EdgeColor=C(10,:);
+        H.mainLine.Color=C(10,:);
+        H.edge(1).Color=C(10,:);
+        H.edge(2).Color=C(10,:);
+
         [~, ~, ~, ~, nback.(chName{ii}).subtraction.largestCluster,...
                 tstatPos_sumsStatSig, tstatNeg_sumsStatSig] = stats.cluster_permutation_Subtraction_Ttest_gpu3d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
                 'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0 );

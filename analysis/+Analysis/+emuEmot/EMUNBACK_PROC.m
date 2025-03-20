@@ -406,7 +406,7 @@ end
 %Emotion
 switch fileVariation
     case {1, 3, 4,6}
-        testfileEm = nwbRead(folderNameEmotion); %[ugh
+        testfileEm = nwbRead(folderNameEmotion); 
         testfileId = nwbRead(folderNameIdentity);
     case 2 %add any single NWB file cases here. MW5
         testfileEmId = nwbRead(emotionidentityFilter);

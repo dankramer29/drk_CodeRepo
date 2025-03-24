@@ -128,9 +128,6 @@ mn1=mean(data1T);
 mn2=mean(data2T);
 sd1=std(data1T);
 sd2=std(data2T);
-SEM1 = std(data1T, [], 1) / sqrt(size(data1T,1));
-SEM2 = std(data2T, [], 1) / sqrt(size(data2T,1));
-
 
 sp=sqrt(((L1-1)*std(data1T,[],1).^2+(L2-1)*std(data2T,[],1).^2)./(L1+L2-2));
 tstat_resR=(mn1-mn2)./(sp*sqrt(1/L1+1/L2));
@@ -182,9 +179,9 @@ end
 if plt
     figure
     subplot(3,1,1)
-    shadedErrorBar([],mn1,SEM1*2,'lineprops', {'-b'});
+    shadedErrorBar([],mn1,sd1,'lineprops', {'-b'});
     hold on;
-    shadedErrorBar([],mn2,SEM2*2,'lineprops', {'-r'});
+    shadedErrorBar([],mn2,sd2,'lineprops', {'-r'});
     subplot(3,1,2)
     plot(tstat_resR)
     subplot(3,1,3)

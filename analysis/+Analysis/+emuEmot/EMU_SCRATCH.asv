@@ -2,6 +2,19 @@
 
 %% this is all scratch pad stuff for now.
 %working on the bandpassed data
+figure
+subplot(3,1,1)
+shadedErrorBar([],mn1,sd1,'lineprops', {'-b'});
+hold on; 
+shadedErrorBar([],mn2,sd2,'lineprops', {'-r'});
+subplot(3,1,2) 
+plot(tstat_resR)
+subplot(3,1,3)
+histogram(thresh,xshuffles)
+hold on
+plot([thesh1tail thresh1tail], [1:20]);
+
+imagesc(IdMeanNorm); axis xy;
 
 testD = identityTaskLFP.byidentity.ch1312.image.bandPassed.filter1to200;
 testDH = identityTaskLFP.byidentity.ch1312.image.Hilbert.Power;
@@ -9,8 +22,21 @@ xx=testDH{1}(:,:,1);
 hgMHil = mean(xx(25:50,:));
 
 [xxx, xi]= max(IdMeanNorm,[],'all');
+mn1 = mean(IdFreqPeakBPsSm);
+SEM = std(IdFreqPeakBPsSm, [], 1) / sqrt(size(IdFreqPeakBPsSm,1));
+figure
+H = shadedErrorBar([],mn1,SEM,'lineprops', {'-b'});
+H.mainLine.LineWidth=4; 
+H.patch.FaceColor=C(5,:);
+H.patch.EdgeColor=C(6,:);
+H.mainLine.Color=C(6,:);
+H.edge(1).Color=C(6,:);
+H.edge(2).Color=C(6,:);
 
-SEM = std(IdFreqPeakBPsSm, [], 2) / sqrt(length(IdFreqPeakBPsSm));
+figure
+plot(IdFreqPeakBPsSm(2,:))
+figure
+plot(IdFreqPeakBPsSmNorm(2,:))
 
 for ii=1:length(lblB)
 tempClassicBandNS=filtfilt(filterClassBand.(lblB{ii}), dataM);

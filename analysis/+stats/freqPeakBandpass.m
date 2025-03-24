@@ -30,82 +30,92 @@ end
 freqRowIlow = freqRowI(1);
 freqRowIhigh = freqRowI(end);
 %normalize the spectrogram
-IdMeanNorm = normalize(mean(data1spectro,3),2);    %expects 3rd dimension to be trials but can be done without
-[mxV, mxVi] = max(IdMeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
-[mxViR, mxViC] = ind2sub(size(IdMeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
+Data1MeanNorm = normalize(mean(data1spectro,3),2);    %expects 3rd dimension to be trials but can be done without
+[mxV, mxVi] = max(Data1MeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
+[mxViR, mxViC] = ind2sub(size(Data1MeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
 freqPeak = ff(freqRowIlow-1+mxViR); %finds the peak frequency
-bandfilterId = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
-IdFreqPeakBP = filtfilt(bandfilterId, data1bandpass'); %assumes data is trials by freq
-IdFreqPeakBP = IdFreqPeakBP';
-IdFreqPeakBPs = IdFreqPeakBP.^2; %turn to power
+bandfilterData1 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+Data1FreqPeakBP = filtfilt(bandfilterData1, data1bandpass'); %assumes data is trials by freq
+Data1FreqPeakBP = Data1FreqPeakBP';
+Data1FreqPeakBPs = Data1FreqPeakBP.^2; %turn to power
 
-IdFreqPeakBPsdb=10*log10(IdFreqPeakBPs); %consider not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
-[IdFreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(IdFreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
-[IdFreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(IdFreqPeakBPsdb, 60, fs);
-IdFreqPeakBPsSm = IdFreqPeakBPsSm';
-IdFreqPeakBPsdbSm = IdFreqPeakBPsdbSm';
+Data1FreqPeakBPsdb=10*log10(Data1FreqPeakBPs); %consData1er not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+[Data1FreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(Data1FreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
+[Data1FreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(Data1FreqPeakBPsdb, 60, fs);
+Data1FreqPeakBPsSm = Data1FreqPeakBPsSm';
+Data1FreqPeakBPsdbSm = Data1FreqPeakBPsdbSm';
 
 %since it's different frequencies, normalize it.
 switch norm
     case 0
-        IdFreqPeakmn = mean(IdFreqPeakBPsSm);
-        IdFreqPeaksem = std(IdFreqPeakBPsSm, [], 1) / sqrt(size(IdFreqPeakBPsSm,1));
+        Data1FreqPeakmn = mean(Data1FreqPeakBPsSm);
+        Data1FreqPeaksem = std(Data1FreqPeakBPsSm, [], 1) / sqrt(size(Data1FreqPeakBPsSm,1));
     case 1
         tempDAll = [];
-        for ii = 1:size(IdFreqPeakBPsdbSm,1)
-            tempD = IdFreqPeakBPsdbSm(ii,:);
-            tempDAll = horcat(tempDAll, tempD);
+        for ii = 1:size(Data1FreqPeakBPsSm,1)
+            tempD = Data1FreqPeakBPsSm(ii,:);
+            tempDAll = horzcat(tempDAll, tempD);
         end
         mn = mean(tempDAll); sd = std(tempDAll);
-        IdFreqPeakBPsdbSmNorm = (IdFreqPeakBPsdbSm - mn)./sd;
-        IdFreqPeakmn = mean(IdFreqPeakBPsdbSmNorm);
-        IdFreqPeaksem = std(IdFreqPeakBPsdbSmNorm, [], 1) / sqrt(size(IdFreqPeakBPsdbSmNorm,1));
+        Data1FreqPeakBPsSmNorm = (Data1FreqPeakBPsSm - mn)./sd;
+        Data1FreqPeakmn = mean(Data1FreqPeakBPsSmNorm);
+        Data1FreqPeaksem = std(Data1FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data1FreqPeakBPsSmNorm,1));
     case 2
-        IdFreqPeakmn = mean(normalize(IdFreqPeakBPsSm,2));
-        IdFreqPeaksem = std(normalize(IdFreqPeakBPsSm,2), [], 1) / sqrt(size(IdFreqPeakBPsSm,1));
+        Data1FreqPeakmn = mean(normalize(Data1FreqPeakBPsSm,2));
+        Data1FreqPeaksem = std(normalize(Data1FreqPeakBPsSm,2), [], 1) / sqrt(size(Data1FreqPeakBPsSm,1));
 end
 
 %normalize the spectrogram
-EmMeanNorm = normalize(mean(data2spectro,3),2);
-[mxV, mxVi] = max(EmMeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
-[mxViR, mxViC] = ind2sub(size(EmMeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
+Data2MeanNorm = normalize(mean(data2spectro,3),2);
+[mxV, mxVi] = max(Data2MeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
+[mxViR, mxViC] = ind2sub(size(Data2MeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
 freqPeak = ff(freqRowIlow-1+mxViR); %finds the peak frequency
-bandfilterEm = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
-EmFreqPeakBP = filtfilt(bandfilterEm, data2bandpass');
-EmFreqPeakBP = EmFreqPeakBP';
-EmFreqPeakBPs = EmFreqPeakBP.^2; %turn to power
+bandfilterData2 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+Data2FreqPeakBP = filtfilt(bandfilterData2, data2bandpass');
+Data2FreqPeakBP = Data2FreqPeakBP';
+Data2FreqPeakBPs = Data2FreqPeakBP.^2; %turn to power
 
-EmFreqPeakBPsdb=10*log10(EmFreqPeakBPs); %consider not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
-[EmFreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(EmFreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
-[EmFreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(EmFreqPeakBPsdb, 60, fs);
-EmFreqPeakBPsSm = EmFreqPeakBPsSm';
-EmFreqPeakBPsdbSm = EmFreqPeakBPsdbSm';
+Data2FreqPeakBPsdb=10*log10(Data2FreqPeakBPs); %consider not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+[Data2FreqPeakBPsSm, tplotC]=Analysis.BasicDataProc.convSmooth(Data2FreqPeakBPs, 60, fs); %tested 60ms window and 30 and 60 is better
+[Data2FreqPeakBPsdbSm, tplotC]=Analysis.BasicDataProc.convSmooth(Data2FreqPeakBPsdb, 60, fs);
+Data2FreqPeakBPsSm = Data2FreqPeakBPsSm';
+Data2FreqPeakBPsdbSm = Data2FreqPeakBPsdbSm';
 
 %since it's different frequencies, normalize it.
 switch norm
-    case 0
-        EmFreqPeakmn = mean(EmFreqPeakBPsSm);
-        EmFreqPeaksem = std(EmFreqPeakBPsSm, [], 1) / sqrt(size(EmFreqPeakBPsSm,1));
-    case 1
+    case 0 %no normalization
+        Data2FreqPeakmn = mean(Data2FreqPeakBPsSm);
+        Data2FreqPeaksem = std(Data2FreqPeakBPsSm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
+        %run shuffle stats
+        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSm, Data1FreqPeakBPsSm);
+
+    case 1 %normalize across all the data (can do this in shuffle too, but better here) (since the frequency is the same, fine to do it across all)
         tempDAll = [];
-        for ii = 1:size(EmFreqPeakBPsdbSm,1)
-            tempD = EmFreqPeakBPsdbSm(ii,:);
-            tempDAll = horcat(tempDAll, tempD);
+        for ii = 1:size(Data2FreqPeakBPsSm,1)
+            tempD = Data2FreqPeakBPsSm(ii,:);
+            tempDAll = horzcat(tempDAll, tempD);
         end
         mn = mean(tempDAll); sd = std(tempDAll);
-        EmFreqPeakBPsdbSmNorm = (EmFreqPeakBPsdbSm - mn)./sd;
-        EmFreqPeakmn = mean(EmFreqPeakBPsdbSmNorm);
-        EmFreqPeaksem = std(EmFreqPeakBPsdbSmNorm, [], 1) / sqrt(size(EmFreqPeakBPsdbSmNorm,1));
-    case 2
-        EmFreqPeakmn = mean(normalize(EmFreqPeakBPsSm,2));
-        EmFreqPeaksem = std(normalize(EmFreqPeakBPsSm,2), [], 1) / sqrt(size(EmFreqPeakBPsSm,1));
+        Data2FreqPeakBPsSmNorm = (Data2FreqPeakBPsSm - mn)./sd;
+        Data2FreqPeakmn = mean(Data2FreqPeakBPsSmNorm);
+        Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSmNorm,1));
+        %run shuffle stats (already normalized)
+        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true);
+    case 2 %normalize within each trial
+        Data2FreqPeakBPsSmNorm = normalize(Data2FreqPeakBPsSm,2); %normalize across all trials
+        Data2FreqPeakmn = mean(Data2FreqPeakBPsSmNorm);
+        Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
+        %run shuffle stats (already normalized)
+        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm);
+
 end
+
 
 %optional plotting
 switch plt
     case 1
-        IdFreqPeaksem = IdFreqPeaksem;
-        EmFreqPeaksem = EmFreqPeaksem;
+        Data1FreqPeaksem = Data1FreqPeaksem;
+        Data2FreqPeaksem = Data2FreqPeaksem;
 
         figure
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -113,7 +123,7 @@ switch plt
             str = colorTempTest{ii};
             C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
         end
-        H = shadedErrorBar([],IdFreqPeakmn,IdFreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(5,:);
         H.patch.EdgeColor=C(6,:);
@@ -121,7 +131,7 @@ switch plt
         H.edge(1).Color=C(6,:);
         H.edge(2).Color=C(6,:);
         hold on
-        H = shadedErrorBar([],EmFreqPeakmn,EmFreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(11,:);
         H.patch.EdgeColor=C(10,:);
@@ -130,8 +140,8 @@ switch plt
         H.edge(2).Color=C(10,:);
 
     case 2
-        IdFreqPeaksem = IdshuffleBand;
-        EmFreqPeaksem = EmshuffleBand;
+        Data1FreqPeaksem = Data1shuffleBand;
+        Data2FreqPeaksem = Data2shuffleBand;
 
         figure
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -139,7 +149,7 @@ switch plt
             str = colorTempTest{ii};
             C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
         end
-        H = shadedErrorBar([],IdFreqPeakmn,IdFreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(5,:);
         H.patch.EdgeColor=C(6,:);
@@ -147,7 +157,7 @@ switch plt
         H.edge(1).Color=C(6,:);
         H.edge(2).Color=C(6,:);
         hold on
-        H = shadedErrorBar([],EmFreqPeakmn,EmFreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(11,:);
         H.patch.EdgeColor=C(10,:);

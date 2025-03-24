@@ -2,6 +2,19 @@
 
 %% this is all scratch pad stuff for now.
 %working on the bandpassed data
+figure
+subplot(3,1,1)
+shadedErrorBar([],mn1,sd1,'lineprops', {'-b'});
+hold on; 
+shadedErrorBar([],mn2,sd2,'lineprops', {'-r'});
+subplot(3,1,2) 
+plot(tstat_resR)
+subplot(3,1,3)
+histogram(thresh,xshuffles)
+hold on
+plot([thresh1tail thresh1tail], [1 5]);
+
+imagesc(IdMeanNorm); axis xy;
 
 testD = identityTaskLFP.byidentity.ch1312.image.bandPassed.filter1to200;
 testDH = identityTaskLFP.byidentity.ch1312.image.Hilbert.Power;
@@ -19,6 +32,11 @@ H.patch.EdgeColor=C(6,:);
 H.mainLine.Color=C(6,:);
 H.edge(1).Color=C(6,:);
 H.edge(2).Color=C(6,:);
+
+figure
+plot(IdFreqPeakBPsSm(2,:))
+figure
+plot(IdFreqPeakBPsSmNorm(2,:))
 
 for ii=1:length(lblB)
 tempClassicBandNS=filtfilt(filterClassBand.(lblB{ii}), dataM);

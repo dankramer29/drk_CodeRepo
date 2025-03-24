@@ -25,7 +25,7 @@ hgMHil = mean(xx(25:50,:));
 mn1 = mean(IdFreqPeakBPsSm);
 SEM = std(IdFreqPeakBPsSm, [], 1) / sqrt(size(IdFreqPeakBPsSm,1));
 figure
-H = shadedErrorBar([],mn1,SEM,'lineprops', {'-b'});
+H = shadedErrorBar([],mn1,SEM*2,'lineprops', {'-b'});
 H.mainLine.LineWidth=4; 
 H.patch.FaceColor=C(5,:);
 H.patch.EdgeColor=C(6,:);

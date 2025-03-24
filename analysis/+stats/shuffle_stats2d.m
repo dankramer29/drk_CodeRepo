@@ -1,4 +1,4 @@
-function [ mn, sd, est_p ] = shuffle_stats2d( data1, data2, varargin )
+function [ mean_sd, thresh_binary ] = shuffle_stats2d( data1, data2, varargin )
 %shuffle_stats shuffles the data between two data sets takes the mean and
 %std to make a distribution of the data to compare the true values to.
 %this is using a tmax approach (Groppe DM, Urbach TP, Kutas M. Mass
@@ -184,7 +184,7 @@ if plt
     subplot(3,1,1)
     shadedErrorBar([],mn1,SEM1*2,'lineprops', {'-b'});
     hold on;
-    shadedErrorBar([],mn2,SEM2*2,'lineprops', {'-r'});
+    shadedErrorBar([],mn2,SEM2*2,'lineprops', {'-r'});    
     subplot(3,1,2)
     plot(tstat_resR)
     subplot(3,1,3)
@@ -197,6 +197,21 @@ if heatmapplot
     imagsc(est_p');
 end
     
+%output
+mean_sd = table;
+mean_sd.mean{1,1} = mn1;
+mean_sd.mean{2,1} = mn2;
+mean_sd.sd{1,1} = sd1;
+mean_sd.sd{2,1} = sd2;
+mean_sd.se{1,1} = SEM1;
+mean_sd.se{2,1} = SEM2;
+mean_sd.histo{1,1} = thresh;
+mean_sd.histo{2,1} = thresh;
+mean_sd.xshuffles{1,1} = xshuffles;
+mean_sd.xshuffles{2,1} = xshuffles;
+
+
+
 end
 
 

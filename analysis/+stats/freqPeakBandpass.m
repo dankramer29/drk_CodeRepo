@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = freqPeakBandpass(data1spectro, data1bandpass, data2spectro, data2bandpass, varargin )
+function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, thresh_binary] = freqPeakBandpass(data1spectro, data1bandpass, data2spectro, data2bandpass, varargin )
 %Will find the peak frequency of a spectrogram data (between the specified
 %band, and then bandpass the data centered on that frequency and run
 %statistical comparison
@@ -87,7 +87,7 @@ switch norm
         Data2FreqPeakmn = mean(Data2FreqPeakBPsSm);
         Data2FreqPeaksem = std(Data2FreqPeakBPsSm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats
-        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSm, Data1FreqPeakBPsSm);
+        [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true);
 
     case 1 %normalize across all the data (can do this in shuffle too, but better here) (since the frequency is the same, fine to do it across all)
         tempDAll = [];
@@ -100,13 +100,13 @@ switch norm
         Data2FreqPeakmn = mean(Data2FreqPeakBPsSmNorm);
         Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSmNorm,1));
         %run shuffle stats (already normalized)
-        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true);
+        [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true);
     case 2 %normalize within each trial
         Data2FreqPeakBPsSmNorm = normalize(Data2FreqPeakBPsSm,2); %normalize across all trials
         Data2FreqPeakmn = mean(Data2FreqPeakBPsSmNorm);
         Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats (already normalized)
-        [~, ~, est_p] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm);
+        [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data2FreqPeakBPsSmNorm, Data1FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true);
 
 end
 
@@ -114,8 +114,7 @@ end
 %optional plotting
 switch plt
     case 1
-        Data1FreqPeaksem = Data1FreqPeaksem;
-        Data2FreqPeaksem = Data2FreqPeaksem;
+
 
         figure
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -123,7 +122,7 @@ switch plt
             str = colorTempTest{ii};
             C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
         end
-        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem*2,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(5,:);
         H.patch.EdgeColor=C(6,:);
@@ -131,7 +130,7 @@ switch plt
         H.edge(1).Color=C(6,:);
         H.edge(2).Color=C(6,:);
         hold on
-        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem*2,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(11,:);
         H.patch.EdgeColor=C(10,:);
@@ -140,8 +139,7 @@ switch plt
         H.edge(2).Color=C(10,:);
 
     case 2
-        Data1FreqPeaksem = Data1shuffleBand;
-        Data2FreqPeaksem = Data2shuffleBand;
+
 
         figure
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -149,7 +147,7 @@ switch plt
             str = colorTempTest{ii};
             C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
         end
-        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data1FreqPeakmn,Data1FreqPeaksem*2,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(5,:);
         H.patch.EdgeColor=C(6,:);
@@ -157,7 +155,7 @@ switch plt
         H.edge(1).Color=C(6,:);
         H.edge(2).Color=C(6,:);
         hold on
-        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem,'lineprops', {'-b'});
+        H = shadedErrorBar([],Data2FreqPeakmn,Data2FreqPeaksem*2,'lineprops', {'-b'});
         H.mainLine.LineWidth=4;
         H.patch.FaceColor=C(11,:);
         H.patch.EdgeColor=C(10,:);

@@ -224,21 +224,21 @@ alreadyFilteredData = false; %toggle to true if you've run the entire dataset th
 % fastRun = true;
 
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
-chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
-fileVariation = 3;
-sessionName = 'MW_18';
-subjName = 'MW_18';
-matNameId = 'NBack_IDENTITY_2022_10_20.13_12_18'; 
-matNameEm = 'NBack_EMOTION_2022_10_20.13_20_21'; 
-identityFilter = 'JM_MW18_Session_11_filter.nwb'; %does NOT need to be placed in a folder
-emotionFilter = 'JM_MW18_Session_12_filter.nwb';
-load JM_MW18_Session_11_EventKey.mat
-EvKeyId = EvKey;
-load JM_MW18_Session_12_EventKey.mat
-EvKeyEm = EvKey;
-removeTrialsEmot = [1,2,4,6:21,25,29:31, 36, 37, 39, 40, 41, 42,42, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 61, 64:67, 69, 70, 71, 72, 73:76, 79:81, 83, 85:94, 97:99, 103, 105, 112,113, 114,115, 119:121, 123:125, 149,152, 153];
-removeTrialsId = [1,2,4,5:15, 17, 20:23, 25:34, 37:44, 46:49, 54:63, 67:80, 84:97, 99, 102, 103, 107:117, 119, 123, 126, 130:133, 135:137, 143, 148, 158, 160];
-fastRun = true;
+% chInterestActual = [12,13, 22:27, 36:39, 149:152, 158:161];
+% fileVariation = 3;
+% sessionName = 'MW_18';
+% subjName = 'MW_18';
+% matNameId = 'NBack_IDENTITY_2022_10_20.13_12_18'; 
+% matNameEm = 'NBack_EMOTION_2022_10_20.13_20_21'; 
+% identityFilter = 'JM_MW18_Session_11_filter.nwb'; %does NOT need to be placed in a folder
+% emotionFilter = 'JM_MW18_Session_12_filter.nwb';
+% load JM_MW18_Session_11_EventKey.mat
+% EvKeyId = EvKey;
+% load JM_MW18_Session_12_EventKey.mat
+% EvKeyEm = EvKey;
+% removeTrialsEmot = [1,2,4,6:21,25,29:31, 36, 37, 39, 40, 41, 42,42, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 61, 64:67, 69, 70, 71, 72, 73:76, 79:81, 83, 85:94, 97:99, 103, 105, 112,113, 114,115, 119:121, 123:125, 149,152, 153];
+% removeTrialsId = [1,2,4,5:15, 17, 20:23, 25:34, 37:44, 46:49, 54:63, 67:80, 84:97, 99, 102, 103, 107:117, 119, 123, 126, 130:133, 135:137, 143, 148, 158, 160];
+% fastRun = true;
 
 
 %MW16 CAN UNCOMMENT THIS AND RUN IT.
@@ -259,18 +259,18 @@ fastRun = true;
 % fastRun = true;
 
 %MW23 channels
-% chInterestActual = [46:48,54:57,68:70,145:147,154:158];
-% fileVariation = 4;
-% sessionName = 'MW_23';
-% subjName = 'MW_23';
-% matNameId = 'NBack_IDENTITY_2023_06_27.13_22_22'; 
-% matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53';
-% identityFilter = 'JM_MW23_Session_8_filter.nwb';
-% emotionFilter = 'JM_MW23_Session_9_filter.nwb';
-% chInterestActual = [46:48,54:57,68:70,145:147,154:158];
-% removeTrialsEmot = [1,3,4,7, 10, 12, 20, 21,22,45];
-% removeTrialsId = [1, 2, 5, 6, 8,9, 25, 37, 48, 49];
-% fastRun = true;
+chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+fileVariation = 4;
+sessionName = 'MW_23';
+subjName = 'MW_23';
+matNameId = 'NBack_IDENTITY_2023_06_27.13_22_22'; 
+matNameEm = 'NBack_EMOTION_2023_06_27.13_29_53';
+identityFilter = 'JM_MW23_Session_8_filter.nwb';
+emotionFilter = 'JM_MW23_Session_9_filter.nwb';
+chInterestActual = [46:48,54:57,68:70,145:147,154:158];
+removeTrialsEmot = [1,3,4,7, 10, 12, 20, 21,22,45];
+removeTrialsId = [1, 2, 5, 6, 8,9, 25, 37, 48, 49];
+fastRun = true;
 
 %MW19 channels:
 % 

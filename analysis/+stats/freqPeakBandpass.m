@@ -1,4 +1,4 @@
-function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, thresh_binary] = freqPeakBandpass(data1spectro, data1bandpass, data2spectro, data2bandpass, varargin )
+function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, thresh_binary, freqPeak1] = freqPeakBandpass(data1spectro, data1bandpass, data2spectro, data2bandpass, varargin )
 %Will find the peak frequency of a spectrogram data (between the specified
 %band, and then bandpass the data centered on that frequency and run
 %statistical comparison
@@ -6,7 +6,7 @@ function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, 
 
 [varargin, ff]=util.argkeyval('ff', varargin, []); %get the frequency bands of the rows of the spectrogram data
 [varargin, freqOfInterest]=util.argkeyval('freqOfInterest', varargin, [1 size(data1spectro,1)]); %get the band to look for the max between
-[varargin, plt]=util.argkeyval('plt', varargin, 2); %plot if you want, 1 does the SE or 2 can do the shuffle as the shaded.
+[varargin, plt]=util.argkeyval('plt', varargin, 0); %plot if you want, 1 does the SE or 2 can do the shuffle as the shaded.
 [varargin, fs]=util.argkeyval('fs', varargin, 500); %sampling rate
 [varargin, bandpassRange]=util.argkeyval('bandpassRange', varargin,5); %how big do we want the frequency range to be
 [varargin, norm]=util.argkeyval('norm', varargin,1); % 0 is don't, 1 is normalize across all data stitched together, 2 is normalize by trial 
@@ -33,8 +33,8 @@ freqRowIhigh = freqRowI(end);
 Data1MeanNorm = normalize(mean(data1spectro,3),2);    %expects 3rd dimension to be trials but can be done without
 [mxV, mxVi] = max(Data1MeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
 [mxViR, mxViC] = ind2sub(size(Data1MeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
-freqPeak = ff(freqRowIlow-1+mxViR); %finds the peak frequency
-bandfilterData1 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+freqPeak1 = ff(freqRowIlow-1+mxViR); %finds the peak frequency
+bandfilterData1 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak1-bandpassRange,'CutoffFrequency2',freqPeak1+bandpassRange, 'SampleRate',fs);
 Data1FreqPeakBP = filtfilt(bandfilterData1, data1bandpass'); %assumes data is trials by freq
 Data1FreqPeakBP = Data1FreqPeakBP';
 Data1FreqPeakBPs = Data1FreqPeakBP.^2; %turn to power
@@ -69,8 +69,8 @@ end
 Data2MeanNorm = normalize(mean(data2spectro,3),2);
 [mxV, mxVi] = max(Data2MeanNorm(freqRowIlow:freqRowIhigh,:),[],'all'); %this finds the max in the frequency range of interest across the matrix (3d)
 [mxViR, mxViC] = ind2sub(size(Data2MeanNorm(freqRowIlow:freqRowIhigh,:)),mxVi);%convert to row/col
-freqPeak = ff(freqRowIlow-1+mxViR); %finds the peak frequency
-bandfilterData2 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak-bandpassRange,'CutoffFrequency2',freqPeak+bandpassRange, 'SampleRate',fs);
+freqPeak2 = ff(freqRowIlow-1+mxViR); %finds the peak frequency
+bandfilterData2 = designfilt('bandpassfir','FilterOrder',100,'CutoffFrequency1',freqPeak2-bandpassRange,'CutoffFrequency2',freqPeak1+bandpassRange, 'SampleRate',fs);
 Data2FreqPeakBP = filtfilt(bandfilterData2, data2bandpass');
 Data2FreqPeakBP = Data2FreqPeakBP';
 Data2FreqPeakBPs = Data2FreqPeakBP.^2; %turn to power
@@ -110,6 +110,8 @@ switch norm
 
 end
 
+freqPeak(1,1) = freqPeak1;
+freqPeak(1,2) = freqPeak2;
 
 %optional plotting
 switch plt

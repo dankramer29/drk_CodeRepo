@@ -2,6 +2,19 @@
 
 %% this is all scratch pad stuff for now.
 %working on the bandpassed data
+
+x = linspace(0, 10, 100);
+y = sin(x);               % Y values to be plotted
+logicVec = mod(floor(x), 2) == 0; % Logical vector (example pattern)
+yBottom = min(y) - 0.1 * range(y);
+% Create the main plot
+figure;
+plot(x, y, 'b');
+hold on
+plot(x(logicVec), repmat(yBottom, sum(logicVec), 1), 'r.', 'MarkerSize', 10);
+
+yy= repmat(yBottom, sum(logicVec), 1);
+
 figure
 subplot(3,1,1)
 shadedErrorBar([],mn1,sd1,'lineprops', {'-b'});

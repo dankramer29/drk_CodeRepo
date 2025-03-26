@@ -23,10 +23,22 @@ function [ mean_sd, thresh_binary ] = shuffle_stats2d( data1, data2, varargin )
 [varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 10000); %how many shuffles you want to do, default is 10k
 [varargin, zscoreAcrossAllData]=util.argkeyval('zscoreAcrossAllData', varargin, 0); %if you want to z score across all data
 [varargin, histogramBuiltThresholds]=util.argkeyval('histogramBuiltThresholds', varargin, []); %you can load in a prebuilt histogram of thresholds if you want, should be [threshPositive threshNegative]
-
-
+[varargin, testChoice]=util.argkeyval('testChoice', varargin, subtractedDiff); %pick which test you want to do. ttest is one option, a difference from iti is another.
+[varargin, itiData1]=util.argkeyval('itiData1', varargin, []); %if doing difference, you can include iti.
+[varargin, itiData2]=util.argkeyval('itiData2', varargin, []); %if doing difference, you can include iti.
 
 util.argempty(varargin); % check all additional inputs have been processed
+
+if testChoice == subtractedDiff 
+    if isempty(itiData1)
+        warning('iti data is empty for data 1')
+        itiData1 = data2; %make the difference a comparison of differences with data 2
+    end
+     if isempty(itiData2)
+        warning('iti data is empty for data 2')
+        itiData2 = data1; %make the difference a comparison of differences with data 1
+     end 
+end
 
 %calculate the size of the samples you want to take, default is just over
 %half
@@ -82,15 +94,33 @@ for ii=1:xshuffles
     totdata=cat(1, data1T, data2T); 
     totdata=totdata(randperm(size(totdata,1)),:);
    
-    mean1=nanmean(totdata(1:L1,:));
-    mean2=nanmean(totdata(L1+1:end,:));
+    switch testChoice %do a ttest as the comparison 
+        case ttst
+            totdata=cat(1, data1T, data2T);
+            totdata=totdata(randperm(size(totdata,1)),:);
+            mean1=nanmean(totdata(1:L1,:));
+            mean2=nanmean(totdata(L1+1:end,:));
 
-    %run the guts of a ttest2 (much faster than the built in function)
-    sp=sqrt(((L1-1)*std(totdata(1:L1,:),[],1).^2+(L2-1)*std(totdata(L1+1:end,:),[],1).^2)./(L1+L2-2));
-    tstat_res(ii,:)=(mean1-mean2)./(sp*sqrt(1/L1+1/L2));
-    %take the most extreme tstat (tmax) and build the distribution off of
-    %that.
-    thresh(ii,1) = max(abs(tstat_res(ii,:)));
+            %run the guts of a ttest2 (much faster than the built in function)
+            sp=sqrt(((L1-1)*std(totdata(1:L1,:),[],1).^2+(L2-1)*std(totdata(L1+1:end,:),[],1).^2)./(L1+L2-2));
+            tstat_res(ii,:)=(mean1-mean2)./(sp*sqrt(1/L1+1/L2));
+            %take the most extreme tstat (tmax) and build the distribution off of
+            %that.
+            thresh(ii,1) = max(abs(tstat_res(ii,:)));
+
+        case subtractedDiff
+            totdata=cat(1, data1T, itiData2T);
+            totdata=totdata(randperm(size(totdata,1)),:);
+            mean1=nanmean(totdata(1:L1,:));
+            mean2=nanmean(totdata(L1+1:end,:));
+
+            %run the guts of a ttest2 (much faster than the built in function)
+            sp=sqrt(((L1-1)*std(totdata(1:L1,:),[],1).^2+(L2-1)*std(totdata(L1+1:end,:),[],1).^2)./(L1+L2-2));
+            tstat_res(ii,:)=(mean1-mean2)./(sp*sqrt(1/L1+1/L2));
+            %take the most extreme tstat (tmax) and build the distribution off of
+            %that.
+            thresh(ii,1) = max(abs(tstat_res(ii,:)));
+    end
 
     % tsr_pNeg=2*tcdf((tstat_res(ii,:)), (L1+L2-2)); %get the p values for adjustment, for just negative deflections
     % tsr_pPos=2*tcdf(-(tstat_res(ii,:)), (L1+L2-2)); %get the p values for adjustment, for just positive deflections
@@ -180,17 +210,27 @@ if fdr_adj
 end
 %%
 if plt
-    figure
+    figure;
     subplot(3,1,1)
-    shadedErrorBar([],mn1,SEM1*2,'lineprops', {'-b'});
+    H1 = shadedErrorBar([],mn1,SEM1*2,'lineprops', {'-b'});
     hold on;
-    shadedErrorBar([],mn2,SEM2*2,'lineprops', {'-r'});    
-    subplot(3,1,2)
+    H2 = shadedErrorBar([],mn2,SEM2*2,'lineprops', {'-r'}); 
+    ax = axis;    
+    xxline = 1:size(thresh_binary,2);
+    plot(xxline(thresh_binary), repmat((ax(3)-0.01), sum(thresh_binary), 1), 'b-', 'MarkerSize', 10);
+    title('mean and 2SE')
+    aX = gca;
+    aX.XLim(1,2) = length(mn1);
+    subplot(3,1,2)    
     plot(tstat_resR)
+    aX = gca;
+    aX.XLim(1,2) = length(mn1);
+    title('tstat')
     subplot(3,1,3)
     histogram(thresh,xshuffles)
     hold on
     plot([thresh1tail thresh1tail], [1 5]);
+    title('histogram and .05 threshold')
 end
 
 if heatmapplot

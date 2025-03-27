@@ -209,7 +209,7 @@ profile on
 no_sig=0;
 %can toggle on and build one histogram of shuffled clusters
 if isempty(histogramBuiltThresholds)
-    tt=tic;
+    ttt=tic;
     for ii=1:xshuffles
         clear rct
         clear rct_d
@@ -468,7 +468,7 @@ if isempty(histogramBuiltThresholds)
             end
         end
     end
-        toc(tt)
+        toc(ttt)
 end
 
 %%
@@ -539,17 +539,17 @@ if splitPosNeg
     else
         tstat1_sumsPos = 0;
     end
-    %% for plotting if you want
+    %% for plotting if you want data 1 (on the right)
     figure
-    subplot(5,2,1)
-    title('mean of data 1')
-    imagesc(normalize(mnd1,2)); axis xy;
-    subplot(5,2,3)
+    subplot(5,2,2)    
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
+    title('mean of data 1 (Emt)')
+    subplot(5,2,4)
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
     title('mean of iti data 1')
-    imagesc(normalize(mnd2,2)); axis xy;
-    subplot(5,2,5)
+    subplot(5,2,6)
+    imagesc(tt, ff, thresh_binaryRPos); axis xy;
     title('positive pixels data 1')
-    imagesc(thresh_binaryRPos); axis xy;    
     %%
     clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
     clRNeg1=regionprops(clustRNeg1); %get the region properties
@@ -757,30 +757,31 @@ if splitPosNeg
     % subplot(4,1,4)
     % imagesc(matPos); axis xy;\
     
-    %this is another plotting strategy that will show the data1 left and
-    %data2 right
-    subplot(5,2,2)
-    title('same data 2')
-    imagesc(normalize(mnd1,2)); axis xy;
-    subplot(5,2,4)
-    imagesc(normalize(mnd2,2)); axis xy;
-    subplot(5,2,6)
-    imagesc(thresh_binaryRPos); axis xy;
+    %this is another plotting strategy that will show the data2 left and
+    %data 1 right (the flip is to match the spectrograms which i set up as
+    %left IdT and right EmT
+    subplot(5,2,1)    
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
+    title('mean of data 2 (IdT)')
+    subplot(5,2,3)
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
+    subplot(5,2,5)
+    imagesc(tt,ff, thresh_binaryRPos); axis xy;
 
     %the biggest clusters
-    subplot(5,2,7)
+    subplot(5,2,8) %data 1 on the right
     title('positive biggest cluster')
     matPosT=false(size(thresh_binaryRPos));
     if ~isempty(cl_keepPos1)
         matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
     end
-    imagesc(matPosT), axis xy;
-    subplot(5,2,8)
+    imagesc(tt, ff, matPosT), axis xy;
+    subplot(5,2,7) %putting data 2 on the left
     matPosT2=false(size(thresh_binaryRPos));
     if ~isempty(cl_keepPos2)
         matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
     end
-    imagesc(matPosT2), axis xy;
+    imagesc(tt,ff, matPosT2), axis xy;
 
 
     clustRNeg2=bwconncomp(thresh_binaryRNeg,8);

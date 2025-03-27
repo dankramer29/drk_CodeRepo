@@ -209,7 +209,7 @@ profile on
 no_sig=0;
 %can toggle on and build one histogram of shuffled clusters
 if isempty(histogramBuiltThresholds)
-    tt=tic;
+    ttt=tic;
     for ii=1:xshuffles
         clear rct
         clear rct_d
@@ -468,7 +468,7 @@ if isempty(histogramBuiltThresholds)
             end
         end
     end
-        toc(tt)
+        toc(ttt)
 end
 
 %%
@@ -541,12 +541,15 @@ if splitPosNeg
     end
     %% for plotting if you want
     figure
-    subplot(5,2,1)
-    imagesc(normalize(mnd1,2)); axis xy;
+    subplot(5,2,1)    
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
+    title('mean of data 1')
     subplot(5,2,3)
-    imagesc(normalize(mnd2,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
+    title('mean of iti data 1')
     subplot(5,2,5)
-    imagesc(thresh_binaryRPos); axis xy;    
+    imagesc(tt, ff, thresh_binaryRPos); axis xy;
+    title('positive pixels data 1')
     %%
     clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
     clRNeg1=regionprops(clustRNeg1); %get the region properties
@@ -731,8 +734,8 @@ if splitPosNeg
         sigclustPosTemp2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=idxT;
         largestCluster.Positive(2).ClusterPixels = sigclustPosTemp2;
         largestCluster.Positive(2).Tstat_Sum = tstat2_sumsPos(maxP2i);
-        largestCluster.Positive(2).Centroid(1,1:2) = clRPos1(cl_keepPos1(maxP2i)).Centroid;
-        largestCluster.Positive(2).BoundingBox(1,1:4) = clRPos1(cl_keepPos1(maxP2i)).BoundingBox;
+        largestCluster.Positive(2).Centroid(1,1:2) = clRPos2(cl_keepPos2(maxP2i)).Centroid;
+        largestCluster.Positive(2).BoundingBox(1,1:4) = clRPos2(cl_keepPos2(maxP2i)).BoundingBox;
     end
     if tstatDiff_Pos>threshP1 %save if over the thresh for data 1 (tail of data1>data2)
         tstatPos_sumsStatSig = 1; %mark whether it's data 1 that is positive or data 2
@@ -757,25 +760,27 @@ if splitPosNeg
     %this is another plotting strategy that will show the data1 left and
     %data2 right
     subplot(5,2,2)
-    imagesc(normalize(mnd1,2)); axis xy;
+    title('same data 2')
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
     subplot(5,2,4)
-    imagesc(normalize(mnd2,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
     subplot(5,2,6)
-    imagesc(thresh_binaryRPos); axis xy;
+    imagesc(tt,ff, thresh_binaryRPos); axis xy;
 
     %the biggest clusters
     subplot(5,2,7)
+    title('positive biggest cluster')
     matPosT=false(size(thresh_binaryRPos));
     if ~isempty(cl_keepPos1)
         matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
     end
-    imagesc(matPosT), axis xy;
+    imagesc(tt, ff, matPosT), axis xy;
     subplot(5,2,8)
     matPosT2=false(size(thresh_binaryRPos));
-    if ~isempty(cl_keepPos1)
+    if ~isempty(cl_keepPos2)
         matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
     end
-    imagesc(matPosT2), axis xy;
+    imagesc(tt,ff, matPosT2), axis xy;
 
 
     clustRNeg2=bwconncomp(thresh_binaryRNeg,8);
@@ -807,13 +812,13 @@ if splitPosNeg
     idxT = 1;
     sigclustNegTemp1 = false(size(thresh_binaryRPos));
     sigclustNegTemp2 = false(size(thresh_binaryRPos));
-    if tstat2_sumsNeg==0 %in the event no clusters meet criteria for negative deflections
+    if tstat1_sumsNeg==0 %in the event no clusters meet criteria for negative deflections
         largestCluster.Negative(1).ClusterPixels = 0;
         largestCluster.Negative(1).Tstat_Sum = 0;
         largestCluster.Negative(1).Centroid(1,1:2) = 0;
         largestCluster.Negative(1).BoundingBox(1,1:4) = 0;        
     else
-        sigclustNegTemp1(clustRPos1.PixelIdxList{cl_keepNeg1(maxN1i)})=idxT; %the idxT here is an option to do more than one cluster (start it at 1 and change as you go)
+        sigclustNegTemp1(clustRNeg1.PixelIdxList{cl_keepNeg1(maxN1i)})=idxT; %the idxT here is an option to do more than one cluster (start it at 1 and change as you go)
         idxT = idxT+1;
         largestCluster.Negative(1).ClusterPixels = sigclustNegTemp1; %save the cluster list
         largestCluster.Negative(1).Tstat_Sum = tstat1_sumsNeg(maxN1i);
@@ -826,11 +831,11 @@ if splitPosNeg
         largestCluster.Negative(2).Centroid(1,1:2) = 0;
         largestCluster.Negative(2).BoundingBox(1,1:4) = 0;        
     else
-        sigclustNegTemp2(clustRPos2.PixelIdxList{cl_keepNeg2(maxN2i)})=idxT;
+        sigclustNegTemp2(clustRNeg2.PixelIdxList{cl_keepNeg2(maxN2i)})=idxT;
         largestCluster.Negative(2).ClusterPixels = sigclustNegTemp2;
         largestCluster.Negative(2).Tstat_Sum = tstat2_sumsNeg(maxN2i);
-        largestCluster.Negative(2).Centroid(1,1:2) = clRNeg1(cl_keepNeg1(maxN2i)).Centroid;
-        largestCluster.Negative(2).BoundingBox(1,1:4) = clRNeg1(cl_keepNeg1(maxN2i)).BoundingBox;
+        largestCluster.Negative(2).Centroid(1,1:2) = clRNeg2(cl_keepNeg2(maxN2i)).Centroid;
+        largestCluster.Negative(2).BoundingBox(1,1:4) = clRNeg2(cl_keepNeg2(maxN2i)).BoundingBox;
     end
     if tstatDiff_Neg>threshN1 %save if over the thresh for data 1 (tail of data1>data2)
         tstatNeg_sumsStatSig = 1; %mark whether it's data 1 that is positive or data 2
@@ -890,6 +895,7 @@ end
 %%
 %if plt
     subplot(5,2,9)
+    title('histogram, red = ns blue = sig')
     histogram(tstat_maxPDiff, xshuffles)
     hold on
     if tstatPos_sumsStatSig>0 

@@ -222,7 +222,7 @@ if plt
     legend([H1.mainLine, H2.mainLine], {'data 2 (IdT)', 'data 1 (EmT)'})
     xxline = 1:size(thresh_binary,2);
     if ~isempty(tt)
-        plot(tt(thresh_binary), repmat((ax(3)+0.05), sum(thresh_binary), 1), '-', 'LineWidth', 2);
+        plot(tt(thresh_binary), repmat((ax(3)-0.05), sum(thresh_binary), 1), 'b-', 'MarkerSize', 20);
     else
         plot(xxline(thresh_binary), repmat((ax(3)-0.01), sum(thresh_binary), 1), 'b-', 'MarkerSize', 10);
     end

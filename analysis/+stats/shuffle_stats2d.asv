@@ -219,20 +219,26 @@ if plt
     hold on;    
     H1 = shadedErrorBar(tt,mn1,SEM1*2,'lineprops', {'-b'});
     ax = axis;
-    legend([H1.mainLine, H2.mainLine], {'data 2 (IdT)', 'data 1 (EmT)'})
-    xxline = 1:size(thresh_binary,2);
-    if ~isempty(tt)
-        plot(tt(thresh_binary), repmat((ax(3)-0.05), sum(thresh_binary), 1), 'b-', 'MarkerSize', 20);
-    else
-        plot(xxline(thresh_binary), repmat((ax(3)-0.01), sum(thresh_binary), 1), 'b-', 'MarkerSize', 10);
+   
+    trueIndices = find(thresh_binary);
+    % Find breaks in consecutive true values
+    splitPoints = find(diff(trueIndices) > 1);
+    % Split into segments
+    startIdx = [1, splitPoints + 1];
+    endIdx = [splitPoints, length(trueIndices)];
+    for ii = 1:length(startIdx)
+        x_seg = tt(trueIndices(startIdx(ii)):trueIndices(endIdx(ii))); % Get x values for segment
+        plot(x_seg, ax(3)+0.02 * ones(size(x_seg)), 'g-', 'LineWidth', 2); % Plot horizontal line
     end
-    title('mean and 2SE')
+    
     aX = gca; 
     if ~isempty(tt)
         aX.XLim = [tt(1) tt(end)];
     else
         aX.XLim = length(mn1);
     end
+    legend([H1.mainLine, H2.mainLine], {'data 2 (IdT)', 'data 1 (EmT)'})
+    title('mean and 2SE')
     subplot(3,1,2) 
     if ~isempty(tt)
         plot(tt, tstat_resR)

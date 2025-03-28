@@ -18,20 +18,8 @@ hold on
 H2 = shadedErrorBar(TT,mnPFt2,sePFt2*2,'lineprops', {'-r'});
 legend([H1.mainLine H2.mainLine], {'Emt', 'IdT'})
 
-[mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
-
-
 figure
-plot(tt, mean(Data1FreqPeakBPs))
-hold on
-plot(tt, mean(Data1FreqPeakBPsSm))
-
-figure
-imagesc(Data1MeanNorm); axis xy;
-
-
-figure
-pspectrum(Data1FreqPeakBP(1,:), fs, 'spectrogram', 'FrequencyLimits', [1 200])
+plot(tt, )
 
 %working on the bandpassed data
 

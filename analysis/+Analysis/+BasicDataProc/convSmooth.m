@@ -8,6 +8,7 @@ function [smoothData, tm] = convSmooth(data, win, fs)
 %       [dataTempClassicBand, tplotCB]=Analysis.BasicDataProc.trapSmooth(dataTempClassicBand, 20, 5, fs];
 
 %rows data, columns channels/bands/etc
+
 if size(data, 1)<size(data,2)
     data=data';
 end

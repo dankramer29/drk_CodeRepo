@@ -352,6 +352,7 @@ folderNameIdentity=strcat('Z:\KramerEmotionID_2023\Data\EMU_nBack', '\', session
 
 %% setup details of the processing
 fs = 500; %sampling rate, original is 4000, so ma_timestamps, it's every 2000 microseconds or 0.002 seconds, which is 500samples/s
+fsFull = 4000;
 %time in seconds to add before and after the events
 preTime = 0.5; %time before and after image on
 postTime = 2; 
@@ -414,7 +415,7 @@ end
 
 %% Load the behavioral data
 trialEm = true;
-%runs nwb
+%runs nwb and this is where the downsampling occurs
 run Analysis.emuEmot.LOAD_processedData_EMU_EmotTasks.m
 %loads behavioral
 load(folderName)
@@ -634,7 +635,7 @@ switch fileVariation
         beh_timestampsEm = beh_timestamps;
         ma_timestampsDSEm = ma_timestampsDS;
         if ~isempty(cellVar)
-            if max(hexNum) < 2 %sometimes has a hex code that is only 1 or 0 or only 255/0
+            if max(hexNum) < 2 %sometimes has a hex code tha8t is only 1 or 0 or only 255/0
                 cellVar = [];
             else
                 hexNumEm = hexNum;
@@ -652,9 +653,9 @@ end
 
 %% reference strategy
 % low pass the data (nyquist 250)
-lpFilt = designfilt('lowpassiir','FilterOrder',8, ...
-    'PassbandFrequency',200,'PassbandRipple',0.2, ...
-    'SampleRate',fs);
+lpFilt = designfilt("bandpassfir", ...
+    FilterOrder=20,CutoffFrequency1=1, ...
+    CutoffFrequency2=200,SampleRate=fs);
 
 switch referenceStrategy
     case 1

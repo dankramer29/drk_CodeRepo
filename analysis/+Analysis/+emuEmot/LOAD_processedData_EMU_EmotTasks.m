@@ -63,7 +63,8 @@ end
 %this is for .raw file
 if rawData == 1
 macroData = testfile.acquisition.get('MacroWireSeries').data.load();
-macroDataD = downsample(macroData', 8); %raw dara is 4000 and want 500 so downsample by 8
+dsAmount = round(fsFull/fs);
+macroDataD = downsample(macroData', dsAmount); %raw dara is 4000 and want 500 so downsample by 8
 macroDataD = macroDataD';
 macrowires = macroDataD;
 end
@@ -81,6 +82,6 @@ ma_timestamps = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').e
 
 %downsamle the timestamps 
 
-ma_timestampsDS=downsample(ma_timestamps, 8);
+ma_timestampsDS=downsample(ma_timestamps, dsAmount);
 
 

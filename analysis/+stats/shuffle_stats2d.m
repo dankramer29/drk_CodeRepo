@@ -237,7 +237,7 @@ if plt
     else
         aX.XLim = length(mn1);
     end
-    legend([H1.mainLine, H2.mainLine], {'data 2 (IdT)', 'data 1 (EmT)'})
+    legend([H1.mainLine, H2.mainLine], {'data 1 (EmT)', 'data 2 (IdT)'})
     title('mean and 2SE')
     subplot(3,1,2) 
     if ~isempty(tt)

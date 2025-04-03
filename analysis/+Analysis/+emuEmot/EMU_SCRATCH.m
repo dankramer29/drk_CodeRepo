@@ -1,6 +1,45 @@
 %EMU SCRATCH PAD
 
 %% this is all scratch pad stuff for now.
+figure
+subplot(4,1,1)
+plot(Data1FreqPeakBP(1,:))
+subplot(4,1,2)
+plot(Data1FreqPeakBPsSm(1,:))
+subplot(4,1,3)
+plot(mean(Data1FreqPeakBPsSm,2))
+
+mirroredEnd = 1;
+
+tempd = mean(Data1FreqPeakBPsSm);
+figure
+plot(dataM(1,:))
+figure
+plot(data1bandpass(1,:))
+
+tempd = permute(mean(normalize(Data1FreqPeakBPs,2),1), [3,2,1]);
+
+
+data1= double(dataBp(:,1000:40000));
+lpFilt1 = designfilt("bandpassfir", ...
+    FilterOrder=100,CutoffFrequency1=1, ...
+    CutoffFrequency2=200,SampleRate=500);
+data2 = filtfilt(lpFilt1,data1');
+lpFilt2 = designfilt("bandpassfir", ...
+    FilterOrder=10,CutoffFrequency1=1, ...
+    CutoffFrequency2=200,SampleRate=500);
+data3 = filtfilt(lpFilt2,data1');
+
+data4 = bandpass(data1, [1 200], fs);
+
+figure
+plot(data1(1,1:500))
+hold on
+plot(data2(1:500,1))
+plot(data3(1:500,1))
+figure
+plot(data4(1,1:500))
+
 TT = linspace(-0.5, 2.5, size(data1spectro,2));
 figure
 peakfSp = data1spectro(freqRowIlow-1+mxViR1-2:freqRowIlow-1+mxViR1+2,:,:);
@@ -258,43 +297,43 @@ chWantBP = 'ch2524';
 
 xx1 = emotionTaskLFP.byemotion.ch2524.image.specD{1};
 xx2 = emotionTaskLFP.byemotion.(chWantBp).image.specD{2};
-xx3 = emotionTaskLFP.byemotion.(chWantBp).image.specD{3};
-xx=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFP.byemotion.(chWantBp).image.specD{3};
+xx=cat(3, xx1, xx2, data4);
 xxN=normalize(xx1,2);
 xxNM = mean(xxN,3);
 
 xx1 = emotionTaskLFPT.byemotion.(chWant).image.specD{1};
 xx2 = emotionTaskLFPT.byemotion.(chWant).image.specD{2};
-xx3 = emotionTaskLFPT.byemotion.(chWant).image.specD{3};
-xxT=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFPT.byemotion.(chWant).image.specD{3};
+xxT=cat(3, xx1, xx2, data4);
 xxTN=normalize(xxT,2);
 xxTNM = mean(xxTN,3);
 
 xx1 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{1};
 xx2 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{2};
-xx3 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{3};
-xxBp=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFPBp.byemotion.(chWantBp).image.specD{3};
+xxBp=cat(3, xx1, xx2, data4);
 xxBpN=normalize(xxBp,2);
 xxBpNM = mean(xxBpN,3);
 
 xx1 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{1};
 xx2 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{2};
-xx3 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{3};
-xxH=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFP.byemotion.(chWant).image.Hilbert.Power{3};
+xxH=cat(3, xx1, xx2, data4);
 xxNH=normalize(xxH,2);
 xxNMH = mean(xxNH,3);
 
 xx1 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{1};
 xx2 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{2};
-xx3 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{3};
-xxTH=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFPT.byemotion.(chWant).image.Hilbert.Power{3};
+xxTH=cat(3, xx1, xx2, data4);
 xxTNH=normalize(xxTH,2);
 xxTNMH = mean(xxTNH,3);
 
 xx1 = emotionTaskLFP.byemotion.ch2524.image.Hilbert.Power{1};
 xx2 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{2};
-xx3 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{3};
-xxBpH=cat(3, xx1, xx2, xx3);
+data4 = emotionTaskLFP.byemotion.(chWantBp).image.Hilbert.Power{3};
+xxBpH=cat(3, xx1, xx2, data4);
 xxBpNH=normalize(xx1,2);
 xxBpNMH = mean(xxBpNH,3);
 

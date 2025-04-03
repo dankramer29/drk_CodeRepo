@@ -542,13 +542,13 @@ if splitPosNeg
     %% for plotting if you want data 1 (on the right)
     figure
     subplot(5,2,2)    
-    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar
     title('mean of data 1 (Emt)')
     subplot(5,2,4)
-    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar
     title('mean of iti data 1')
     subplot(5,2,6)
-    imagesc(tt, ff, thresh_binaryRPos); axis xy;
+    imagesc(tt, ff, thresh_binaryRPos); axis xy; colorbar
     title('positive pixels data 1')
     %%
     clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
@@ -761,12 +761,12 @@ if splitPosNeg
     %data 1 right (the flip is to match the spectrograms which i set up as
     %left IdT and right EmT
     subplot(5,2,1)    
-    imagesc(tt, ff, normalize(mnd1,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar;
     title('mean of data 2 (IdT)')
     subplot(5,2,3)
-    imagesc(tt, ff, normalize(mnd2,2)); axis xy;
+    imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar;
     subplot(5,2,5)
-    imagesc(tt,ff, thresh_binaryRPos); axis xy;
+    imagesc(tt,ff, thresh_binaryRPos); axis xy; colorbar;
 
     %the biggest clusters
     subplot(5,2,8) %data 1 on the right
@@ -775,13 +775,13 @@ if splitPosNeg
     if ~isempty(cl_keepPos1)
         matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
     end
-    imagesc(tt, ff, matPosT), axis xy;
+    imagesc(tt, ff, matPosT), axis xy; colorbar;
     subplot(5,2,7) %putting data 2 on the left
     matPosT2=false(size(thresh_binaryRPos));
     if ~isempty(cl_keepPos2)
         matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
     end
-    imagesc(tt,ff, matPosT2), axis xy;
+    imagesc(tt,ff, matPosT2), axis xy; colorbar;
 
 
     clustRNeg2=bwconncomp(thresh_binaryRNeg,8);

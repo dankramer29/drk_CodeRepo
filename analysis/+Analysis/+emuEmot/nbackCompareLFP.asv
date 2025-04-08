@@ -76,6 +76,9 @@ if comparedToSubtractionITI == 1
         % per channel.
         itiDataId = itiDataFilt.IdentityTask.RandomTimeIti.(chName{ii}).specD;
         itiDataEm = itiDataFilt.EmotionTask.RandomTimeIti.(chName{ii}).specD;
+        itiDataIdBp = itiDataFilt.IdentityTask.RandomTimeIti.(chName{ii}).bandPassed; %this should be 1 to 200 filtered without any other preprocessing (besides comb)
+        itiDataEmBp = itiDataFilt.EmotionTask.RandomTimeIti.(chName{ii}).bandPassed; %trials by time.
+        ttBp = itiDataFilt.EmotionTask.RandomTimeIti.(chName{ii}).RandomTimesInSec;
         thresholds = [];
 
 
@@ -112,6 +115,8 @@ if comparedToSubtractionITI == 1
                 tstatPos_sumsStatSig, tstatNeg_sumsStatSig] = stats.cluster_permutation_Subtraction_Ttest_gpu3d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
                 'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0 );
 
+       
+
         [nback.(chName{ii}).freqPeak.emotionTask.mean,...
             nback.(chName{ii}).freqPeak.emotionTask.sem,...
             nback.(chName{ii}).freqPeak.identityTask.mean,...
@@ -119,9 +124,10 @@ if comparedToSubtractionITI == 1
             nback.(chName{ii}).thresh_binary,...
             nback.(chName{ii}).freqPeak] = stats.freqPeakBandpass(dataEmotionTaskAllIdentities, dataEmotionTaskAllIdentitiesBP,...
                                                                         dataIdentityTaskAllIdentities, dataIdentityTaskAllIdentitiesBP,...
-                                                                            'ff', identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
+                                                                            'data1itibp', itiDataEmBp, 'data2itibp', itiDataIdBp, 'ff', identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
                                                                                 'tt', identityTaskLFP.tPlotImageBandPass); 
        
+      
         if tstatPos_sumsStatSig>0 %this is only taking the positive
             significantSubtraction{idxcomp,1} = chName{ii};
             significantSubtraction{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger

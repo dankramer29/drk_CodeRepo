@@ -13,6 +13,8 @@ function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, 
 [varargin, norm]=util.argkeyval('norm', varargin,1); % 0 is don't, 1 is normalize across all data stitched together, 2 is normalize by trial 
 [varargin, tt]=util.argkeyval('tt', varargin, []); % time for plotting if you want 
 [varargin, mirroredEnd]=util.argkeyval('mirroredEnd', varargin, 0.5); % time you want for a mirrored end in seconds
+[varargin, data1itibp]=util.argkeyval('data1itibp', varargin, []); % data1 iti band passed, need that for subtraction
+[varargin, data2itibp]=util.argkeyval('data2itibp', varargin, []); % data2 iti band passed, need that for subtraction
 
 if isempty(ff)
     ff = 1:size(data1spectro,1);
@@ -61,6 +63,18 @@ for ii = fplow-bandpassRange:5:fphigh+bandpassRange-5 %5 hz filters until it get
     end
     Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
     Data1FreqPeakBPtempN(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
+    if ~isempty(data1itibp) && ~isempty(data2itibp)
+        ramp=fs*mirroredEnd;
+        if ramp>0
+            dataMirror1 = horzcat(flip(data1itibp(:, 1:ramp-1),2), data1itibp, flip(data1itibp(:, end-ramp+1:end),2));
+            dataMirror2 = horzcat(flip(data2itibp(:, 1:ramp-1),2), data2itibp, flip(data2itibp(:, end-ramp+1:end),2));
+        end
+        Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
+        Data1FreqPeakitiBP(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
+        Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
+        Data2FreqPeakitiBP(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
+    end
+
     idx = idx + 1;
 end
 Data1FreqPeakBP = Data1FreqPeakBPtempN;
@@ -73,15 +87,27 @@ switch pwr
     case 1
         %square for power
         Data1FreqPeakBPs = Data1FreqPeakBP.^2; %turn to power
+        if ~isempty(data1itibp) && ~isempty(data2itibp)
+            Data1FreqPeakitiBPs = Data1FreqPeakitiBP.^2;
+            Data2FreqPeakitiBPs = Data2FreqPeakitiBP.^2;
+        end
     case 2
         %hilbert for power
         Data1FreqPeakBP = permute(Data1FreqPeakBP, [2,1,3]);
         Data1FreqPeakBPs = abs(hilbert(Data1FreqPeakBP));
         Data1FreqPeakBPs = permute(Data1FreqPeakBPs, [2,1,3]);
+        if ~isempty(data1itibp) && ~isempty(data2itibp)
+            Data1FreqPeakitiBP = permute(Data1FreqPeakitiBP, [2,1,3]);
+            Data1FreqPeakitiBPs = abs(hilbert(Data1FreqPeakitiBP));
+            Data1FreqPeakitiBPs = permute(Data1FreqPeakitiBPs, [2,1,3]);
+            Data2FreqPeakitiBP = permute(Data2FreqPeakitiBP, [2,1,3]);
+            Data2FreqPeakitiBPs = abs(hilbert(Data2FreqPeakitiBP));
+            Data2FreqPeakitiBPs = permute(Data2FreqPeakitiBPs, [2,1,3]);
+        end
 
 end
 
-Data1FreqPeakBPsdb=10*log10(Data1FreqPeakBPs); %consData1er not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+Data1FreqPeakBPsdb=10*log10(Data1FreqPeakBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
 
 for ii = 1:size(Data1FreqPeakBPs,1)
 [Data1FreqPeakBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
@@ -91,6 +117,53 @@ end
 Data1FreqPeakBPsSm = permute(mean(normalize(Data1FreqPeakBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
 Data1FreqPeakBPsdbSm = permute(mean(normalize(Data1FreqPeakBPsdbSm,2),1), [3,2,1]); %right now the frequency should be in each row
 
+Data1FreqPeakBPsdb=10*log10(Data1FreqPeakBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+
+%% do for the iti data if exists
+if ~isempty(data1itibp) && ~isempty(data2itibp)
+    Data1FreqPeakitiBPsdb=10*log10(Data1FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+
+    for ii = 1:size(Data1FreqPeakitiBPs,1)
+        [Data1FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
+        [Data1FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPsdb(ii,:,:)), 60, fs);
+    end
+    %normalize for each band (can cut this totally if not using it)
+    Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
+    Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
+
+
+    Data1FreqPeakitiBPsdb=10*log10(Data1FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+
+    for ii = 1:size(Data1FreqPeakitiBPs,1)
+        [Data1FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
+        [Data1FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPsdb(ii,:,:)), 60, fs);
+    end
+    %normalize for each band (can cut this totally if not using it)
+    Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
+    Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
+
+    Data1FreqPeakitiBPsdb=10*log10(Data1FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+
+    for ii = 1:size(Data1FreqPeakitiBPs,1)
+        [Data1FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
+        [Data1FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPsdb(ii,:,:)), 60, fs);
+    end
+    %normalize for each band (can cut this totally if not using it)
+    Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
+    Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
+
+
+    Data2FreqPeakitiBPsdb=10*log10(Data2FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
+
+    for ii = 1:size(Data2FreqPeakitiBPs,1)
+        [Data2FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data2FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
+        [Data2FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data2FreqPeakitiBPsdb(ii,:,:)), 60, fs);
+    end
+    %normalize for each band (can cut this totally if not using it)
+    Data2FreqPeakitiBPsSm = permute(mean(normalize(Data2FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
+    Data2FreqPeakitiBPsdb = permute(mean(normalize(Data2FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
+
+end
 
 %since it's different frequencies, normalize it.
 switch norm
@@ -181,6 +254,11 @@ switch norm
         %THING TO DO NEXT IS CHECK THAT EMT IS THE RED LINE AND THE RIGHT
         %SPECTROGRAM...
         [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+
+        
+         [~, thresh_binary] = stats.shuffle_subtraction_stats2d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
+                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'timeRange', [100 900]);
+
 
   %      [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSmNorm, Data2FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
     case 2 %normalize within each trial

@@ -2,12 +2,46 @@
 
 %% this is all scratch pad stuff for now.
 figure
+plot(mean(Data1FreqPeakitiBPsSmTst,1))
+
+    Data1FreqPeakitiBPsSmTst = Data1FreqPeakitiBPsSm(:,ramp:end-ramp,:); %remove mirrored ends
+
+figure
 subplot(4,1,1)
-plot(Data1FreqPeakBP(1,:))
+Data1FreqPeakmnNoNorm = mean(Data1FreqPeakBPsSm);
+plot(Data1FreqPeakmnNoNorm) %no norm
 subplot(4,1,2)
-plot(Data1FreqPeakBPsSm(1,:))
+tempDAll = [];
+for ii = 1:size(Data1FreqPeakBPsSm,1)
+    tempD = Data1FreqPeakBPsSm(ii,:);
+    tempDAll = horzcat(tempDAll, tempD);
+end
+mn = mean(tempDAll); sd = std(tempDAll);
+Data1FreqPeakBPsSmNorm = (Data1FreqPeakBPsSm - mn)./sd;
+Data1FreqPeakmnNormAcross = mean(Data1FreqPeakBPsSmNorm);
+plot(Data1FreqPeakmnNormAcross) %norm across all of them
 subplot(4,1,3)
-plot(mean(Data1FreqPeakBPsSm,2))
+Data1FreqPeakmn = mean(normalize(Data1FreqPeakBPsSm,2));
+plot(Data1FreqPeakmn) %norm across each trial
+
+
+
+figure
+subplot(3,1,1)
+plot(mean1)
+hold on
+plot(mean2)
+subplot(3,1,2)
+plot(mean1)
+hold on
+plot(mean2)
+subplot(3,1,3)
+plot(tstat_res1(ii,:))
+hold on
+plot(tstat_res2(ii,:))
+
+figure
+histogram(thresh, xshuffles)
 
 mirroredEnd = 1;
 

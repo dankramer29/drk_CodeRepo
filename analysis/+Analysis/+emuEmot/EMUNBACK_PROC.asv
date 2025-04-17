@@ -369,7 +369,6 @@ timeCheck = 0; %toggle on if you want to check the clock for neural data and tha
 referenceStrategy = 3;  %case switch 1 is CAR with all electrodes, 2 is with just the ones you are using and,3 is bipolar
 randomTimeIti = true; %to make your iti a bunch of randomly selected time points so the average is essentially low.
 randomTimeItiTotal = 2.5; %seconds of the iti. since it's random times, it's evenly split between before and after. IF IT'S LESS THAN THE ACTUAL EPOCH, IT CREATES AN ARTIFACT IN THE BAND PASSED.
-
 %
 beh_timestamps = [];
 ma_timestamps = [];
@@ -919,7 +918,7 @@ end
 %about 335 seconds to 250 1 s ITIs.
 if randomTimeIti
     [itiDataReal.EmotionTask.RandomTimeIti, percKeptbyChEm] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltEmotion, 'fs', fs,...
-        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', randomTimeItiTotal/2, 'itiEpochPlus', randomTimeItiTotal/2 );
+        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
 end
 
 
@@ -1254,7 +1253,7 @@ end
 %about 335 seconds to 250 1 s ITIs.
 if randomTimeIti
     [itiDataReal.IdentityTask.RandomTimeIti, percKeptbyChId] = Analysis.emuEmot.nwbLFPchProc_ITIRandomTimes(itiDataFiltIdentity, 'fs', fs,...
-        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', randomTimeItiTotal/2, 'itiEpochPlus', randomTimeItiTotal/2 );
+        'chNum', chInterest, 'itiCount', 250, 'itiEpochMinus', 0.5, 'itiEpochPlus', 0.5 );
 end
 
 %record details of the run of the iti. threshold is what was the automatic

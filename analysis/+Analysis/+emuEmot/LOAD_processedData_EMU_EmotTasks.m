@@ -59,11 +59,12 @@ macrowires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').elec
 %microwires = testfile.processing.get('ecephys').nwbdatainterface.get('LFP').electricalseries.get('MicroWireSeries').data.load;
 end
 
+dsAmount = round(fsFull/fs); %create a downsample amount
+
 
 %this is for .raw file
 if rawData == 1
 macroData = testfile.acquisition.get('MacroWireSeries').data.load();
-dsAmount = round(fsFull/fs);
 macroDataD = downsample(macroData', dsAmount); %raw dara is 4000 and want 500 so downsample by 8
 macroDataD = macroDataD';
 macrowires = macroDataD;

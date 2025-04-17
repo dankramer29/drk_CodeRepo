@@ -3,6 +3,7 @@ function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, 
 %band, and then bandpass the data centered on that frequency and run
 %statistical comparison
 
+%data 1 is emt and data 2 is idt the way it's being input
 
 [varargin, ff]=util.argkeyval('ff', varargin, []); %get the frequency bands of the rows of the spectrogram data
 [varargin, freqOfInterest]=util.argkeyval('freqOfInterest', varargin, [1 size(data1spectro,1)]); %get the band to look for the max between
@@ -10,7 +11,7 @@ function [Data1FreqPeakmn, Data1FreqPeaksem, Data2FreqPeakmn, Data2FreqPeaksem, 
 [varargin, plt]=util.argkeyval('plt', varargin, 0); %plot if you want, 1 does the SE or 2 can do the shuffle as the shaded.
 [varargin, fs]=util.argkeyval('fs', varargin, 500); %sampling rate
 [varargin, bandpassRange]=util.argkeyval('bandpassRange', varargin,5); %how big do we want the frequency range to be
-[varargin, norm]=util.argkeyval('norm', varargin,1); % 0 is don't, 1 is normalize across all data stitched together, 2 is normalize by trial 
+[varargin, norm]=util.argkeyval('norm', varargin,1); % 0 is don't, 1 is normalize across all data stitched together, 2 is normalize by trial (since currently normalizing across the sub frequency bands (5 hz) i tested normalizing again and option 1 is the best))
 [varargin, tt]=util.argkeyval('tt', varargin, []); % time for plotting if you want 
 [varargin, mirroredEnd]=util.argkeyval('mirroredEnd', varargin, 0.5); % time you want for a mirrored end in seconds
 [varargin, data1itibp]=util.argkeyval('data1itibp', varargin, []); % data1 iti band passed, need that for subtraction
@@ -50,9 +51,10 @@ else
     fplow = freqPeak1;
     fphigh = freqPeak2;
 end
-%GOING TO DO A FOR LOOP THAT CUTS IT INTO SMALLER BANDS AND THEN NORMALIZES
-%IT. ALSO THIS From matlab: Do not use filtfilt with differentiator and Hilbert FIR filters, because the operation of those filters depends heavily on their phase response.
+% ALSO THIS From matlab: Do not use filtfilt with differentiator and Hilbert FIR filters, because the operation of those filters depends heavily on their phase response.
 %SO TRY NOT USING FILTFILT? MAYBE TRY JUST BANDPASS BUT ALSO TRY FILT
+
+%SOMEWHERE IN HERE, THE RAMPED ENDS OF THE ITI ARE CAUSING A SEVERE CHANGE.
 idx = 1;
 for ii = fplow-bandpassRange:5:fphigh+bandpassRange-5 %5 hz filters until it gets to the top (will cut off a small amount that will be irrelevant).
     bandfilterData = designfilt('bandpassfir','FilterOrder', 100,'CutoffFrequency1',ii,'CutoffFrequency2',ii+5, 'SampleRate',fs);
@@ -64,15 +66,16 @@ for ii = fplow-bandpassRange:5:fphigh+bandpassRange-5 %5 hz filters until it get
     Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
     Data1FreqPeakBPtempN(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
     if ~isempty(data1itibp) && ~isempty(data2itibp)
+        clear Data1TempMirror
         ramp=fs*mirroredEnd;
         if ramp>0
             dataMirror1 = horzcat(flip(data1itibp(:, 1:ramp-1),2), data1itibp, flip(data1itibp(:, end-ramp+1:end),2));
             dataMirror2 = horzcat(flip(data2itibp(:, 1:ramp-1),2), data2itibp, flip(data2itibp(:, end-ramp+1:end),2));
         end
-        Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
-        Data1FreqPeakitiBP(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
-        Data1TempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror'); %assumes data is trials by freq
-        Data2FreqPeakitiBP(idx,:,:) = Data1TempMirror(idx, ramp:end-ramp,:);
+        Data1itiTempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror1'); %assumes data is trials by freq
+        Data1FreqPeakitiBP(idx,:,:) = Data1itiTempMirror(idx, :,:);
+        Data2itiTempMirror(idx,:,:) = filtfilt(bandfilterData, dataMirror2'); %assumes data is trials by freq
+        Data2FreqPeakitiBP(idx,:,:) = Data2itiTempMirror(idx, :,:);
     end
 
     idx = idx + 1;
@@ -117,7 +120,6 @@ end
 Data1FreqPeakBPsSm = permute(mean(normalize(Data1FreqPeakBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
 Data1FreqPeakBPsdbSm = permute(mean(normalize(Data1FreqPeakBPsdbSm,2),1), [3,2,1]); %right now the frequency should be in each row
 
-Data1FreqPeakBPsdb=10*log10(Data1FreqPeakBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
 
 %% do for the iti data if exists
 if ~isempty(data1itibp) && ~isempty(data2itibp)
@@ -130,27 +132,8 @@ if ~isempty(data1itibp) && ~isempty(data2itibp)
     %normalize for each band (can cut this totally if not using it)
     Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
     Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
-
-
-    Data1FreqPeakitiBPsdb=10*log10(Data1FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
-
-    for ii = 1:size(Data1FreqPeakitiBPs,1)
-        [Data1FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
-        [Data1FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPsdb(ii,:,:)), 60, fs);
-    end
-    %normalize for each band (can cut this totally if not using it)
-    Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
-    Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
-
-    Data1FreqPeakitiBPsdb=10*log10(Data1FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
-
-    for ii = 1:size(Data1FreqPeakitiBPs,1)
-        [Data1FreqPeakitiBPsSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPs(ii,:,:)), 60, fs); %tested 60ms window and 30 and 60 is better
-        [Data1FreqPeakitiBPsdbSm(ii,:,:), tplotC]=Analysis.BasicDataProc.convSmooth(squeeze(Data1FreqPeakitiBPsdb(ii,:,:)), 60, fs);
-    end
-    %normalize for each band (can cut this totally if not using it)
-    Data1FreqPeakitiBPsSm = permute(mean(normalize(Data1FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
-    Data1FreqPeakitiBPsdb = permute(mean(normalize(Data1FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
+    Data1FreqPeakitiBPsSm = Data1FreqPeakitiBPsSm(:,ramp:end-ramp,:); %remove mirrored ends
+    Data1FreqPeakitiBPsdb = Data1FreqPeakitiBPsdb(:,ramp:end-ramp,:);
 
 
     Data2FreqPeakitiBPsdb=10*log10(Data2FreqPeakitiBPs); % not doing this(or doing it after the smoothing) it creates a weirder view and it's so narrow a band.
@@ -162,15 +145,18 @@ if ~isempty(data1itibp) && ~isempty(data2itibp)
     %normalize for each band (can cut this totally if not using it)
     Data2FreqPeakitiBPsSm = permute(mean(normalize(Data2FreqPeakitiBPsSm,2),1), [3,2,1]); %right now the frequency should be in each row
     Data2FreqPeakitiBPsdb = permute(mean(normalize(Data2FreqPeakitiBPsdb,2),1), [3,2,1]); %right now the frequency should be in each row
-
+    Data2FreqPeakitiBPsSm = Data2FreqPeakitiBPsSm(:,ramp:end-ramp,:);
+    Data2FreqPeakitiBPsdb = Data2FreqPeakitiBPsdb(:,ramp:end-ramp,:);
 end
-
-%since it's different frequencies, normalize it.
+%since it's different frequencies, normalize it. given that normalizing
+%across each 5 hz band already makes a normalization scheme, it doesn't
+%need to be normalized, however I ran all three and the case 1 gives the
+%widest range of variability and is the most honest normalization anyway.
 switch norm
-    case 0
+    case 0 %no normalization)
         Data1FreqPeakmn = mean(Data1FreqPeakBPsSm);
         Data1FreqPeaksem = std(Data1FreqPeakBPsSm, [], 1) / sqrt(size(Data1FreqPeakBPsSm,1));
-    case 1
+    case 1 %normalization across all data
         tempDAll = [];
         for ii = 1:size(Data1FreqPeakBPsSm,1)
             tempD = Data1FreqPeakBPsSm(ii,:);
@@ -180,11 +166,12 @@ switch norm
         Data1FreqPeakBPsSmNorm = (Data1FreqPeakBPsSm - mn)./sd;
         Data1FreqPeakmn = mean(Data1FreqPeakBPsSmNorm);
         Data1FreqPeaksem = std(Data1FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data1FreqPeakBPsSmNorm,1));
-    case 2
+    case 2 %normalize by trial
         Data1FreqPeakmn = mean(normalize(Data1FreqPeakBPsSm,2));
         Data1FreqPeaksem = std(normalize(Data1FreqPeakBPsSm,2), [], 1) / sqrt(size(Data1FreqPeakBPsSm,1));
 end
 
+%% for data 2 (right now data 2 is identity task)
 idx = 1;
 for ii = fplow-bandpassRange:5:fphigh+bandpassRange-5 %5 hz filters until it gets to the top (will cut off a small amount that will be irrelevant).
     bandfilterData = designfilt('bandpassfir','FilterOrder', 100,'CutoffFrequency1',ii,'CutoffFrequency2',ii+5, 'SampleRate',fs);
@@ -251,13 +238,12 @@ switch norm
         % run shuffle stats (already normalized) 
         % data 1 is emotion task,
         %data 2 is identity task the way it's being put in now. 
-        %THING TO DO NEXT IS CHECK THAT EMT IS THE RED LINE AND THE RIGHT
-        %SPECTROGRAM...
-        [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+        
+        [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', false, 'tt', tt , 'ff', ff);
 
         
-         [~, thresh_binary] = stats.shuffle_subtraction_stats2d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
-                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'timeRange', [100 900]);
+         [~, thresh_binary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
+                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
 
 
   %      [mean_sd, thresh_binary] = stats.shuffle_stats2d(Data1FreqPeakBPsSmNorm, Data2FreqPeakBPsSmNorm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);

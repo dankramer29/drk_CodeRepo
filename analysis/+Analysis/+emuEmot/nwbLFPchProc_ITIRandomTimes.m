@@ -13,8 +13,8 @@ function [itiRandomTime, percKeptbyCh] = nwbLFPchProc_ITIRandomTimes(data, varar
 [varargin, itiCount] = util.argkeyval('itiCount',varargin, 250); %number of 1 second samples that will be taken. there are about 335seconds in each trial, so 250 from each feels about right
 [varargin, sdThresh] = util.argkeyval('sdThresh',varargin, 3); %the standard deviation threshold you would cut it over
 [varargin, chNum] = util.argkeyval('chNum',varargin, []); %for speed, if you want to load in processed data instead of running it each time
-[varargin, itiEpochMinus] = util.argkeyval('itiEpochMinus',varargin, 0.5); %length of the time iti epoch before and after the randomly chosen time point
-[varargin, itiEpochPlus] = util.argkeyval('itiEpochPlus',varargin, 0.5); %length of the time iti epochplus
+[varargin, itiEpochMinus] = util.argkeyval('itiEpochMinus',varargin, 0.5); %length of the time iti epoch before randomly chosen time point
+[varargin, itiEpochPlus] = util.argkeyval('itiEpochPlus',varargin, 0.5); %length of the time iti epoch after the randomly chosen time point.
 
 
 if isempty(chNum)

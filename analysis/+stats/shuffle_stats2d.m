@@ -272,9 +272,11 @@ mean_sd.sd{2,1} = sd2;
 mean_sd.se{1,1} = SEM1;
 mean_sd.se{2,1} = SEM2;
 mean_sd.histo{1,1} = thresh;
-mean_sd.histo{2,1} = thresh;
 mean_sd.xshuffles{1,1} = xshuffles;
-mean_sd.xshuffles{2,1} = xshuffles;
+mean_sd.thresh_binary{1,1} = thresh_binary;
+mean_sd.thresh1tail{1,1} = thresh1tail;
+mean_sd.thresh{1,1} = alph;
+
 
 
 

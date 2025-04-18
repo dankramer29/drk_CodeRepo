@@ -142,7 +142,8 @@ else
     itidata2T = itiData2Temp;
 end
 
-for ii=1:xshuffles
+ticT = tic;
+for ii=1:xshuffles   
     switch testChoice %do a ttest as the comparison 
         case 'ttst'
             %% fake data 1, all iti
@@ -193,7 +194,7 @@ for ii=1:xshuffles
             thresh(ii,1) = max(abs(tstat_res(ii,:)));
     end    
 end
-
+toc(ticT)
 %sort the histogram
 threshSort=sort(thresh);
 %find the tail(s)
@@ -340,10 +341,18 @@ mean_sd.sd{1,1} = sd1;
 mean_sd.sd{2,1} = sd2;
 mean_sd.se{1,1} = SEM1;
 mean_sd.se{2,1} = SEM2;
+mean_sd.tmaxLoc{1,1} = in1r+tR(1);
+mean_sd.tmaxLoc{2,1} = in2r+tR(1);
+mean_sd.thresh_SubtractionBinary{1,1} = thresh_binary;
+mean_sd.thresh_tmaxDiff{1,1} = realDiff;
 mean_sd.histo{1,1} = thresh;
-mean_sd.histo{2,1} = thresh;
 mean_sd.xshuffles{1,1} = xshuffles;
-mean_sd.xshuffles{2,1} = xshuffles;
+mean_sd.thresh1tail{1,1} = thresh1tail;
+mean_sd.thresh{1,1} = alph;
+
+
+
+
 
 
 

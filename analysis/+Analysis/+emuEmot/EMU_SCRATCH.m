@@ -2,7 +2,52 @@
 
 %% this is all scratch pad stuff for now.
 figure
-plot(mean(Data1FreqPeakitiBPsSmTst,1))
+plot(mean(dataMirror))
+figure
+hold on
+plot(xxF)
+plot(xxFP)
+plot(xxFPs)
+
+xx= mean(dataMirror);
+xxF = filtfilt(bandfilterData, xx);
+xxFP = abs(hilbert(xxF));
+[xxFPs]=Analysis.BasicDataProc.convSmooth(xxFP, 60, fs);
+ 
+yy= mean(data1bandpass);
+yyF = filtfilt(bandfilterData, yy');
+yyFP = abs(hilbert(yyF));
+[yyFPs]=Analysis.BasicDataProc.convSmooth(yyFP, 60, fs);
+
+zz= dataMirror;
+zzF = filtfilt(bandfilterData, zz');
+zzFP = abs(hilbert(zzF));
+zzFPf = zzFP';
+[zzFPs]=Analysis.BasicDataProc.convSmooth(zzFPf, 60, fs);
+zzFPsm = mean(zzFPs,2);
+
+figure
+hold on
+plot(xxF)
+plot(xxFP)
+plot(xxFPs)
+
+figure
+hold on
+plot(yyF)
+plot(yyFP)
+plot(yyFPs)
+
+figure
+rrr= zzFP(ramp:end-ramp,:);
+plot(mean(rrr,2))
+
+yy = mean(Data1FreqPeakitiBPsSm);
+yyy= Data1FreqPeakitiBPsSm(1:10,:);
+figure
+plot(yy)
+hold on
+plot(yyy')
 
     Data1FreqPeakitiBPsSmTst = Data1FreqPeakitiBPsSm(:,ramp:end-ramp,:); %remove mirrored ends
 

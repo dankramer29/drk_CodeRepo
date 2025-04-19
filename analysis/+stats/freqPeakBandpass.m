@@ -293,18 +293,24 @@ switch norm
             shTTestMean_sd.freqPeak{2,1} = freqPeak2; %emt
             if sum(shuffleBinary) >= 1
                 shuffleBinaryPos = 1;
+                shTTestMean_sd.shuffleBinaryPos{1,1} = 1; 
+            else
+                shuffleBinaryPos = 0;
+                shTTestMean_sd.shuffleBinaryPos{1,1} = 0; 
             end
         else
             shTTestMean_sd = [];
         end
 
         if subtractTmaxStats
-        [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
+            [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
                 'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
-        subtractionThresh_binary.task{1,1} = 'EmotionTask';
-        subtractionThresh_binary.task{2,1} = 'IdentityTask';
-        subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
-        subtractionThresh_binary.freqPeak{2,1} = freqPeak2; %emt
+            subtractionThresh_binary.task{1,1} = 'EmotionTask';
+            subtractionThresh_binary.task{2,1} = 'IdentityTask';
+            subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
+            subtractionThresh_binary.freqPeak{2,1} = freqPeak2; %idt
+            subtractionThresh_binary.subtBinary{1,1} = subtBinary; %1 or 0 if positive or not
+
         else
             subtractionThresh_binary = [];
         end

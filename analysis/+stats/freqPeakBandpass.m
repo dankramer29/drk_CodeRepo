@@ -259,6 +259,8 @@ switch norm
             end
         else
             shTTestMean_sd = [];
+            shuffleBinary = [];
+
         end
 
         if subtractTmaxStats
@@ -270,6 +272,7 @@ switch norm
         subtractionThresh_binary.freqPeak{2,1} = freqPeak2; %emt
         else
             subtractionThresh_binary = [];
+            subtBinary = [];
         end
     case 1 %normalize across all the data (can do this in shuffle too, but better here) (since the frequency is the same, fine to do it across all)
         tempDAll = [];
@@ -300,6 +303,7 @@ switch norm
             end
         else
             shTTestMean_sd = [];
+            shuffleBinary = [];
         end
 
         if subtractTmaxStats
@@ -313,6 +317,7 @@ switch norm
 
         else
             subtractionThresh_binary = [];
+            subtBinary = [];
         end
     case 2 %normalize within each trial
         Data2FreqPeakBPsSmNorm = normalize(Data2FreqPeakBPsSm,2); %normalize across all trials
@@ -330,6 +335,7 @@ switch norm
             end
         else
             shTTestMean_sd = [];
+            shuffleBinary = [];
         end
 
         if subtractTmaxStats
@@ -341,6 +347,7 @@ switch norm
         subtractionThresh_binary.freqPeak{2,1} = freqPeak2; %emt
         else
             subtractionThresh_binary = [];
+            subtBinary =[];
         end
 end
 

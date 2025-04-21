@@ -131,11 +131,24 @@ if comparedToSubtractionITI == 1
        
       
         if tstatPos_sumsStatSig>0 %this is only taking the positive
-            significantSubtraction{idxcomp,1} = chName{ii};
-            significantSubtraction{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
-            significantSubtraction{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
+            significantSubtractionCluster{idxcomp,1} = chName{ii};
+            significantSubtractionCluster{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
+            significantSubtractionCluster{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
             idxcomp = idxcomp + 1;
         end
+        if nback.(chName{ii}).freqPeak.subtBinary>0 %this is only taking the positive
+            significantSubtractionBP{idxcomp,1} = chName{ii};
+            significantSubtractionBP{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
+            significantSubtractionBP{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
+            idxcomp = idxcomp + 1;
+        end
+        if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary>0 %this is only taking the positive
+            significantshuffleBP{idxcomp,1} = chName{ii};
+            significantshuffleBP{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
+            significantshuffleBP{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
+            idxcomp = idxcomp + 1;
+        end
+    
     
         idx1 = 1;
         idx2 = 1;      

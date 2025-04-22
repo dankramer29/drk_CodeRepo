@@ -67,7 +67,7 @@ if comparedToSubtractionITI == 1
     %the iti and the task.
     %identity.
     %Using non z scored data
-    idxcomp=1;
+    idxcomp=1; idxcomp2 = 1;
     for ii = 1:length(chInterest)
         idx1 = 1;
         idx2 = 1;
@@ -118,7 +118,7 @@ if comparedToSubtractionITI == 1
        
 
         [nback.(chName{ii}).freqPeak.emotionTask.bandpass,...
-            nback.(chName{ii}).freqPeak.identityTask,bandpass,...
+            nback.(chName{ii}).freqPeak.identityTask.bandpass,...
             nback.(chName{ii}).freqPeak.emotionTaskiti.bandpass,...
             nback.(chName{ii}).freqPeak.identityTaskiti.bandpass,...
             nback.(chName{ii}).freqPeak.shuffleTtestMax,...
@@ -126,27 +126,27 @@ if comparedToSubtractionITI == 1
             nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary,...
             nback.(chName{ii}).freqPeak.subtBinary] = stats.freqPeakBandpass(dataEmotionTaskAllIdentities, dataEmotionTaskAllIdentitiesBP,...
                                                                         dataIdentityTaskAllIdentities, dataIdentityTaskAllIdentitiesBP,...
-                                                                            'data1itibp', itiDataEmBp, 'data2itibp', itiDataIdBp, 'ff', identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
-                                                                                'tt', identityTaskLFP.tPlotImageBandPass); 
-       
+                                                                            'data1itibp', itiDataEmBp, 'data2itibp', itiDataIdBp, 'ff',...
+                                                                                identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
+                                                                                    'tt', identityTaskLFP.tPlotImageBandPass); 
       
         if tstatPos_sumsStatSig>0 %this is only taking the positive
             significantSubtractionCluster{idxcomp,1} = chName{ii};
             significantSubtractionCluster{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
             significantSubtractionCluster{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
             idxcomp = idxcomp + 1;
+        end          
+        if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary>0 %this is only taking the positive
+            significantshuffleBP{idxcomp2,1} = chName{ii};
+            significantshuffleBP{idxcomp2,2} = nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary; %1 is data 1 is larger, 2 is data 2 is larger
+            significantshuffleBP{idxcomp2,3} = nback.(chName{ii}).freqPeak.shuffleTtestMax.thresh_binary; %the actual binary of where the differences occur. 
+            idxcomp2 = idxcomp2 + 1;
         end
         if nback.(chName{ii}).freqPeak.subtBinary>0 %this is only taking the positive
-            significantSubtractionBP{idxcomp,1} = chName{ii};
+            significantSubtractionBP{idxcomp3,1} = chName{ii};
             significantSubtractionBP{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
-            significantSubtractionBP{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
-            idxcomp = idxcomp + 1;
-        end
-        if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary>0 %this is only taking the positive
-            significantshuffleBP{idxcomp,1} = chName{ii};
-            significantshuffleBP{idxcomp,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
-            significantshuffleBP{idxcomp,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
-            idxcomp = idxcomp + 1;
+            significantSubtractionBP{idxcomp2,3} = nback.(chName{ii}).freqPeak.subtractionTtest.thresh_tmaxDiff{1,1}; %take the difference
+            idxcomp2 = idxcomp2 + 1;
         end
     
     

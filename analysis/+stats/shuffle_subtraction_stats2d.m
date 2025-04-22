@@ -28,6 +28,7 @@ function [ mean_sd, thresh_binary ] = shuffle_subtraction_stats2d( data1, itiDat
 [varargin, histogramBuiltThresholds]=util.argkeyval('histogramBuiltThresholds', varargin, []); %you can load in a prebuilt histogram of thresholds if you want, should be [threshPositive threshNegative]
 [varargin, testChoice]=util.argkeyval('testChoice', varargin, 'ttst'); %pick which test you want to do.'ttst' ttest is one option, 'subtractedDiff' a difference from iti is another.
 [varargin, tt]=util.argkeyval('tt', varargin, []); %tt time if you want for plotting
+[varargin, gpuOn]=util.argkeyval('gpuOn', varargin, true); %run the shuffle as gpu, takes 7-9 seconds with it off
 
 
 util.argempty(varargin); % check all additional inputs have been processed
@@ -142,6 +143,13 @@ else
     itidata2T = itiData2Temp;
 end
 
+if gpuOn
+    data1T = gpuArray(data1T);
+    data2T = gpuArray(data2T);
+    itidata1T = gpuArray(itidata1T);
+    itidata2T = gpuArray(itidata2T);
+end
+
 ticT = tic;
 for ii=1:xshuffles   
     switch testChoice %do a ttest as the comparison 
@@ -195,6 +203,12 @@ for ii=1:xshuffles
     end    
 end
 toc(ticT)
+data1T = gather(data1T);
+data2T = gather(data2T);
+itidata1T = gather(itidata1T);
+itidata2T = gather(itidata2T);
+thresh = gather(thresh);
+
 %sort the histogram
 threshSort=sort(thresh);
 %find the tail(s)
@@ -238,7 +252,15 @@ realDiff = maxTdata1 - maxTdata2;
 
 %% find the max t stat mass (meaning the sum of the t stats in the max area using image recognition using bwconncomp)
 
-thresh_binary=abs(realDiff)>thresh1tail; %this is where it counts how many shuffled points, this would be essentially 1 tailed.
+if realDiff >=0 && abs(realDiff)>thresh1tail %this is where it counts how many shuffled points, this would be essentially 1 tailed.
+    thresh_binary = 1; %1 if data 1 is bigger
+elseif realDiff <0 && abs(realDiff)>thresh1tail
+    thresh_binary = 2; %2 if data 2 is bigger
+else
+    thresh_binary = 0; %1 if data 1 is bigger
+end
+
+
 
 [~, in1r]  = ind2sub(size(tstat_resR1), in1); %this will give the location of the max (need to add tR)
 [~, in2r]  = ind2sub(size(tstat_resR2), in2);
@@ -341,9 +363,9 @@ mean_sd.sd{1,1} = sd1;
 mean_sd.sd{2,1} = sd2;
 mean_sd.se{1,1} = SEM1;
 mean_sd.se{2,1} = SEM2;
+mean_sd.thresh_SubtractionBinary{1,1} = thresh_binary;
 mean_sd.tmaxLoc{1,1} = in1r+tR(1);
 mean_sd.tmaxLoc{2,1} = in2r+tR(1);
-mean_sd.thresh_SubtractionBinary{1,1} = thresh_binary;
 mean_sd.thresh_tmaxDiff{1,1} = realDiff;
 mean_sd.histo{1,1} = thresh;
 mean_sd.xshuffles{1,1} = xshuffles;

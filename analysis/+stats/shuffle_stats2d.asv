@@ -24,8 +24,8 @@ function [ mean_sd, thresh_binary ] = shuffle_stats2d( data1, data2, varargin )
 [varargin, zscoreAcrossAllData]=util.argkeyval('zscoreAcrossAllData', varargin, 0); %if you want to z score across all data
 [varargin, histogramBuiltThresholds]=util.argkeyval('histogramBuiltThresholds', varargin, []); %you can load in a prebuilt histogram of thresholds if you want, should be [threshPositive threshNegative]
 [varargin, testChoice]=util.argkeyval('testChoice', varargin, 'ttst'); %pick which test you want to do.'ttst' ttest is one option, 'subtractedDiff' a difference from iti is another.
-[varargin, itiData1T]=util.argkeyval('itiData1', varargin, []); %if doing difference, you can include iti.
-[varargin, itiData2T]=util.argkeyval('itiData2', varargin, []); %if doing difference, you can include iti.
+[varargin, itiData1]=util.argkeyval('itiData1', varargin, []); %if doing difference, you can include iti.
+[varargin, itiData2]=util.argkeyval('itiData2', varargin, []); %if doing difference, you can include iti.
 [varargin, tt]=util.argkeyval('tt', varargin, []); %tt time if you want for plotting
 [varargin, ff]=util.argkeyval('ff', varargin, []); %ff freq if you want for plotting
 [varargin, timeRange]=util.argkeyval('timeRange', varargin, []); %a time range to look for peaks in the data, default is all, and to be entered in seconds
@@ -35,13 +35,13 @@ function [ mean_sd, thresh_binary ] = shuffle_stats2d( data1, data2, varargin )
 util.argempty(varargin); % check all additional inputs have been processed
 
 if strcmp(testChoice, 'subtractedDiff') 
-    if isempty(itiData1T)
+    if isempty(itiData1)
         warning('iti data is empty for data 1')
-        itiData1T = data2; %make the difference a comparison of differences with data 2
+        itiData1 = data2; %make the difference a comparison of differences with data 2
     end
-     if isempty(itiData2T)
+     if isempty(itiData2)
         warning('iti data is empty for data 2')
-        itiData2T = data1; %make the difference a comparison of differences with data 1
+        itiData2 = data1; %make the difference a comparison of differences with data 1
      end 
 end
 
@@ -115,11 +115,11 @@ end
 if gpuOn
     data1T = gpuArray(data1T);
     data2T = gpuArray(data2T);
-    if ~isempty(itiData1T)
-        itiData1T = gpuArray(itiData1T);
+    if ~isempty(itidata1T)
+        itidata1T = gather(itidata1T);
     end
-    if ~isempty(itiData2T)
-        itiData2T = gpuArray(itiData2T);
+    if ~isempty(itidata2T)
+        itidata2T = gather(itidata2T);
     end
 end
 
@@ -159,11 +159,11 @@ toc(ticT)
 if gpuOn
     data1T = gather(data1T);
     data2T = gather(data2T);
-    if ~isempty(itiData1T)
-        itiData1T = gather(itiData1T);
+    if ~isempty(itidata1T)
+        itidata1T = gather(itidata1T);
     end
-    if ~isempty(itiData2T)
-        itiData2T = gather(itiData2T);
+    if ~isempty(itidata2T)
+        itidata2T = gather(itidata2T);
     end
     thresh = gather(thresh);
 end

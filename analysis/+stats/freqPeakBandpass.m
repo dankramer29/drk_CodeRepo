@@ -249,20 +249,20 @@ switch norm
         Data2FreqPeaksem = std(Data2FreqPeakBPsSm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', false, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
-            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %emt
-            if sum(shuffleBinary) >= 1
-                shuffleBinaryPos = 1;
-            end
+            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %idt
+            shTTestMean_sd.freqPeak{1,1} = shuffleBinary; %the actual output at each time point
+            shuffleBinaryPos = shuffle_binaryDirection; %0 for not positive, 1 for data 1 positive (emt), 2 for data 2 positive (idt)
+            shTTestMean_sd.shuffleBinaryPos{1,1} = shuffle_binaryDirection;
         else
             shTTestMean_sd = [];
+            shuffleBinaryPos = [];
             shuffleBinary = [];
-
         end
-
+        %run the subtraction stats
         if subtractTmaxStats
         [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
                 'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
@@ -289,20 +289,17 @@ switch norm
         %data 2 is identity task the way it's being put in now. 
         
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
-            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %emt
-            if sum(shuffleBinary) >= 1
-                shuffleBinaryPos = 1;
-                shTTestMean_sd.shuffleBinaryPos{1,1} = 1; 
-            else
-                shuffleBinaryPos = 0;
-                shTTestMean_sd.shuffleBinaryPos{1,1} = 0; 
-            end
+            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %idt
+            shTTestMean_sd.freqPeak{1,1} = shuffleBinary; %the actual output at each time point
+            shuffleBinaryPos = shuffle_binaryDirection; %0 for not positive, 1 for data 1 positive (emt), 2 for data 2 positive (idt)
+            shTTestMean_sd.shuffleBinaryPos{1,1} = shuffle_binaryDirection;            
         else
             shTTestMean_sd = [];
+            shuffleBinaryPos = [];
             shuffleBinary = [];
         end
 
@@ -313,7 +310,7 @@ switch norm
             subtractionThresh_binary.task{2,1} = 'IdentityTask';
             subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
             subtractionThresh_binary.freqPeak{2,1} = freqPeak2; %idt
-            subtractionThresh_binary.subtBinary{1,1} = subtBinary; %1 or 0 if positive or not
+            subtractionThresh_binary.subtBinary{1,1} = subtBinary; %0 if not positive, 1 is data 1 (emt) and 2 if data 2 (idt)
 
         else
             subtractionThresh_binary = [];
@@ -325,19 +322,20 @@ switch norm
         Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats (already normalized)
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', false, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
-            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %emt
-            if sum(shuffleBinary) >= 1
-                shuffleBinaryPos = 1;
-            end
+            shTTestMean_sd.freqPeak{2,1} = freqPeak2; %idt
+            shTTestMean_sd.freqPeak{1,1} = shuffleBinary; %the actual output at each time point
+            shuffleBinaryPos = shuffle_binaryDirection; %0 for not positive, 1 for data 1 positive (emt), 2 for data 2 positive (idt)
+            shTTestMean_sd.shuffleBinaryPos{1,1} = shuffle_binaryDirection;
         else
             shTTestMean_sd = [];
+            shuffleBinaryPos = [];
             shuffleBinary = [];
         end
-
+        %run the subtraction stats
         if subtractTmaxStats
             [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
                 'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);

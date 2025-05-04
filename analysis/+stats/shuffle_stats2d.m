@@ -1,4 +1,4 @@
-function [ mean_sd, thresh_binary ] = shuffle_stats2d( data1, data2, varargin )
+function [ mean_sd, thresh_binary, thresh_binaryDirection ] = shuffle_stats2d( data1, data2, varargin )
 %shuffle_stats shuffles the data between two data sets takes the mean and
 %std to make a distribution of the data to compare the true values to.
 %this is using a tmax approach (Groppe DM, Urbach TP, Kutas M. Mass
@@ -198,42 +198,17 @@ tstat_resR=(mn1-mn2)./(sp*sqrt(1/L1+1/L2));
 %% find the max t stat mass (meaning the sum of the t stats in the max area using image recognition using bwconncomp)
 
 thresh_binary=abs(tstat_resR(1,tR(1):tR(2)))>thresh1tail; %this is where it counts how many shuffled points, this would be essentially 1 tailed.
-
-
-
-% tsr_pNegR=2*tcdf((tstat_resR), (L1+L2-2)); %get the p values for adjustment, for just negative deflections
-% tsr_pPosR=2*tcdf(-(tstat_resR), (L1+L2-2)); %get the p values for adjustment, for just positive deflections
-% tsr_pR=2*tcdf(-abs(tstat_resR), (L1+L2-2)); %if want to combine, do abs because it won't matter here whether + or -
-% 
-% %% find the max t stat mass (meaning the sum of the t stats in the max area using image recognition using bwconncomp)
-% thresh_binaryN = tsr_pNegR<alph/2; %finds the negative deflections
-% thresh_binaryP = tsr_pPosR<alph/2; %finds the positive deflections
-% thresh_binary=tsr_pR<alph; %this is where it counts how many shuffled points, this would be essentially 1 tailed.
-% 
-% if isempty(histogramBuiltThresholds)
-%     threshSort=sort(tstat_maxP);
-%     threshP=threshSort(round(size(tstat_maxP,1)*alphaHistoHalf));
-%     temp_tsmN=sort(tstat_maxN);
-%     threshN=temp_tsmN(round(size(tstat_maxN,1)*alphaHistoHalf));
-% end
-% thresholds(1,1) = threshP;
-% thresholds(1,2) = threshN;
-
-
-%this is from an old function and i haven't checked to see if this works.
-% switch tails
-%     case 1
-%         diffR=abs(mn(1)-mn(2)); %one tailed
-%         temp_p=arrayfun(@gt, difftot, diffR);
-%         est_p=nnz(temp_p,2)/xshuffles; %get the percentage
-%     case 2
-%         diffR=mn(1)-mn(2);
-%         if diffR<0
-%             est_p=nnz(difftot<=diffR)/xshuffles;
-%         else
-%             est_p=nnz(difftot>=diffR)/xshuffles;
-%         end
-% end
+if sum(thresh_binary) > 0
+    if abs(max(tstat_resR(1,tR(1):tR(2)))) > abs(min(tstat_resR(1,tR(1):tR(2)))) %this checks if data 1 or data 2 was the significant portion (data 1 would be positive and data 2 would be negative)
+        thresh_binaryDirection = 1;
+    elseif abs(max(tstat_resR(1,tR(1):tR(2)))) < abs(min(tstat_resR(1,tR(1):tR(2))))
+        thresh_binaryDirection = 2;
+    else
+        thresh_binaryDirection = 0;
+    end
+else
+    thresh_binaryDirection = 0;
+end
 
 if fdr_adj
     est_p=stats.fdr_bh(length(thresh_binary)); %runs a multiple comparisons correction

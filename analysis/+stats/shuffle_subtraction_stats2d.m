@@ -246,7 +246,7 @@ SEM2iti = std(itidata2T, [], 1) / sqrt(size(itidata2T,1));
 
 sp=sqrt(((L2-1)*std(data2T,[],1).^2+(L2iti-1)*std(itidata2T,[],1).^2)./(L2+L2iti-2));
 tstat_resR2=(mn2-mn2iti)./(sp*sqrt(1/L2+1/L2iti));
-[maxTdata2 in2]= max(abs(tstat_resR2(1, tR(1):tR(2))));
+[maxTdata2, in2]= max(abs(tstat_resR2(1, tR(1):tR(2))));
 
 realDiff = maxTdata1 - maxTdata2;
 

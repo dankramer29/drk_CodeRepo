@@ -25,6 +25,7 @@ if comparedToITI ==1
     end
 end
 
+sigComparison = struct;
 
 %% set up names for the struct
 if ~iscell(chInterest)
@@ -55,7 +56,8 @@ event = fieldnames(identityTaskLFP.byemotion.(chName{1}));
 
 nback = struct;
 significantComparisons = [];
-
+significantshuffleBP = [];
+significantSubtractionBP = [];
 
 %% compares a subtraction of the two conditions as clusters compared to iti TRYING THIS OUT
 
@@ -132,19 +134,31 @@ if comparedToSubtractionITI == 1
       
         if tstatPos_sumsStatSig>0 %this is only taking the positive
             significantSubtractionCluster{idxcomp1,1} = chName{ii};
-            significantSubtractionCluster{idxcomp1,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
+             if tstatPos_sumsStatSig == 1 %1 is data 1 is larger, 2 is data 2 is larger
+                significantSubtractionCluster{idxcomp1,2} = 'emotionTask';
+            elseif tstatPos_sumsStatSig == 2
+                significantSubtractionCluster{idxcomp1,2} = 'identityTask';
+            end  
             significantSubtractionCluster{idxcomp1,3} = nback.(chName{ii}).subtraction.largestCluster.Positive(1,1).TstatDiff; %take the difference
             idxcomp1 = idxcomp1 + 1;
         end          
-        if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary>0 %this is only taking the positive
+        if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary>0 %shuffle tmax (not subtraction)
             significantshuffleBP{idxcomp2,1} = chName{ii};
-            significantshuffleBP{idxcomp2,2} = nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary; %1 is data 1 is larger, 2 is data 2 is larger
+            if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary == 1 %1 is data 1 is larger, 2 is data 2 is larger
+                significantshuffleBP{idxcomp2,2} = 'emotionTask';
+            elseif nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary == 2
+                significantshuffleBP{idxcomp2,2} = 'identityTask';
+            end  
             significantshuffleBP{idxcomp2,3} = nback.(chName{ii}).freqPeak.shuffleTtestMax.thresh_binary; %the actual binary of where the differences occur. 
             idxcomp2 = idxcomp2 + 1;
         end
-        if nback.(chName{ii}).freqPeak.subtBinary>0 %this is only taking the positive
+        if nback.(chName{ii}).freqPeak.subtBinary>0 %subtraction t test
             significantSubtractionBP{idxcomp3,1} = chName{ii};
-            significantSubtractionBP{idxcomp3,2} = tstatPos_sumsStatSig; %1 is data 1 is larger, 2 is data 2 is larger
+            if nback.(chName{ii}).freqPeak.subtBinary == 1 %1 is data 1 is larger, 2 is data 2 is larger
+                significantSubtractionBP{idxcomp3,2} = 'emotionTask';
+            elseif nback.(chName{ii}).freqPeak.subtBinary == 2
+                significantSubtractionBP{idxcomp3,2} = 'identityTask';
+            end                
             significantSubtractionBP{idxcomp3,3} = nback.(chName{ii}).freqPeak.subtractionTtest.thresh_tmaxDiff{1,1}; %take the difference
             idxcomp3 = idxcomp3 + 1;
         end
@@ -153,6 +167,10 @@ if comparedToSubtractionITI == 1
        
     end
 end
+
+sigComparison.significantSubtractionCluster = significantSubtractionCluster;
+sigComparison.significantshuffleBP = significantshuffleBP;
+sigComparison.significantSubtractionBP = significantSubtractionBP;
 
 
 
@@ -352,7 +370,7 @@ if comparedToITI == 1
     end
 end
 
-
+sigComparison.sigClustervsITIall = significantComparisons;
 
 %% compares condition vs condition
 if comparedToCondition == 1

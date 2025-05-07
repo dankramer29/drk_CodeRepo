@@ -30,6 +30,7 @@ function [ mean_sd, thresh_binary, thresh_binaryDirection ] = shuffle_stats2d( d
 [varargin, ff]=util.argkeyval('ff', varargin, []); %ff freq if you want for plotting
 [varargin, timeRange]=util.argkeyval('timeRange', varargin, []); %a time range to look for peaks in the data, default is all, and to be entered in seconds
 [varargin, gpuOn]=util.argkeyval('gpuOn', varargin, true); %do it as gpu. much faster so leave on. 
+[varargin, chName]=util.argkeyval('chName', varargin, []); % inputs a channel name to name the figures so you can find them easier later.
 
 
 util.argempty(varargin); % check all additional inputs have been processed
@@ -216,6 +217,7 @@ end
 %%
 if plt
     figure;
+    sgtitle(chName)
     subplot(3,1,1) %PUTTING DATA 2 ON THE LEFT WHICH IS IDT (TO MATCH THE SPECTROGRAM OUTPUT)
     H2 = shadedErrorBar(tt,mn2,SEM2*2,'lineprops', {'-r'}); 
     hold on;    

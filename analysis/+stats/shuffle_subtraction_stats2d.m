@@ -29,6 +29,7 @@ function [ mean_sd, thresh_binary ] = shuffle_subtraction_stats2d( data1, itiDat
 [varargin, testChoice]=util.argkeyval('testChoice', varargin, 'ttst'); %pick which test you want to do.'ttst' ttest is one option, 'subtractedDiff' a difference from iti is another.
 [varargin, tt]=util.argkeyval('tt', varargin, []); %tt time if you want for plotting
 [varargin, gpuOn]=util.argkeyval('gpuOn', varargin, true); %run the shuffle as gpu, takes 7-9 seconds with it off
+[varargin, chName]=util.argkeyval('chName', varargin, []); % inputs a channel name to name the figures so you can find them easier later.
 
 
 util.argempty(varargin); % check all additional inputs have been processed
@@ -286,6 +287,7 @@ end
 %%
 if plt
     figure;
+    sgtitle(chName)
     subplot(3,1,1) %PUTTING DATA 2 first WHICH IS IDT (TO MATCH THE SPECTROGRAM OUTPUT)
     H1 = shadedErrorBar(tt,mn1,SEM1*2,'lineprops', {'-b'}); %data 1 is emt
     hold on;  

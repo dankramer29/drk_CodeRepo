@@ -1,4 +1,4 @@
-function [nback,significantComparisons] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
+function [nback,sigComparison] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
 %UNTITLED2 Summary of this function goes here
 %   lfp1/2 = expects output of nwbLFPchProc for the emotion relevant task
 %   and the identity relevant task
@@ -115,7 +115,7 @@ if comparedToSubtractionITI == 1
 
         [~, ~, ~, ~, nback.(chName{ii}).subtraction.largestCluster,...
                 tstatPos_sumsStatSig, tstatNeg_sumsStatSig] = stats.cluster_permutation_Subtraction_Ttest_gpu3d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
-                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0 );
+                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0, 'chName', chName{ii} );
 
        
 
@@ -130,7 +130,7 @@ if comparedToSubtractionITI == 1
                                                                         dataIdentityTaskAllIdentities, dataIdentityTaskAllIdentitiesBP,...
                                                                             'data1itibp', itiDataEmBp, 'data2itibp', itiDataIdBp, 'ff',...
                                                                                 identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
-                                                                                    'tt', identityTaskLFP.tPlotImageBandPass); 
+                                                                                    'tt', identityTaskLFP.tPlotImageBandPass, 'chName', chName{ii}); 
       
         if tstatPos_sumsStatSig>0 %this is only taking the positive
             significantSubtractionCluster{idxcomp1,1} = chName{ii};

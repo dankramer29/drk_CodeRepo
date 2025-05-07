@@ -68,8 +68,8 @@ summaryStatsSigTrials = [];
 %grab fields
 chNum = fieldnames(nback);
 conditionName = fieldnames(nback.(chNum{1}));
-resultName = fieldnames(nback.(chNum{1}).(conditionName{1}));
-resultNameAll = fieldnames(nback.(chNum{1}).(conditionName{4}));
+resultName = fieldnames(nback.(chNum{1}).(conditionName{4}));
+resultNameAll = fieldnames(nback.(chNum{1}).(conditionName{1}));
 
 bandNames = fieldnames(identityTaskLFP.byidentity.(chNum{1}).image.bandPassed);
 
@@ -649,7 +649,7 @@ for cc = 1:length(chNum)
     %     ResponseTimeId = [];
     %     ResponseTimeEm = [];
     idx2 = 1;   %this is so the nn can move through the fields but the idx can stay at the emotion or identity you are interested in (emotion2 is nn6 for example)
-    for nn = 1:3  %runs through each id
+    for nn = 4:6  %runs through each id
         T2 = []; %for multiple clusters
         pkIndex = [];
         bData = [];
@@ -842,7 +842,7 @@ for cc = 1:length(chNum)
     %     ResponseTimeId = [];
     %     ResponseTimeEm = [];
     idx2 = 1;   %idx2 is because nn goes 5-7 but you may want the 2nd emotion etc.
-    for nn = 5:7  %runs through each Em
+    for nn = 7:9  %runs through each Em
         T2 = [];
         pkIndex = [];
         bData = [];

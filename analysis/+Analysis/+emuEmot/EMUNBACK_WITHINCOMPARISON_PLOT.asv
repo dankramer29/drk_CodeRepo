@@ -117,7 +117,12 @@ end
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [40 150],...
     'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 1.5);
 
-
+%% create an all subjects matrix for spectrogram and bandpassed data with a 
+%MWAll.
+% for ii = length(channelName)
+% MWAllSpectrogram.Data = identityTaskLFP.byemotion;
+% MWAllSpectrogram.channelName = channelName; %this is so you can paste in the ID/EM Kept
+% MWAllSpectrogram.channelLocation = chLocationName';
 %% for saving. probably easier to do by hand
 % So save these variables with these names
 

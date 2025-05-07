@@ -267,6 +267,9 @@ if isempty(histogramBuiltThresholds)
     end
     toc(tt)
 end
+data1 = gather(data1);
+data2_temp = gather(data2_temp);
+
 
 %%
 %get the real mean difference and sd at each value

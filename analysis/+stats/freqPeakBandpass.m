@@ -32,6 +32,7 @@ function [Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2Fr
 [varargin, mirroredEnd]=util.argkeyval('mirroredEnd', varargin, 0.5); % time you want for a mirrored end in seconds
 [varargin, data1itibp]=util.argkeyval('data1itibp', varargin, []); % data1 iti band passed, need that for subtraction
 [varargin, data2itibp]=util.argkeyval('data2itibp', varargin, []); % data2 iti band passed, need that for subtraction
+[varargin, chName]=util.argkeyval('chName', varargin, []); % inputs a channel name to name the figures so you can find them easier later.
 
 [varargin, shuffleStatsTmax]=util.argkeyval('shuffleStatsTmax', varargin, true); % tmax shuffle stats, can do both that and subtraction or one seperately or neither if you just want the frequencies out
 [varargin, subtractTmaxStats]=util.argkeyval('subtractTmaxStats', varargin, true); % tmax subtraction shuffle stats, can do both that and subtraction or one seperately or neither if you just want the frequencies out
@@ -249,7 +250,7 @@ switch norm
         Data2FreqPeaksem = std(Data2FreqPeakBPsSm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff, 'chName', chName);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
@@ -265,7 +266,7 @@ switch norm
         %run the subtraction stats
         if subtractTmaxStats
         [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
-                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
+                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true, 'chName', chName);
         subtractionThresh_binary.task{1,1} = 'EmotionTask';
         subtractionThresh_binary.task{2,1} = 'IdentityTask';
         subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
@@ -289,7 +290,7 @@ switch norm
         %data 2 is identity task the way it's being put in now. 
         
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff, 'chName', chName);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
@@ -305,7 +306,7 @@ switch norm
 
         if subtractTmaxStats
             [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
-                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
+                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true, 'chName', chName);
             subtractionThresh_binary.task{1,1} = 'EmotionTask';
             subtractionThresh_binary.task{2,1} = 'IdentityTask';
             subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
@@ -322,7 +323,7 @@ switch norm
         Data2FreqPeaksem = std(Data2FreqPeakBPsSmNorm, [], 1) / sqrt(size(Data2FreqPeakBPsSm,1));
         %run shuffle stats (already normalized)
         if shuffleStatsTmax
-            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff);
+            [shTTestMean_sd, shuffleBinary, shuffle_binaryDirection] = stats.shuffle_stats2d(Data1FreqPeakBPsSm, Data2FreqPeakBPsSm, 'xshuffles', 1000, 'plt', true, 'tt', tt , 'ff', ff, 'chName', chName);
             shTTestMean_sd.task{1,1} = 'EmotionTask';
             shTTestMean_sd.task{2,1} = 'IdentityTask';
             shTTestMean_sd.freqPeak{1,1} = freqPeak1; %emt
@@ -338,7 +339,7 @@ switch norm
         %run the subtraction stats
         if subtractTmaxStats
             [subtractionThresh_binary, subtBinary] = stats.shuffle_subtraction_stats2d(Data1FreqPeakBPsSm, Data1FreqPeakitiBPsSm, Data2FreqPeakBPsSm, Data2FreqPeakitiBPsSm,...
-                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true);
+                'xshuffles', 1000, 'tt', tt, 'timeRange', [100 900], 'plt', true, 'chName', chName);
             subtractionThresh_binary.task{1,1} = 'EmotionTask';
             subtractionThresh_binary.task{2,1} = 'IdentityTask';
             subtractionThresh_binary.freqPeak{1,1} = freqPeak1; %emt
@@ -356,6 +357,7 @@ switch plt
 
 
         figure
+        sgtitle(chName)
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
         for ii = 1:length(colorTempTest)
             str = colorTempTest{ii};
@@ -381,6 +383,7 @@ switch plt
 
 
         figure
+        sgtitle(chName)
         colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
         for ii = 1:length(colorTempTest)
             str = colorTempTest{ii};

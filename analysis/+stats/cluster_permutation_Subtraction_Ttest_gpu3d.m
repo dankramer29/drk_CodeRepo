@@ -49,6 +49,7 @@ function [ mnd1, mnd2, sd1, sd2, largestCluster, tstatPos_sumsStatSig, tstatNeg_
 [varargin, flipData]=util.argkeyval('flipData', varargin, 1); %flip some of the data on the time axis to really shuffle it up.
 [varargin, timeSmearMean]=util.argkeyval('timeSmearMean', varargin, 0); %this is an option to take the mean and std across time. the point here is the the comparison group of itis may have random ups and downs at specific time points, so this equalizes the mean and variance for one frequency across time.
 [varargin, allITIdata]=util.argkeyval('allITIdata', varargin, 1); %this makes the shuffled data entirely built on iti
+[varargin, chName]=util.argkeyval('chName', varargin, []); %chName for plotting
 
 %an option to build a histogram where you enter data1 and data2 as just
 %itis or itis and all trials and then just shuffle it up to build the
@@ -540,16 +541,19 @@ if splitPosNeg
         tstat1_sumsPos = 0;
     end
     %% for plotting if you want data 1 (on the right)
-    figure
-    subplot(5,2,2)    
-    imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar
-    title('mean of data 1 (Emt)')
-    subplot(5,2,4)
-    imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar
-    title('mean of iti data 1')
-    subplot(5,2,6)
-    imagesc(tt, ff, thresh_binaryRPos); axis xy; colorbar
-    title('positive pixels data 1')
+    if plt
+        figure
+        sgtitle(chName)
+        subplot(5,2,2)
+        imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar
+        title('mean of data 1 (Emt)')
+        subplot(5,2,4)
+        imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar
+        title('mean of iti data 1')
+        subplot(5,2,6)
+        imagesc(tt, ff, thresh_binaryRPos); axis xy; colorbar
+        title('positive pixels data 1')
+    end
     %%
     clustRNeg1=bwconncomp(thresh_binaryRNeg,8);
     clRNeg1=regionprops(clustRNeg1); %get the region properties
@@ -760,29 +764,30 @@ if splitPosNeg
     %this is another plotting strategy that will show the data2 left and
     %data 1 right (the flip is to match the spectrograms which i set up as
     %left IdT and right EmT
-    subplot(5,2,1)    
-    imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar;
-    title('mean of data 2 (IdT)')
-    subplot(5,2,3)
-    imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar;
-    subplot(5,2,5)
-    imagesc(tt,ff, thresh_binaryRPos); axis xy; colorbar;
+    if plt
+        subplot(5,2,1)
+        imagesc(tt, ff, normalize(mnd1,2)); axis xy; colorbar;
+        title('mean of data 2 (IdT)')
+        subplot(5,2,3)
+        imagesc(tt, ff, normalize(mnd2,2)); axis xy; colorbar;
+        subplot(5,2,5)
+        imagesc(tt,ff, thresh_binaryRPos); axis xy; colorbar;
 
-    %the biggest clusters
-    subplot(5,2,8) %data 1 on the right
-    title('positive biggest cluster')
-    matPosT=false(size(thresh_binaryRPos));
-    if ~isempty(cl_keepPos1)
-        matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
+        %the biggest clusters
+        subplot(5,2,8) %data 1 on the right
+        title('positive biggest cluster')
+        matPosT=false(size(thresh_binaryRPos));
+        if ~isempty(cl_keepPos1)
+            matPosT(clustRPos1.PixelIdxList{cl_keepPos1(maxP1i)})=true;
+        end
+        imagesc(tt, ff, matPosT), axis xy; colorbar;
+        subplot(5,2,7) %putting data 2 on the left
+        matPosT2=false(size(thresh_binaryRPos));
+        if ~isempty(cl_keepPos2)
+            matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
+        end
+        imagesc(tt,ff, matPosT2), axis xy; colorbar;
     end
-    imagesc(tt, ff, matPosT), axis xy; colorbar;
-    subplot(5,2,7) %putting data 2 on the left
-    matPosT2=false(size(thresh_binaryRPos));
-    if ~isempty(cl_keepPos2)
-        matPosT2(clustRPos2.PixelIdxList{cl_keepPos2(maxP2i)})=true;
-    end
-    imagesc(tt,ff, matPosT2), axis xy; colorbar;
-
 
     clustRNeg2=bwconncomp(thresh_binaryRNeg,8);
     clRNeg2=regionprops(clustRNeg2); %get the region properties
@@ -894,7 +899,7 @@ end
 % bonc=0.05/(size(mnd1,1)*size(mnd1,2));
 % rlab=r_pvalue<bonc;
 %%
-%if plt
+if plt
     subplot(5,2,9)
     title('histogram, red = ns blue = sig')
     histogram(tstat_maxPDiff, xshuffles)
@@ -904,7 +909,7 @@ end
     else
         plot([tstatDiff_Pos, tstatDiff_Pos], [0, 20], 'Color', 'r', 'LineWidth', 1)
     end
-%end
+end
 
 
 

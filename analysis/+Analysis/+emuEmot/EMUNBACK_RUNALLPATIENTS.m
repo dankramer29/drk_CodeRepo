@@ -2,6 +2,10 @@
 TSigClustSummStatsTemp = [];
 TSigClustSummStatsIndividTemp = [];
 TSigClustChannelCountTemp = [];
+TSigClustvITIStatsTemp = [];
+TSigClustSubtractionStatsTemp = [];
+TSigBPSubtractionStatsTemp = [];
+TSigBPshuffleStatsTemp = [];
 PercKeptAll = zeros(14,14);
 idxTemp1 = 1;
 %turns off the plotting since it's been done a bunch
@@ -27,12 +31,25 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW24.identityTask = identityTaskLFP;
+MWAll.MW24.emotionTask = emotionTaskLFP;
+MWAll.MW24.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW24.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW2
 fileVariation = 2;
@@ -54,13 +71,27 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW2.identityTask = identityTaskLFP;
+MWAll.MW2.emotionTask = emotionTaskLFP;
+MWAll.MW2.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW2.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW5 
 fileVariation = 2;
@@ -81,13 +112,26 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW5.identityTask = identityTaskLFP;
+MWAll.MW5.emotionTask = emotionTaskLFP;
+MWAll.MW5.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW5.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW18 channels NOTE MW18 HAS CHANNELS MISSING
 
@@ -114,12 +158,27 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
-close all
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
+MWAll.MW18.identityTask = identityTaskLFP;
+MWAll.MW18.emotionTask = emotionTaskLFP;
+MWAll.MW18.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW18.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
 
+close all
+
+
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW16 CAN UNCOMMENT THIS AND RUN IT.
 fileVariation = 3;
@@ -144,13 +203,27 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW16.identityTask = identityTaskLFP;
+MWAll.MW16.emotionTask = emotionTaskLFP;
+MWAll.MW16.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW16.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW23 channels
 
@@ -172,13 +245,26 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW23.identityTask = identityTaskLFP;
+MWAll.MW23.emotionTask = emotionTaskLFP;
+MWAll.MW23.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW23.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW19 channels:
 % 
@@ -200,13 +286,27 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW19.identityTask = identityTaskLFP;
+MWAll.MW19.emotionTask = emotionTaskLFP;
+MWAll.MW19.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW19.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW22 channels:
 
@@ -228,14 +328,26 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW22.identityTask = identityTaskLFP;
+MWAll.MW22.emotionTask = emotionTaskLFP;
+MWAll.MW22.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW22.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
-
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 % %MW21 channels:
 
 fileVariation = 4;
@@ -256,13 +368,26 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW21.identityTask = identityTaskLFP;
+MWAll.MW21.emotionTask = emotionTaskLFP;
+MWAll.MW21.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW21.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
 
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1
 
 %MW13 channels:
 fileVariation = 6;
@@ -285,9 +410,23 @@ run Analysis.emuEmot.EMUNBACK_WITHINCOMPARISON_PLOT.m
 TSigClustSummStatsTemp = vertcat(TSigClustSummStatsTemp, MWX.SigClusterSummStats);
 TSigClustSummStatsIndividTemp = vertcat(TSigClustSummStatsIndividTemp, MWX.SigClusterSummStatsIndividEmId);
 TSigClustChannelCountTemp = vertcat(TSigClustChannelCountTemp, MWX.SigClusterChannelCount);
+
+TSigClustvITIStatsTemp = vertcat(TSigClustvITIStatsTemp, sigComparisonImageOn.sigClustervsITIall); %cluster vs iti, the standard output
+TSigClustSubtractionStatsTemp = vertcat(TSigClustSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionCluster); %cluster subtraction
+TSigBPSubtractionStatsTemp = vertcat(TSigBPSubtractionStatsTemp, sigComparisonImageOn.significantSubtractionBP); %bp subtraction
+TSigBPshuffleStatsTemp = vertcat(TSigBPshuffleStatsTemp, sigComparisonImageOn.significantshuffleBP); %bp shuffle
+
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Id; idxTemp1 = idxTemp1+1;
 PercKeptAll{idxTemp1,:} = MWX.percentKeptIti.Em; idxTemp1 = idxTemp1+1;
 
+MWAll.MW13.identityTask = identityTaskLFP;
+MWAll.MW13.emotionTask = emotionTaskLFP;
+MWAll.MW13.identityTaskiti = itiDataReal.IdentityTask.RandomTimeIti;
+MWAll.MW13.emotionTaskiti = itiDataReal.EmotionTask.RandomTimeIti;
+
 close all
 
-clearvars -except TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp TSigClustChannelCountTemp PercKeptAll idxTemp1
+
+clearvars -except MWAll TSigClustvITIStatsTemp TSigClustSubtractionStatsTemp TSigBPSubtractionStatsTemp...
+TSigBPshuffleStatsTemp TSigClustSummStatsTemp TSigClustSummStatsIndividTemp TSigClustChannelCountTemp...
+TSigClustChannelCountTemp PercKeptAll idxTemp1

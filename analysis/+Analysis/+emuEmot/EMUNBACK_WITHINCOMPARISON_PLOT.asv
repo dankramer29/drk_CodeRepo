@@ -53,6 +53,18 @@ tTot = tic;
     'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2);
 toc(tTot)
 
+
+amygdalaEmtSpectrogram = [];
+amygdalaIdtSpectrogram = [];
+
+for ii = 1:length(chLocationName)
+    if strcmp('R Amygdala',chLocationName{ii}) || strcmp('L Amygdala',chLocationName{ii})
+        amygdalaIdtSpectrogram = cat(3, amygdalaIdtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).identityTaskData);
+       amygdalaIdtSpectrogram = cat(3, amygdalaIdtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).identityTaskData);
+
+    end
+end
+
 %% plotting
 ttImage = identityTaskLFP.tPlotImage;
 ff = itiDataFiltIdentity.freq;
@@ -117,12 +129,7 @@ end
     identityTaskLFP, emotionTaskLFP, 'timeMinMax', [.1 .9], 'freqMinMax', [40 150],...
     'chName', chLocationName, 'patientName', subjName, 'sdThreshold', 1.5);
 
-%% create an all subjects matrix for spectrogram and bandpassed data with a 
-%MWAll.
-% for ii = length(channelName)
-% MWAllSpectrogram.Data = identityTaskLFP.byemotion;
-% MWAllSpectrogram.channelName = channelName; %this is so you can paste in the ID/EM Kept
-% MWAllSpectrogram.channelLocation = chLocationName';
+
 %% for saving. probably easier to do by hand
 % So save these variables with these names
 

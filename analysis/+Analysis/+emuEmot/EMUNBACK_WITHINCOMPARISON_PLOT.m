@@ -53,6 +53,18 @@ tTot = tic;
     'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2);
 toc(tTot)
 
+
+amygdalaEmtSpectrogram = [];
+amygdalaIdtSpectrogram = [];
+
+for ii = 1:length(chLocationName) %bascially do this for all of them and then run the shuffle with the itis and the freakpeak
+    if strcmp('R Amygdala',chLocationName{ii}) || strcmp('L Amygdala',chLocationName{ii})
+        amygdalaIdtSpectrogram = cat(3, amygdalaIdtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).identityTaskData);
+        amygdalaEmtSpectrogram = cat(3, amygdalaEmtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).emotionTaskData);
+
+    end
+end
+
 %% plotting
 ttImage = identityTaskLFP.tPlotImage;
 ff = itiDataFiltIdentity.freq;

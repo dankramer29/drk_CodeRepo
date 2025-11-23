@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = npixMSIT_test2(unitSpikesCl,taskData)
+function [spkITI,spkStimO,spkITI] = parseTrials(unitSpikesCl,taskData)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -14,10 +14,7 @@ postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effect
 tempStimSize = zeros(length(taskData.Trial), preStim+postStim);
 tempITISize = zeros(length(taskData.Trial), preITI+postITI);
 tempRespSize = zeros(length(taskData.Trial), preResp+postResp);
-%create cell array for each unit
-spkStimOn{jj} = cell(length(unitSpikesCl),1);
-spkITI{jj} = cell(length(unitSpikesCl),1);
-spkResp{jj} = cell(length(unitSpikesCl),1);
+
 
 for jj = 1:length(unitSpikesCl) 
     spkStimOn{jj} = tempStimSize;
@@ -35,8 +32,8 @@ for jj = 1:length(unitSpikesCl)
         tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
         tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
         if ~isempty(tempSpikeTimesConverted)
-            if tempSpikeTimesConverted(1) == 0; tempSpikeTimesConverted(1) = 1; end %if round puts a spike at 0 or after the trial, move it to 1 or end
-            if tempSpikeTimesConverted(end) > preITI+postITI; tempSpikeTimesConverted(1) = preITI+postITI; end %if round puts a spike at 0 or after the trial, move it to 1 or end
+            tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
+            tempSpikeTimesConverted(tempSpikeTimesConverted >= preITI+postITI) = preITI+postITI; %if round puts a spike at 0 or after the trial, move it to 1 or end
             spkITI{jj}(ii, tempSpikeTimesConverted) = 1;
         end
         clear tempSpikeTimes; clear tempSpikeTimesConverted
@@ -44,8 +41,8 @@ for jj = 1:length(unitSpikesCl)
         tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
         tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
         if ~isempty(tempSpikeTimesConverted)
-            if tempSpikeTimesConverted(1) == 0; tempSpikeTimesConverted(1) = 1; end %if round puts a spike at 0 or after the trial, move it to 1 or end
-            if tempSpikeTimesConverted(end) > preStim+postStim; tempSpikeTimesConverted(1) = preStim+postStim; end %if round puts a spike at 0 or after the trial, move it to 1 or end
+            tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
+            tempSpikeTimesConverted(tempSpikeTimesConverted >= preStim+postStim) = preStim+postStim;
             spkStimOn{jj}(ii, tempSpikeTimesConverted) = 1;
         end
         clear tempSpikeTimes; clear tempSpikeTimesConverted
@@ -53,8 +50,8 @@ for jj = 1:length(unitSpikesCl)
         tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
         tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cel
         if ~isempty(tempSpikeTimesConverted)
-            if tempSpikeTimesConverted(1) == 0; tempSpikeTimesConverted(1) = 1; end %if round puts a spike at 0 or after the trial, move it to 1 or end
-            if tempSpikeTimesConverted(end) > preResp+postResp; tempSpikeTimesConverted(1) = preResp+postResp; end %if round puts a spike at 0 or after the trial, move it to 1 or end
+            tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
+            tempSpikeTimesConverted(tempSpikeTimesConverted >= preResp+postResp) = preResp+postResp;
             spkResp{jj}(ii, tempSpikeTimesConverted) = 1;
         end
       

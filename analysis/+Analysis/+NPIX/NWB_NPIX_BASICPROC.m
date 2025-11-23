@@ -1,5 +1,7 @@
 %%%%%%%
 %% BASIC PROCESSING OF NPIX FILES 11/20/2025
+% NOTE: this is called in the msit processing so don't need to call it
+% separately.
 %%%%%%%
 
 % Condition = a conflict trial, 1 = a non conflict trial (xx3 or 100)

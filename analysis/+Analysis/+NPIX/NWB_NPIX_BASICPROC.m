@@ -1,11 +1,30 @@
 %%%%%%%
 %% BASIC PROCESSING OF NPIX FILES 11/20/2025
 %%%%%%%
+
+% Condition = a conflict trial, 1 = a non conflict trial (xx3 or 100)
+% Conflict = ???
+% Correct = what the correct answer is supposed to be
+% ISI = fixation cross time of the preceding ITI 
+% ResponseAccuracy = if the correct answer is the same as what they pressed (so correct or not)
+% ResponseKey = what they actually pressed
+% ResponseUncertainty = ???
+% Stimulation = ???
+% Stimuli = the stimuli the patient saw
+% Trial = trial number, 64 trial blocks
+% fixation_time = start of the iti in ms
+% responsetime = when they responded
+% stimulus_time = when the stimulus appeared
+% trial_end_time = when the trial ends and is fractions of a ms from when the next fixation time comes on.
+
+
 addpath(genpath('Z:\KramerEmotionID_2023\Data\NPIX'));
 
 %load the patient data
-subjectId = '004';
-dataName = 'NPIX_MSIT_004.nwb';
+% subjectId = '004';
+% dataName = 'NPIX_MSIT_004.nwb';
+
+
 
 %create the folder
 folderName=strcat('Z:\KramerEmotionID_2023\Data\NPIX\MSIT\', subjectId, '\', dataName);
@@ -23,6 +42,12 @@ for i = 1:length(cols)
     field = cols{i};
     taskData.(field) = nwbObj.intervals_trials.vectordata.get(field).data.load();
 end
+
+%for data that does not load from the vectordata.keys (which can be in the
+%object but not listed as a key, do the following:
+% taskData.start_time = nwbObj.intervals_trials.start_time.data.load;
+% taskData.stop_time = nwbObj.intervals_trials.stop_time.data.load;
+%however, these are the same times listed as fixation time and trial end
 
 
 %cols = nwbObj.units.colnames; %get all column names
@@ -49,10 +74,12 @@ end
 
 goodUnitTotal = sum(strcmp('good', unitData.label)); %number of good units
 muaUnitTotal = sum(strcmp('mua', unitData.label)); %number of mua
-noiseUnitTotal = sum(strcmp('noise', unitData.label)); %number of mua
+noiseUnitTotal = sum(strcmp('noise', unitData.label)); %number of noise
 
 
-%remove noise (currently lumping mua and good together
+%remove noise (currently lumping mua and good together) OF NOTE, THIS IS AN
+%AUTOMATED CLEANING PROCESS AND NOT PERFECT. NEED TO BUILD IN A VISUAL
+%INSPECTION?
 idx1 = 1;
 for ii = 1:length(unitData.label)
     if strcmp('noise', unitData.label{ii}) == 0

@@ -68,17 +68,15 @@ for ii = 1:length(unitSpikesCl)
 end
 lastRecording = max(lastUnit);
 
-idx=1;
 for ii = 1:length(unitSpikesCl)
-    spikeRate(ii,1) = length(unitSpikesCl{ii})/lastRecording;  %units/second    
-    if spikeRate(ii) > 0.5
-        unitSpikesF{idx,1} = unitSpikesCl{ii};
-        idx = idx+1;
-    end
+    spikeRate(ii,1) = length(unitSpikesCl{ii})/lastRecording;
+    for jj = 1:driftWin:length(unitSpikesCl{ii})
+    spikeRateDrift(ii,2) = 
+    
 end
 %% BREAK UP INTO TRIALS
 % pull the spikes for each trial out with smoothed 
-[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesF, taskData);
+[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesCl, taskData);
 
 
 
@@ -98,7 +96,7 @@ for ii = 1:10
     plt.raster_plot(spkStimOn.spk{spikeId}(ii,:), 'tm', tt, 'halfWidth', 0.4 )
 end
 
-%for plotting multiple units BUT NEEDS WORK
+%for plotting multiple units a
 pltXxX = 3; 
 idx1 = [1,2,3,7,8,9,13,14,15]; %top rows programmatically is 1:pltXxX, then that + pltXxX*2, then +pltXxX*4 until the end but i don't have time to codeit
 idx2 = idx1+pltXxX;

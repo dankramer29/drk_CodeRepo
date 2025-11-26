@@ -96,8 +96,6 @@ xlim([Time(1) Time(end)]);
 ylim([0 Trials+1]);
 set(gca, 'YDir', 'reverse');
 
-hold off
-
 
 
 %%simple version

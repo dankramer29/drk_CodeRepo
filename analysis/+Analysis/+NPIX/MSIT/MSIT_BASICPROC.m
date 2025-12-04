@@ -76,9 +76,18 @@ for ii = 1:length(unitSpikesCl)
         idx = idx+1;
     end
 end
+
+%% check if there is a last trial that doesn't have any spikes associated with it (or trials)
+trialEndTime = taskData.trial_end_time(end);
+for ii = 1:length(unitSpikesCl)
+    lastSpikeTime(ii,1) = unitSpikesCl{ii,1}(end); 
+end
+lastlastSpikeTime = max(lastSpikeTime);
+noSpikeTrial = find(taskData.trial_end_time>lastlastSpikeTime);
+endTrials = noSpikeTrial(1)-1;
 %% BREAK UP INTO TRIALS
 % pull the spikes for each trial out with smoothed 
-[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesF, taskData);
+[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesF, taskData, 'shuffleFR', true, 'xshuffle', 100, 'endTrials', endTrials);
 
 
 

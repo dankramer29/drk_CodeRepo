@@ -1,4 +1,4 @@
-function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,taskData)
+function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,taskData, varargin)
 %parseTrials.m takes spike times and converts to spikes within trials
 %broken up by different epoch. THIS IS REALLY FOR MSIT OUTPUT
 
@@ -10,8 +10,13 @@ function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,
 %           spkITI etc- has spikes in an array of 0s/1s each spot is a ms.
 %           then binned spikes at 
 
-[varargin, basicAvgFR] = util.argkeyval('basicAvgFR',varargin, true); % option to get some basic firing rate average (not for good statistics, just quick so no need to shuffle)
+[varargin, shuffleFR]=util.argkeyval('shuffleFR', varargin, true); %run a basic average fr calculation
+[varargin, xshuffle]=util.argkeyval('xshuffle', varargin, 1000); %number of shuffles
+[varargin, endTrials]=util.argkeyval('endTrials', varargin, []); %if the trials should end at a certain spot because the recording ended
 
+if isempty(endTrials)
+    endTrials = length(taskData.Trial);
+end
 
 preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
 postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
@@ -22,13 +27,14 @@ postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effect
 
 
 %create template rasters the size specified above
-tempStimSize = zeros(length(taskData.Trial), preStim+postStim);
-tempITISize = zeros(length(taskData.Trial), preITI+postITI);
-tempRespSize = zeros(length(taskData.Trial), preResp+postResp);
+tempStimSize = zeros(endTrials, preStim+postStim);
+tempITISize = zeros(endTrials, preITI+postITI);
+tempRespSize = zeros(endTrials, preResp+postResp);
 
 spkITI = struct;
 spkStimOn = struct;
 spkResp = struct;
+shuffleSpikes = struct;
 
 spkITI.spkTime= -preITI+1:1:postITI;
 spkStimOn.spkTime= -preStim+1:1:postStim;
@@ -37,8 +43,8 @@ spkResp.spkTime = -preResp+1:1:postStim;
 for jj = 1:length(unitSpikesCl) 
     spkStimOn.spk{jj,1} = tempStimSize;
     spkITI.spk{jj,1} = tempITISize;
-    spkResp.spk{jj,1} = tempRespSize;    
-    for ii = 1:length(taskData.Trial)
+    spkResp.spk{jj,1} = tempRespSize;
+    for ii = 1:endTrials %stops any spot where the recording ends (so if no spikes at a certain trial (001 is like that) stops there)
         itiSt = taskData.fixaton_time(ii);
         stimSt = taskData.stimulus_time(ii);
         if jj == 1 %only needs to be done once
@@ -54,30 +60,9 @@ for jj = 1:length(unitSpikesCl)
         tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
         tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
         if ~isempty(tempSpikeTimesConverted)
-            tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
-            if basicAvgFR     
-                %find time of any block ends
-                idx1 = 1;
-                for ii = 1:length(taskData.Trial)-1
-                    if taskData.Trial(ii+1)-taskData.Trial(ii)>1
-                        blockChange(idx1) = taskData.fixation_time(ii)*1000; %convert ot ms
-                        idx1 = idx1 + 1;
-                    end
-                end
-                %will do for each block, WILL NEED TO DO A MOVING WINDOW AT
-                %SOME POINT JUST TO MAKE SURE THERE ISN'T SIGNIFICANT DRIFT
-                %BUT NOT DOING IT THIS SECOND AND THIS IS AN EASY WAY TO DO
-                %IT
-                for ii = 1:length(blockChange)
-                    if ii ==1
-                        basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii);
-                    else
-                        basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii)-blockChange(ii-1);
-                    end
-                end
-
+            tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1; %if the round ends up putting a spike at 0, move it to 1            
             tempSpikeTimesConverted(tempSpikeTimesConverted >= preITI+postITI) = preITI+postITI; %if round puts a spike at 0 or after the trial, move it to 1 or end
-            spkITI.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
+            spkITI.spk{jj,1}(ii, tempSpikeTimesConverted) = 1; %create the binary 0 and 1 for spikes. each time bin is 1ms
             [~, spkITI.spkRate{jj,1}(ii,:), spkITI.spkRateSm{jj,1}(ii,:), spkITI.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkITI.spk{jj}(ii,:));
         end
         clear tempSpikeTimes; clear tempSpikeTimesConverted
@@ -99,8 +84,52 @@ for jj = 1:length(unitSpikesCl)
             tempSpikeTimesConverted(tempSpikeTimesConverted >= preResp+postResp) = preResp+postResp; %if round puts a spike at 0 or after the trial, move it to 1 or end
             spkResp.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
             [~, spkResp.spkRate{jj,1}(ii,:), spkResp.spkRateSm{jj,1}(ii,:), spkResp.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkResp.spk{jj}(ii,:));
+        end     
+    end
+    if shuffleFR
+        timeRangeEnd = taskData.trial_end_time(endTrials);
+        a = 0; b = timeRangeEnd; n = endTrials;
+        for kk = 1:xshuffle              
+            r = a + (b-a).*rand(n,1); %random generate start times
+            shuffleSpikes = tempStimSize;
+            for ii = 1:length(r)                
+                stimSt = r(ii); %take random start times
+                epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
+                tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
+                tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
+                if ~isempty(tempSpikeTimesConverted)
+                    tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
+                    tempSpikeTimesConverted(tempSpikeTimesConverted >= preStim+postStim) = preStim+postStim; %if round puts a spike at 0 or after the trial, move it to 1 or end
+                    shuffleSpikes(ii, tempSpikeTimesConverted) = 1;
+                end
+                [~, ~, shuffleSpikesSm, ~] = Analysis.BasicDataProc.spikeRateGauss(shuffleSpikesBinary);
+
+                clear tempSpikeTimes; clear tempSpikeTimesConverted
+            end
+            shuffleHist{jj,1}(kk,1) = mean(shuffleSpikesSm)+2*std(shuffleSpikesSm, [], 2); %positive deviation
+            shuffleHist{jj,1}(kk,2) = mean(shuffleSpikesSm)-2*std(shuffleSpikesSm, [], 2); %negative deviation
+
+            % %find time of any block ends THIS IS TO SET UP FOR BLOCKS
+            % IN CASE FR DRIFTS, WILL DO THIS MORE COMPLETELY LATER
+            % idx1 = 1;
+            % for ii = 1:length(taskData.Trial)-1
+            %     if taskData.Trial(ii+1)-taskData.Trial(ii)<1 %if the trial count starts over
+            %         blockChange(idx1) = taskData.fixation_time(ii+1)*1000; %convert the next trial number to ms
+            %         idx1 = idx1 + 1;
+            %     end
+            % end
+            % %will do for each block, WILL NEED TO DO A MOVING WINDOW AT
+            % %SOME POINT JUST TO MAKE SURE THERE ISN'T SIGNIFICANT DRIFT
+            % %BUT NOT DOING IT THIS SECOND AND THIS IS AN EASY WAY TO DO
+            % %IT JUST BREAK IT UP INTO BLOCKS.
+            % for ii = 1:length(blockChange)
+            %     if ii ==1
+            %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii); %find the overall firing rate
+            %     else
+            %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii)-blockChange(ii-1);
+            %     end
+            % end
         end
-      
     end
 end
 

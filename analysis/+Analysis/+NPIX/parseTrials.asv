@@ -13,23 +13,27 @@ function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,
 [varargin, shuffleFR]=util.argkeyval('shuffleFR', varargin, true); %run a basic average fr calculation
 [varargin, xshuffle]=util.argkeyval('xshuffle', varargin, 1000); %number of shuffles
 [varargin, endTrials]=util.argkeyval('endTrials', varargin, []); %if the trials should end at a certain spot because the recording ended
-
-
-alph = 0.05;
-alphP = 1-(alph/2);
-alphN = alph/2;
-
+[varargin, interval]=util.argkeyval('interval', varargin, []); %get the intervals, defaults below
 
 if isempty(endTrials)
     endTrials = length(taskData.Trial);
 end
 
-preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
-postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
-preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
-preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+if isempty(interval)
+    interval.preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
+    interval.postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
+    interval.preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
+    interval.postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+    interval.preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
+    interval.postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+end
+
+preStim = interval.preStim; %ms prior to stim on (includes a ramp to cut off for edge effects)
+postStim= interval.postStim; %ms post to stim on (includes a ramp to cut off for edge effects)
+preITI = interval.preITI; %ms prior to iti on (includes a ramp to cut off for edge effects)
+postITI = interval.postITI; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+preResp = interval.preResp; %ms prior to iti on (includes a ramp to cut off for edge effects)
+postResp = interval.postResp; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
 
 
 %create template rasters the size specified above
@@ -95,10 +99,10 @@ for jj = 1:length(unitSpikesCl)
     if shuffleFR
         timeRangeEnd = taskData.trial_end_time(endTrials);
         a = 0; b = timeRangeEnd; n = endTrials;
-        for kk = 1:xshuffle              
+        for kk = 1:xshuffle
             r = a + (b-a).*rand(n,1); %random generate start times
             shuffleSpikes = tempStimSize;
-            for ii = 1:length(r)                
+            for ii = 1:length(r)
                 stimSt = r(ii); %take random start times
                 epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
                 tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
@@ -109,38 +113,33 @@ for jj = 1:length(unitSpikesCl)
                     shuffleSpikes(ii, tempSpikeTimesConverted) = 1;
                 end
                 [~, ~, shuffleSpikesSm(ii,:), ~] = Analysis.BasicDataProc.spikeRateGauss(shuffleSpikes(ii,:));
+
                 clear tempSpikeTimes; clear tempSpikeTimesConverted
             end
-            shuffleHistPos{jj,1}(kk,:) = mean(shuffleSpikesSm)+2*std(shuffleSpikesSm, [], 1); %positive deviation
-            shuffleHistNeg{jj,1}(kk,:) = mean(shuffleSpikesSm)-2*std(shuffleSpikesSm, [], 1); %negative deviation
-            
-
-            % %find time of any block ends THIS IS TO SET UP FOR BLOCKS
-            % IN CASE FR DRIFTS, WILL DO THIS MORE COMPLETELY LATER
-            % idx1 = 1;
-            % for ii = 1:length(taskData.Trial)-1
-            %     if taskData.Trial(ii+1)-taskData.Trial(ii)<1 %if the trial count starts over
-            %         blockChange(idx1) = taskData.fixation_time(ii+1)*1000; %convert the next trial number to ms
-            %         idx1 = idx1 + 1;
-            %     end
-            % end
-            % %will do for each block, WILL NEED TO DO A MOVING WINDOW AT
-            % %SOME POINT JUST TO MAKE SURE THERE ISN'T SIGNIFICANT DRIFT
-            % %BUT NOT DOING IT THIS SECOND AND THIS IS AN EASY WAY TO DO
-            % %IT JUST BREAK IT UP INTO BLOCKS.
-            % for ii = 1:length(blockChange)
-            %     if ii ==1
-            %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii); %find the overall firing rate
-            %     else
-            %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii)-blockChange(ii-1);
-            %     end
-            % end
+            shuffleMatrix{jj,1}(:,:,kk) = shuffleSpikesSm; %positive deviation
         end
-        shuffleHistPos{jj,1} = sort(shuffleHistPos{jj,1},1); 
-        shuffleHistNeg{jj,1} = sort(shuffleHistNeg{jj,1},1); 
+        shuffleHist{jj,1} = squeeze(mean(mean(shuffleMatrix{jj},1),2));
 
-        Thresh{jj}(1,:) = shuffleHistPos{jj}(round(xshuffle*alphP),:);
-        Thresh{jj}(2,:) = shuffleHistNeg{jj}(round(xshuffle*alphN),:);
+        % %find time of any block ends THIS IS TO SET UP FOR BLOCKS
+        % IN CASE FR DRIFTS, WILL DO THIS MORE COMPLETELY LATER
+        % idx1 = 1;
+        % for ii = 1:length(taskData.Trial)-1
+        %     if taskData.Trial(ii+1)-taskData.Trial(ii)<1 %if the trial count starts over
+        %         blockChange(idx1) = taskData.fixation_time(ii+1)*1000; %convert the next trial number to ms
+        %         idx1 = idx1 + 1;
+        %     end
+        % end
+        % %will do for each block, WILL NEED TO DO A MOVING WINDOW AT
+        % %SOME POINT JUST TO MAKE SURE THERE ISN'T SIGNIFICANT DRIFT
+        % %BUT NOT DOING IT THIS SECOND AND THIS IS AN EASY WAY TO DO
+        % %IT JUST BREAK IT UP INTO BLOCKS.
+        % for ii = 1:length(blockChange)
+        %     if ii ==1
+        %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii); %find the overall firing rate
+        %     else
+        %         basicMeanFr(jj,1) = sum(tempSpikeTimesConverted(1:round(blockChange(ii))))/blockChange(ii)-blockChange(ii-1);
+        %     end
+        % end
 
     end
 end

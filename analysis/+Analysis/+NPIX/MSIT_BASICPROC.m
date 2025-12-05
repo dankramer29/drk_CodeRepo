@@ -20,13 +20,12 @@
 %unitSpikesCl = spike times
 %taskData = task data
 
-preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
-postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
-preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
-preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
-
+interval.preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
+interval.postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
+interval.preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
+interval.postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+interval.preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
+interval.postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
 
 %load the patient data
 subjectId = '004';
@@ -34,7 +33,7 @@ dataName = 'NPIX_MSIT_004.nwb';
 
 %will load all of the data into unitDataCl and unitSpikesCl (meaning it
 %removes the noise spikes) and task data in taskData
-run Analysis.NPIX.NWB_NPIX_BASICPROC 
+run Analysis.NPIX.NWB_NPIX_BASICPROC.m
 
 %choosing to do smoothing per trial with tails to cut off rather than
 %smooth the whole thing and handle the time differences
@@ -87,7 +86,8 @@ noSpikeTrial = find(taskData.trial_end_time>lastlastSpikeTime);
 endTrials = noSpikeTrial(1)-1;
 %% BREAK UP INTO TRIALS
 % pull the spikes for each trial out with smoothed 
-[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesF, taskData, 'shuffleFR', true, 'xshuffle', 100, 'endTrials', endTrials);
+[spkITI,spkStimOn,spkResp] = Analysis.NPIX.parseTrials(unitSpikesF, taskData, 'shuffleFR', true, 'xshuffle', 100,...
+    'endTrials', endTrials, 'interval', interval);
 
 
 

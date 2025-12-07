@@ -92,49 +92,49 @@ endTrials = noSpikeTrial(1)-1;
 %THINGS TO DO, MAKE THIS FASTER. ALSO NEEDS TO BE RUN ONCE ONLY
 [spkITI, spkStimOn, spkResp, shuffleHist, itiEnd, responseTime] = Analysis.NPIX.parseTrials(unitSpikesF, taskData, 'shuffleFR', true, 'xshuffle', 100,...
     'endTrials', endTrials, 'interval', interval);
-% 
-% for jj = 1:length(spkITI.spkRateSm)
-%     spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
-%     spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(:,250:end-250));
-%     spkStimOn.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
-%     spkStimOn.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
-%     spkResp.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
-%     spkResp.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
-%     spkITI.posSection(jj,:) = spkITI.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
-%     spkIti.negSection(jj,:)  = spkITI.smMean(jj,:) < shuffleHist{jj,3}; %less that 2.5th of the mean
-%     for ii = sigWindow:length(spkITI.posSection(jj,:))
-%         if spkITI.posSection(jj,ii) ==1
-%             if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkITI.negSection(jj,ii) ==1
-%             if sum(spkITI.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end 
-%         if spkStimOn.posSection(jj,ii) ==1
-%             if sum(spkStimOn.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.StimOn(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkStimOn.negSection(jj,ii) ==1
-%             if sum(spkStimOn.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end 
-%         if spkResp.posSection(jj,ii) ==1
-%             if sum(spkResp.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkResp.negSection(jj,ii) ==1
-%             if sum(spkResp.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end    
-%     end
-% end
+
+for jj = 1:length(spkITI.spkRateSm)
+    spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
+    spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(250:end-250));
+    spkStimOn.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(250:end-250),1);
+    spkStimOn.smStd(jj,:) = std(spkResp.spkRateSm{jj}(250:end-250));
+    spkResp.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(250:end-250),1);
+    spkResp.smStd(jj,:) = std(spkResp.spkRateSm{jj}(250:end-250));
+    spkITI.posSection(jj,:) = spkITI.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
+    spkIti.negSection(jj,:)  = spkITI.smMean(jj,:) < shuffleHist{jj,3}; %less that 2.5th of the mean
+    for ii = sigWindow:length(spkITI.posSection(jj,:))
+        if spkITI.posSection(jj,ii) ==1
+            if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkITI.negSection(jj,ii) ==1
+            if sum(spkITI.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end 
+        if spkStimOn.posSection(jj,ii) ==1
+            if sum(spkStimOn.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.StimOn(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkStimOn.negSection(jj,ii) ==1
+            if sum(spkStimOn.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end 
+        if spkITI.posSection(jj,ii) ==1
+            if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkITI.negSection(jj,ii) ==1
+            if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end    
+    end
+end
 
 spkStimOn.spkTime(end+1) = 1750;
 tt = spkStimOn.spkTime;

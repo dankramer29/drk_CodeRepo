@@ -1,4 +1,4 @@
-function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,taskData, varargin)
+function [spkITI,spkStimOn,spkResp, shuffleHist, itiEnd, responseTime] = parseTrials(unitSpikesCl,taskData, varargin)
 %parseTrials.m takes spike times and converts to spikes within trials
 %broken up by different epoch. THIS IS REALLY FOR MSIT OUTPUT
 
@@ -14,6 +14,14 @@ function [spkITI,spkStimOn,spkResp, itiEnd, stimEnd] = parseTrials(unitSpikesCl,
 [varargin, xshuffle]=util.argkeyval('xshuffle', varargin, 1000); %number of shuffles
 [varargin, endTrials]=util.argkeyval('endTrials', varargin, []); %if the trials should end at a certain spot because the recording ended
 [varargin, interval]=util.argkeyval('interval', varargin, []); %get the intervals, defaults below
+[varargin, alph]=util.argkeyval('alph', varargin, 0.05); %alpha level for finding the threshold of mean firing rates
+[varargin, sigWindow]=util.argkeyval('sigWindow', varargin, 30); %ms over which you need to be significant to count it as a significant trial
+
+
+alphP = 1-(alph/2);
+alphN = alph/2; 
+alphPThreshold = round(xshuffle*alphP);
+alphNThreshold = round(xshuffle*alphN);
 
 if isempty(endTrials)
     endTrials = length(taskData.Trial);
@@ -61,7 +69,7 @@ for jj = 1:length(unitSpikesCl)
             %record where on each trial the fixation ends/response happens so you can mark it in
             %time, adding the pretime so you can just plot it on the raster
             itiEnd(ii) = taskData.stimulus_time(ii)-taskData.fixaton_time(ii)+preITI;
-            stimEnd(ii) = taskData.response_time(ii)-taskData.stimulus_time(ii)+preStim;
+            responseTime(ii) = taskData.response_time(ii)-taskData.stimulus_time(ii)+preStim;
         end
         respSt = taskData.response_time(ii);
         %round is putting it into the closest ms (can have more fine
@@ -74,7 +82,13 @@ for jj = 1:length(unitSpikesCl)
             tempSpikeTimesConverted(tempSpikeTimesConverted >= preITI+postITI) = preITI+postITI; %if round puts a spike at 0 or after the trial, move it to 1 or end
             spkITI.spk{jj,1}(ii, tempSpikeTimesConverted) = 1; %create the binary 0 and 1 for spikes. each time bin is 1ms
             [~, spkITI.spkRate{jj,1}(ii,:), spkITI.spkRateSm{jj,1}(ii,:), spkITI.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkITI.spk{jj}(ii,:));
+        else 
+            %NEED TO DO THE SPkRATE WHICH IS SOMETHING LIKE THE TIME
+            %DIVIDED BY THE WINDOW BUT I'M NOT REALLY USING THE
+            %INSTANTANEOUS SPIKERATE SO WHATEVER
+            spkITI.spkRateSm{jj,1}(ii,:) = zeros(1,preITI+postITI); %fill in the splots where there are no spikes
         end
+
         clear tempSpikeTimes; clear tempSpikeTimesConverted
         epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
         tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
@@ -84,6 +98,9 @@ for jj = 1:length(unitSpikesCl)
             tempSpikeTimesConverted(tempSpikeTimesConverted >= preStim+postStim) = preStim+postStim; %if round puts a spike at 0 or after the trial, move it to 1 or end
             spkStimOn.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
             [~, spkStimOn.spkRate{jj,1}(ii,:), spkStimOn.spkRateSm{jj,1}(ii,:), spkStimOn.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkStimOn.spk{jj}(ii,:));
+        else 
+            %NEED TO DO THE SPkRATE WHICH 
+            spkStimOn.spkRateSm{jj,1}(ii,:) = zeros(1,preStim+postStim); %fill in the splots where there are no spikes
         end
         clear tempSpikeTimes; clear tempSpikeTimesConverted
         epochSt = respSt-(preResp/1000); epochEnd = respSt + (postResp/1000);
@@ -94,9 +111,13 @@ for jj = 1:length(unitSpikesCl)
             tempSpikeTimesConverted(tempSpikeTimesConverted >= preResp+postResp) = preResp+postResp; %if round puts a spike at 0 or after the trial, move it to 1 or end
             spkResp.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
             [~, spkResp.spkRate{jj,1}(ii,:), spkResp.spkRateSm{jj,1}(ii,:), spkResp.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkResp.spk{jj}(ii,:));
+        else 
+            %NEED TO DO THE SPkRATE WHICH 
+            spkResp.spkRateSm{jj,1}(ii,:) = zeros(1,preResp+postResp); %fill in the splots where there are no spikes
         end     
     end
     if shuffleFR
+        ticT = tic;
         timeRangeEnd = taskData.trial_end_time(endTrials);
         a = 0; b = timeRangeEnd; n = endTrials;
         for kk = 1:xshuffle
@@ -118,6 +139,12 @@ for jj = 1:length(unitSpikesCl)
             end
             shuffleMatrix{jj,1}(:,:,kk) = shuffleSpikesSm; %positive deviation
         end
+        shuffleHist{jj,1} = sort(squeeze(mean(mean(shuffleMatrix{jj},1),2))); %now above or below this .05/2 percentile should be significant.
+        shuffleHist{jj,2} = shuffleHist{jj,1}(alphPThreshold);
+        shuffleHist{jj,3} = shuffleHist{jj,1}(alphNThreshold);
+        toc(ticT)
+
+
 
         % %find time of any block ends THIS IS TO SET UP FOR BLOCKS
         % IN CASE FR DRIFTS, WILL DO THIS MORE COMPLETELY LATER
@@ -140,6 +167,52 @@ for jj = 1:length(unitSpikesCl)
         %     end
         % end
 
+    end
+end
+
+
+%find the significant periods of time
+
+for jj = 1:length(spkITI.spkRateSm)
+    spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
+    spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(:,250:end-250));
+    spkStimOn.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
+    spkStimOn.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
+    spkResp.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
+    spkResp.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
+    spkITI.posSection(jj,:) = spkITI.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
+    spkIti.negSection(jj,:)  = spkITI.smMean(jj,:) < shuffleHist{jj,3}; %less that 2.5th of the mean
+    for ii = sigWindow:length(spkITI.posSection(jj,:))
+        if spkITI.posSection(jj,ii) ==1
+            if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkITI.negSection(jj,ii) ==1
+            if sum(spkITI.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end 
+        if spkStimOn.posSection(jj,ii) ==1
+            if sum(spkStimOn.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.StimOn(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkStimOn.negSection(jj,ii) ==1
+            if sum(spkStimOn.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end 
+        if spkResp.posSection(jj,ii) ==1
+            if sum(spkResp.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end
+        if spkResp.negSection(jj,ii) ==1
+            if sum(spkResp.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
+                sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
+            end
+        end    
     end
 end
 

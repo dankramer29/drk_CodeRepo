@@ -33,8 +33,8 @@ histogram(shuffleHist{jj,1})
 for zz = 15:20
 
 figure
-xx= spkStimOn.spk{jj,1}(zz,:);
-yy= spkStimOn.spkRateSm{jj,1}(zz,:);
+xx= spkStimOn.spk{zz,1}(ii,:);
+yy= spkStimOn.spkRateSm{zz,1}(ii,:);
 plot(yy)
 hold on
 plot(xx, 'marker','.','linestyle','none','MarkerSize', 4)
@@ -48,10 +48,7 @@ figure
 plot(zzz)
 
 xxx=round(unitSpikesCl{jj}*1000);
-yyy=find(xxx>900000 & xxx < 901000);
-zzz = zeros(1,round(lastSpikeTime*1000));
-zzz(xxx) = 1;
-xx = zzz(900000:901000);
+yyy=find(xxx>900000 * xxx < 901000)
 xx=tempAllSize(900000:901000);
 zz = find(unitSpikesCl{jj}(:)>900 & unitSpikesCl{jj}<901);
 yy=unitSpikesCl{jj}(unitSpikesCl{jj}(:)>900 & unitSpikesCl{jj}<901);

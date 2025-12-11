@@ -49,7 +49,7 @@ longestTrial = max(trialLength);
 %get the reaction time
 reactionTime = taskData.response_time-taskData.stimulus_time;
 maxReactionTime = max(reactionTime);
-if maxReactionTime*1000 > postStim
+if maxReactionTime*1000 > interval.postStim
     warning('the window around stim does not include the longest reaction time')
 end
 
@@ -71,27 +71,36 @@ lastRecording = max(lastUnit);
 
 idx=1;
 for ii = 1:length(unitSpikesCl)
-    spikeRate(ii,1) = length(unitSpikesCl{ii})/lastRecording;  %units/second    
+    spikeRate(ii,1) = length(unitSpikesCl{ii})/lastRecording;  %units/second
+    for jj = 1:round(lastRecording)-1
+        spikeRateMoving(ii,jj) =length(find(unitSpikesCl{ii}>jj & unitSpikesCl{jj}<jj+1));
+    end
     if spikeRate(ii) > 0.5
         unitSpikesF{idx,1} = unitSpikesCl{ii};
         idx = idx+1;
     end
 end
 
-%% check if there is a last trial that doesn't have any spikes associated with it (or trials)
+%% find the times that the recording starts.
+% %if there is a period with no spikes for any unit and also a last trial that doesn't have any spikes associated with it (or trials)
 trialEndTime = taskData.trial_end_time(end);
 for ii = 1:length(unitSpikesCl)
+    firstSpikeTime(ii,1) = unitSpikesCl{ii,1}(1); 
     lastSpikeTime(ii,1) = unitSpikesCl{ii,1}(end); 
 end
+firstfirstSpikeTime = min(firstSpikeTime);
 lastlastSpikeTime = max(lastSpikeTime);
 noSpikeTrial = find(taskData.trial_end_time>lastlastSpikeTime);
 endTrials = noSpikeTrial(1)-1;
+
 %% BREAK UP INTO TRIALS
 % pull the spikes for each trial out with smoothed spike rates and it is
 % {units}(trials x ms)
 %THINGS TO DO, MAKE THIS FASTER. ALSO NEEDS TO BE RUN ONCE ONLY
-[spkITI, spkStimOn, spkResp, shuffleHist, itiEnd, responseTime] = Analysis.NPIX.parseTrials(unitSpikesF, taskData, 'shuffleFR', true, 'xshuffle', 100,...
-    'endTrials', endTrials, 'interval', interval);
+[spkITI, spkStimOn, spkResp, shuffleHist, itiEnd, responseTime] = Analysis.NPIX.parseTrials(unitSpikesF,...
+    taskData, 'shuffleFR', false, 'xshuffle', 100,...
+    'endTrials', endTrials, 'interval', interval, 'firstSpikeTime', firstfirstSpikeTime, 'lastSpikeTime',...
+    lastlastSpikeTime);
 % 
 % for jj = 1:length(spkITI.spkRateSm)
 %     spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects

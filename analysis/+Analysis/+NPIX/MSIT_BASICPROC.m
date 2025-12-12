@@ -63,23 +63,6 @@ end
 %WHOLE RECORDING WHICH WILL REQUIRE GETTING ALL OF THE DATA INTO A MATRIX
 %AND RUNNING THE SPIKE RATE SMOOTHING ON IT.
 
-%find the latest recroded unit
-for ii = 1:length(unitSpikesCl)
-    lastUnit(ii,1) = unitSpikesCl{ii}(end);   
-end
-lastRecording = max(lastUnit);
-
-idx=1;
-for ii = 1:length(unitSpikesCl)
-    spikeRate(ii,1) = length(unitSpikesCl{ii})/lastRecording;  %units/second
-    for jj = 1:round(lastRecording)-1
-        spikeRateMoving(ii,jj) =length(find(unitSpikesCl{ii}>jj & unitSpikesCl{jj}<jj+1));
-    end
-    if spikeRate(ii) > 0.5
-        unitSpikesF{idx,1} = unitSpikesCl{ii};
-        idx = idx+1;
-    end
-end
 
 %% find the times that the recording starts.
 % %if there is a period with no spikes for any unit and also a last trial that doesn't have any spikes associated with it (or trials)
@@ -88,20 +71,64 @@ for ii = 1:length(unitSpikesCl)
     firstSpikeTime(ii,1) = unitSpikesCl{ii,1}(1); 
     lastSpikeTime(ii,1) = unitSpikesCl{ii,1}(end); 
 end
-firstfirstSpikeTime = min(firstSpikeTime);
-lastlastSpikeTime = max(lastSpikeTime);
-noSpikeTrial = find(taskData.trial_end_time>lastlastSpikeTime);
+startSpikeTime = min(firstSpikeTime);
+finalSpikeTime = max(lastSpikeTime);
+noSpikeTrial = find(taskData.trial_end_time>finalSpikeTime);
 endTrials = noSpikeTrial(1)-1;
+
+idx=1; 
+for ii = 1:length(unitSpikesCl)
+    spikeRate(ii,1) = length(unitSpikesCl{ii})/(finalSpikeTime-startSpikeTime);  %units/second
+    idx2 = 1;
+    for jj = 1:round(finalSpikeTime-startSpikeTime)-1
+        temp =find(unitSpikesCl{ii}>(startSpikeTime + jj) & unitSpikesCl{ii}<(startSpikeTime+jj+1));
+        spikeRateMoving(ii,idx2) = length(temp); %records the spikes per second (so just spikes each second) to look for major spike drift
+        idx2 = idx2+1;
+        clear temp
+    end
+   
+    if spikeRate(ii) > 0.5
+        unitSpikesF{idx,1} = unitSpikesCl{ii};
+        idx = idx+1;
+    end
+end
+spikeRate(:,2) = mean(spikeRateMoving(:, 1:round(length(spikeRateMoving)/2)),2); %find the spike rate of 1st half to compare to second half
+spikeRate(:,3) = mean(spikeRateMoving(:, round(length(spikeRateMoving)/2):end),2);
+
+
+
 
 %% BREAK UP INTO TRIALS
 % pull the spikes for each trial out with smoothed spike rates and it is
 % {units}(trials x ms)
 %THINGS TO DO, MAKE THIS FASTER. ALSO NEEDS TO BE RUN ONCE ONLY
-[spkITI, spkStimOn, spkResp, shuffleHist, itiEnd, responseTime] = Analysis.NPIX.parseTrials(unitSpikesF,...
-    taskData, 'shuffleFR', false, 'xshuffle', 100,...
-    'endTrials', endTrials, 'interval', interval, 'firstSpikeTime', firstfirstSpikeTime, 'lastSpikeTime',...
-    lastlastSpikeTime);
-% 
+[spkITI, spkStimOn, spkResp,...
+    sigUnits, shuffleHist, itiEnd,...
+    responseTime] = Analysis.NPIX.parseTrials(unitSpikesF,...
+                    taskData, 'shuffleFR', false, 'xshuffle', 100,...
+                    'endTrials', endTrials, 'interval', interval, 'firstSpikeTime',...
+                    startSpikeTime, 'lastSpikeTime', finalSpikeTime, 'shuffleHist', shuffleHist);
+tt= -500:1499;
+for ii = 1:10
+    mn = spkStimOn.smMean(ii,:);
+    std= spkStimOn.smSTD(ii,:);
+    shP= shuffleHist{ii,2};
+    shN= shuffleHist{ii,3};
+    shPplt= repmat(shP,1,length(mn));
+    shNplt= repmat(shN,1,length(mn));
+    rst = spkStimOn.spk{ii}(:, 501:1500);
+
+    figure
+    subplot(2,1,1)
+    shadedErrorBar(tt,mn,std);
+    hold on
+    plot(tt, shPplt)
+    plot(tt, shNplt)
+    subplot(2,1,2)
+    plt.raster_plot(rst);
+end
+
+
 % for jj = 1:length(spkITI.spkRateSm)
 %     spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
 %     spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(:,250:end-250));

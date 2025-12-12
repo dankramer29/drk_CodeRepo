@@ -19,22 +19,36 @@ zzzP = repmat(zzP,1,length(yy));
 zzN=shuffleHist{jj,3};
 zzzN = repmat(zzN,1,length(yy));
 
+%plot the individual smooth mean units
+
+x1 = jjj;
+xx=posSection(x1,:);
+zz=spk.spk{x1};
+yy=smMean(x1,:);
+xxx=shuffleHist{x1,2};
+zzz = repmat(xxx,1,length(yy));
+yyy=shuffleHist{x1,3};
+x2 = repmat(yyy,1,length(yy));
+
 figure
-subplot(2,1,1)
+subplot(3,1,1)
 plot(xx)
 hold on
 plot(yy)
-plot(zzzP)
-plot(zzzN)
-ylim([0 7])
-subplot(2,1,2)
-histogram(shuffleHist{jj,1})
+plot(zzz)
+plot(x2)
+ylim([0 max(yy)+xxx])
+subplot(3,1,2)
+plt.raster_plot(zz)
+subplot(3,1,3)
+histogram(shuffleHist{x1,1}, 40)
+%%
 
-for zz = 15:20
+for zz = 60:70
 
 figure
-xx= spkStimOn.spk{jj,1}(zz,:);
-yy= spkStimOn.spkRateSm{jj,1}(zz,:);
+xx= spkStimOn.spk{179,1}(zz,:);
+yy= spkStimOn.spkRateSm{179,1}(zz,:);
 plot(yy)
 hold on
 plot(xx, 'marker','.','linestyle','none','MarkerSize', 4)
@@ -43,7 +57,7 @@ xx = spkStimOn.spk{zz,1}(ii,1:100);
 nansum(xx)
 end
 
-zzz=mean(spkStimOn.spkRateSm{5});
+zzz=mean(spkStimOn.spkRateSm{2});
 figure
 plot(zzz)
 
@@ -59,3 +73,26 @@ figure
 plot(xx, 'marker','.','linestyle','none','MarkerSize', 4)
 ylim([0.5, 2])
 
+
+%plot the significant units
+x1 = jjj;
+xx=posSection(x1,:);
+zz=spkStimOn.spk{x1};
+yy=smMean(x1,:);
+xxx=shuffleHist{x1,2};
+zzz = repmat(xxx,1,length(yy));
+yyy=shuffleHist{x1,3};
+x2 = repmat(yyy,1,length(yy));
+
+figure
+subplot(3,1,1)
+plot(xx)
+hold on
+plot(yy)
+plot(zzz)
+plot(x2)
+ylim([0 max(yy)+xxx])
+subplot(3,1,2)
+plt.raster_plot(zz)
+subplot(3,1,3)
+histogram(shuffleHist{x1,1}, 40)

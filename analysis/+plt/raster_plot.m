@@ -37,8 +37,12 @@ end
 %   Y=X+ii;
 %   plot(Y, 'LineWidth', 3, 'color', C(ii,:))
 % end
-[varargin, color]=util.argkeyval('color', varargin, 37); %should be a green
 
+if sum(isnan(spk_times)) > 0
+    nanPlot = 1;
+else
+    nanPlot = 0;
+end
 
 if rainbowC
     colorTempTest = {'#1A1334', '#26294A', '#055459', '#077353', '#14C285', '#ABD96D', '#FCBF54', '#EE6C3B', '#EC0E47', '#A02C5D', '#710461', '#022B7A' };
@@ -49,7 +53,7 @@ if rainbowC
     end
     color=1;
 else
-    colorTempTest = {'#5EFB6E'}; %can change the color here to any hex code.#E4287C is pink lemonade. and here is a good three #678CEC #D49BAE and #BBCB50 which is blue/pink/green
+    colorTempTest = {'#678CEC'}; %can change the color here to any hex code.#E4287C is pink lemonade. and here is a good three #678CEC #D49BAE and #BBCB50 which is blue/pink/green
     for ii = 1:length(colorTempTest)
         str = colorTempTest{ii};
         C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
@@ -63,49 +67,74 @@ end
 
 [Trials, Time] = size(spk_times);
 
-if ~isempty(tm)
-    Time = tm;
-end
-%figure; 
-hold on;
-idx=color;
-for i = 1:Trials
-    spikeIdx = find(spk_times(i,:));
-    for s = 1:length(spikeIdx)
-        x = [spikeIdx(s) + Time(1) , spikeIdx(s) + Time(1)];
-        y = [i- hashWidth/2, i + hashWidth/2];
+if ~nanPlot
+    if ~isempty(tm)
+        Time = tm;
+    end
+    %figure;
+    hold on;
+    idx=color;
+    for i = 1:Trials
+        spikeIdx = find(spk_times(i,:));
+        for s = 1:length(spikeIdx)
+            x = [spikeIdx(s) + Time(1) , spikeIdx(s) + Time(1)];
+            y = [i- hashWidth/2, i + hashWidth/2];
+            if rainbowC
+
+                line(x, y, 'Color', C(color+idx,:), 'LineWidth', 2);
+            else
+                line(x, y, 'Color', C(color,:), 'LineWidth', 2);
+            end
+        end
+        idx= idx+1;
         if rainbowC
-            
-            line(x, y, 'Color', C(color+idx,:), 'LineWidth', 2);            
-        else
-            line(x, y, 'Color', C(color,:), 'LineWidth', 2);
+            if idx+color>length(colorTempTest)
+                color = 1;
+                idx=0;
+            end
         end
     end
-    idx= idx+1;
-    if rainbowC
-        if idx+color>length(colorTempTest)
-            color = 1;
-            idx=0;
-        end
-    end
+
+    xlabel('Time (samples)');
+    ylabel('Trial');
+    xlim([Time(1) Time(end)]);
+    ylim([0 Trials+1]);
+    set(gca, 'YDir', 'reverse');
+
+    hold off
 end
 
-xlabel('Time (samples)');
-ylabel('Trial');
-xlim([Time(1) Time(end)]);
-ylim([0 Trials+1]);
-set(gca, 'YDir', 'reverse');
+if nanPlot   
+     tvec = 1:size(spk_times,2);  
 
-hold off
+    [nTrials, nBins] = size(spk_times);
+    hold on;
+    for tr = 1:nTrials
+        % find spike times (NaNs automatically ignored)
+        st = tvec(~isnan(spk_times(tr,:)));
 
+        % each spike is a short vertical line from trial-0.4 to trial+0.4
+        for s = 1:numel(st)
+            line([st(s) st(s)], [tr-0.4 tr+0.4], 'Color', C(color,:), 'LineWidth', 2);
+        end
+    end
+    xlabel('Time (ms)')
+    ylabel('Trial')
+    ylim([0 nTrials+1])
+    
 
+    set(gca, 'YDir','reverse') % trial 1 at top
 
-%%simple version
-% 
-% spk_times(spk_times==0)=NaN;
-% 
-% plot(spk_times(:,1), 'marker','.','linestyle','none','MarkerSize', 4, 'color', C(color,:))
-% %plot(spk_times(:,1), spk_times(:,2), 'marker','.','linestyle','none','MarkerSize', 4, 'color', C(color,:))
+   
+end
+
+ % %%simple version
+    % for ii = 1:size(spk_times,1)
+    %     plot(spk_times(ii,:), 'marker','.','linestyle','none','MarkerSize', 4, 'color', C(color,:))
+    %     hold on
+    % end
+    %axis tight
+%%plot(spk_times(:,1), spk_times(:,2), 'marker','.','linestyle','none','MarkerSize', 4, 'color', C(color,:))
 % axis tight
 % %pbaspect([8 1 1]);%this changes the aspect ratio x y z
 % 

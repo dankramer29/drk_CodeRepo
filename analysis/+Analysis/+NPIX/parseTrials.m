@@ -1,4 +1,4 @@
-function [spkITI,spkStimOn,spkResp, shuffleHist, itiEnd, responseTime] = parseTrials(unitSpikesCl,taskData, varargin)
+function [spkITI, spkStimOn, spkResp, sigUnits, shuffleHist, itiEnd, responseTime] = parseTrials(unitSpikesCl,taskData, varargin)
 %parseTrials.m takes spike times and converts to spikes within trials
 %broken up by different epoch. THIS IS REALLY FOR MSIT OUTPUT
 
@@ -26,7 +26,7 @@ else
     shuffleFR = 0; %if provided, no need to run again
 end
 %set up some variables for trouble shooting so no nested variable errors.
-xx=[];yy=[];zz=[];xxx=[];yyy=[];zzz=[];
+xx=[];yy=[];zz=[];xxx=[];yyy=[];zzz=[]; x1 = []; x2 = []; x3 =[];
 
 
 alphP = 1-(alph/2);
@@ -69,7 +69,6 @@ postResp = interval.postResp; %ms prior to iti on (includes a ramp to cut off fo
 tempStimSize = zeros(endTrials, preStim+postStim); 
 tempITISize = zeros(endTrials, preITI+postITI);
 tempRespSize = zeros(endTrials, preResp+postResp);
-tempAllSize = zeros(1,round(lastSpikeTime*1000));
 
 spkITI = struct;
 spkStimOn = struct;
@@ -80,6 +79,8 @@ spkStimOn.spkTime= -preStim+1:1:postStim;
 spkResp.spkTime = -preResp+1:1:postStim;
 
 for jj = 1:length(unitSpikesCl) 
+    clear spikeTimesTemp tempAllSize
+    tempAllSize = zeros(1,round(lastSpikeTime*1000));
     spkStimOn.spk{jj,1} = tempStimSize;
     spkITI.spk{jj,1} = tempITISize;
     spkResp.spk{jj,1} = tempRespSize;
@@ -104,56 +105,19 @@ for jj = 1:length(unitSpikesCl)
         spkStimOn.spk{jj,1}(ii,:) = spkAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim); 
         spkStimOn.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim);
         spkResp.spk{jj,1}(ii,:) = spkAll{jj,1}(1,respSt-preResp+1:respSt+postITI); 
-        spkResp.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,respSt-preResp+1:respSt+postResp);
+        spkResp.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,respSt-preResp+1:respSt+postResp);       
         
-        % epochSt = itiSt-(preITI/1000); epochEnd = itiSt + (postITI/1000);
-        % tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
-        % tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
-        % if ~isempty(tempSpikeTimesConverted)
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1; %if the round ends up putting a spike at 0, move it to 1            
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted >= preITI+postITI) = preITI+postITI; %if round puts a spike at 0 or after the trial, move it to 1 or end
-        %     spkITI.spk{jj,1}(ii, tempSpikeTimesConverted) = 1; %create the binary 0 and 1 for spikes. each time bin is 1ms
-        %     [~, spkITI.spkRate{jj,1}(ii,:), spkITI.spkRateSm{jj,1}(ii,:), spkITI.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkITI.spk{jj}(ii,:));
-        % else
-        %     [~, spkITI.spkRate{jj,1}(ii,:), spkITI.spkRateSm{jj,1}(ii,:), spkITI.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkITI.spk{jj}(ii,:));
-        % end
-        % 
-        % clear tempSpikeTimes; clear tempSpikeTimesConverted
-        % epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
-        % tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
-        % tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
-        % if ~isempty(tempSpikeTimesConverted)
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted >= preStim+postStim) = preStim+postStim; %if round puts a spike at 0 or after the trial, move it to 1 or end
-        %     spkStimOn.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
-        %     [~, spkStimOn.spkRate{jj,1}(ii,:), spkStimOn.spkRateSm{jj,1}(ii,:), spkStimOn.spkRateTime] = Analysis.BasicDataProc.spikeRateGauss(spkStimOn.spk{jj}(ii,:));
-        % else 
-        %     [~, spkStimOn.spkRate{jj,1}(ii,:), spkStimOn.spkRateSm{jj,1}(ii,:), spkStimOn.spkRateTime] = Analysis.BasicDataProc.spikeRateGauss(spkStimOn.spk{jj}(ii,:));
-        %     %fill in the splots where there are no spikes
-        % end
-        % clear tempSpikeTimes; clear tempSpikeTimesConverted
-        % epochSt = respSt-(preResp/1000); epochEnd = respSt + (postResp/1000);
-        % tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
-        % tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cel
-        % if ~isempty(tempSpikeTimesConverted)
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
-        %     tempSpikeTimesConverted(tempSpikeTimesConverted >= preResp+postResp) = preResp+postResp; %if round puts a spike at 0 or after the trial, move it to 1 or end
-        %     spkResp.spk{jj,1}(ii, tempSpikeTimesConverted) = 1;
-        %     [~, spkResp.spkRate{jj,1}(ii,:), spkResp.spkRateSm{jj,1}(ii,:), spkResp.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkResp.spk{jj}(ii,:));
-        % else 
-        %     [~, spkResp.spkRate{jj,1}(ii,:), spkResp.spkRateSm{jj,1}(ii,:), spkResp.spkRateSmTime] = Analysis.BasicDataProc.spikeRateGauss(spkResp.spk{jj}(ii,:));
-        % end     
     end
     if shuffleFR
         ticT = tic;
-        timeRangeEnd = taskData.trial_end_time(endTrials)*1000; % take the last trial and convert to ms
+        timeRangeEnd = lastSpikeTime*1000; % take the last trial and convert to ms
         timeRangeSt = firstSpikeTime*1000;
-        a = timeRangeSt; b = timeRangeEnd; n = endTrials;
+        a = timeRangeSt+preStim; b = timeRangeEnd - postStim; n = endTrials;
         for kk = 1:xshuffle
             r = a + (b-a).*rand(n,1); %random generate start times
             for ii = 1:length(r)
                 stimSt = round(r(ii)); %take random start times
-                shuffleMatrix{jj,1}(:,:,kk) = spkRateSmoothAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim); %positive deviation
+                shuffleMatrix{jj,1}(ii,:,kk) = spkRateSmoothAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim); %get random times
 
                 % epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
                 % tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
@@ -169,7 +133,9 @@ for jj = 1:length(unitSpikesCl)
             end
             %shuffleMatrix{jj,1}(:,:,kk) = shuffleSpikesSm; %positive deviation
         end
-        shuffleHist{jj,1} = sort(squeeze(mean(mean(shuffleMatrix{jj},1),2))); %now above or below this .05/2 percentile should be significant.
+        shuffleTemp1 = mean(shuffleMatrix{jj},1);
+        shuffleTemp2 = mean(shuffleTemp1, 2);        
+        shuffleHist{jj,1} = sort(squeeze(shuffleTemp2)); %now above or below this .05/2 percentile should be significant.
         shuffleHist{jj,2} = shuffleHist{jj,1}(alphPThreshold);
         shuffleHist{jj,3} = shuffleHist{jj,1}(alphNThreshold);
         toc(ticT)
@@ -198,103 +164,33 @@ for jj = 1:length(unitSpikesCl)
 end
 
 
-%find the significant periods of time
+[spkITI.smMean, spkITI.smSTD, spkITI.posSection, spkITI.negSection, sigUnits.ITI] = findPositiveSection(spkITI, shuffleHist, sigWindow);
+[spkStimOn.smMean, spkStimOn.smSTD, spkStimOn.posSection, spkStimOn.negSection, sigUnits.StimOn] = findPositiveSection(spkStimOn, shuffleHist, sigWindow);
+[spkResp.smMean, spkResp.smSTD, spkResp.posSection, spkResp.negSection, sigUnits.Resp] = findPositiveSection(spkResp, shuffleHist, sigWindow);
 
-
-% for jj = 1:length(spkITI.spkRateSm)
-%     spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,251:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
-%     spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(:,251:end-250));
-%     spkStimOn.smMean(jj,:) = mean(spkStimOn.spkRateSm{jj}(:,251:end-250),1);
-%     spkStimOn.smStd(jj,:) = std(spkStimOn.spkRateSm{jj}(:,251:end-250));
-%     spkResp.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,251:end-250),1);
-%     spkResp.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,251:end-250));
-%     spkITI.posSection(jj,:) = spkITI.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
-%     spkITI.negSection(jj,:)  = spkITI.smMean(jj,:) < shuffleHist{jj,3}; %less that 2.5th of the mean
-%     spkStimOn.posSection(jj,:) = spkStimOn.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
-%     spkStimOn.negSection(jj,:)  = spkStimOn.smMean(jj,:) < shuffleHist{jj,3};
-%     spkResp.posSection(jj,:) = spkResp.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
-%     spkResp.negSection(jj,:)  = spkResp.smMean(jj,:) < shuffleHist{jj,3};    
-%     clustN=bwconncomp(spkITI.posSection(jj,:),8);
-%     for ii = 1:clustN.NumObjects
-%         if length(clustN.PixelIdxList{ii}) < sigWindow %make sure they are size of your window. 
-%             spkResp.posSection(clustN.PixelIdxList{ii}) = 0;%convert any too small to 0
-%         else
-%             sigUnits.ITI(jj) = 1;
-%         end
-%     end
-%     clustN=bwconncomp(spkStimOn.posSection(jj,:),8);
-%     for ii = 1:clustN.NumObjects
-%         if length(clustN.PixelIdxList{ii}) < sigWindow %make sure they are size of your window. 
-%             clustN.PixelIdxList{ii} = [];
-%         else
-%             sigUnits.ITI(jj) = 1;
-%         end
-%     end
-% 
-%     for ii = sigWindow:length(spkITI.posSection(jj,:))        
-%         if spkITI.posSection(jj,ii) ==1
-%            %CAN MAKE THIS BETTER WHERE IT JUST FINDS THE SECTION THAT IS
-%            %POSITIVE AND SEES THE SIZE OF IT. REALLY A CLUSTER
-%             if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             %delet any points that are not significant for a period long
-%             %enough for the designated sigWindow
-%             end
-% 
-%         end    
-%         if spkITI.negSection(jj,ii) ==1
-%             if sum(spkITI.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             elseif ii <= length(spkITI.negSection(jj,:))-sigWindow 
-%                 if sum(spkITI.negSection(jj,ii:sigWindow+ii)) < sigWindow
-%                     spkITI.negSection(jj,ii) = 0;
-%                 end
-%             end
-%         end%DOUBLE CHECK THE ABOVE WORKS BEFORE DOING THE NEXT SECTION THE SAME.
-        % if spkStimOn.posSection(jj,ii) ==1
-        %     if sum(spkStimOn.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-        %         sigUnits.StimOn(jj) = 1; %counts any unit with significant firing over or under baseline firing
-        %     end
-        % end
-        % if spkStimOn.negSection(jj,ii) ==1
-        %     if sum(spkStimOn.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-        %         sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-        %     end
-        % end 
-        % if spkResp.posSection(jj,ii) ==1
-        %     if sum(spkResp.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-        %         sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-        %     end
-        % end
-        % if spkResp.negSection(jj,ii) ==1
-        %     if sum(spkResp.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-        %         sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-        %     end
-        % end    
-%     end
-% end
-[spkITI.posSection, spkITI.negSection, sigUnits.ITI] = findPositiveSection(spkITI, shuffleHist, sigWindow);
-
-    function [posSection, negSection, sigUnits] = findPositiveSection(spk, shuffleHist, sigWindow)
+    function [smMean, smStd, posSection, negSection, sigUnits] = findPositiveSection(spk, shuffleHist, sigWindow)
+        sigUnits = zeros(size(spk.spkRateSm,1), 2); idx1 = 1; idx2 = 1;
         for jjj = 1:length(spk.spkRateSm)
-            spk.smMean(jjj,:) = mean(spk.spkRateSm{jjj}(:,251:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
-            spk.smStd(jjj,:) = std(spk.spkRateSm{jjj}(:,251:end-250));
-            spk.posSection(jjj,:) = spk.smMean(jjj,:) > shuffleHist{jjj,2}; %greater than 97.5th of the mean
-            spk.negSection(jjj,:)  = spk.smMean(jjj,:) < shuffleHist{jjj,3}; %less that 2.5th of the mean
-            clustP=bwconncomp(spk.posSection(jjj,:),8);
+            smMean(jjj,:) = mean(spk.spkRateSm{jjj}(:,251:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
+            smStd(jjj,:) = std(spk.spkRateSm{jjj}(:,251:end-250));
+            posSection(jjj,:) = smMean(jjj,:) > shuffleHist{jjj,2}; %greater than 97.5th of the mean
+            negSection(jjj,:)  = smMean(jjj,:) < shuffleHist{jjj,3}; %less that 2.5th of the mean
+            clustP=bwconncomp(posSection(jjj,:),8);
             for iii = 1:clustP.NumObjects
                 if length(clustP.PixelIdxList{iii}) < sigWindow %make sure they are size of your window.
-                    posSection(clustN.PixelIdxList{iii}) = 0;%convert any too small to 0
+                    posSection(clustP.PixelIdxList{iii}) = 0;%convert any too small to 0
                 else
                     sigUnits(jjj,1) = 1; %mark if it was positive or not.
+                    idx1 = idx1+1;
                 end
             end
-            clustN=bwconncomp(spk.negSection(jjj,:),8);
+            clustN=bwconncomp(negSection(jjj,:),8);
             for iii = 1:clustN.NumObjects
                 if length(clustN.PixelIdxList{iii}) < sigWindow %make sure they are size of your window.
                     negSection(clustN.PixelIdxList{iii}) = 0;%convert any too small to 0
                 else
-                    sigUnits(jjj,2) = -1; %mark if it was positive or not.
+                    sigUnits(jjj,2) = 2; %mark if it was positive or not.
+                    idx2 = idx2+1;
                 end
             end
         end

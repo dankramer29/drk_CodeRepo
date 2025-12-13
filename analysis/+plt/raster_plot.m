@@ -9,6 +9,7 @@ function  raster_plot( spk_times, varargin )
 %not as part of another plotting function
 [varargin, title]=util.argkeyval('title', varargin, []);
 [varargin, tm]=util.argkeyval('tm', varargin, []); % a time vector
+[varargin, condSep]=util.argkeyval('condSep', varargin, []); % if some are in one condition and others are in another condition, list the number where the trials separate
 
 [varargin, hashWidth]=util.argkeyval('hashWidth', varargin, 0.8); % set the width. 0.8 is good if doing a lot of trials but bad if only one or two
 
@@ -21,6 +22,10 @@ function  raster_plot( spk_times, varargin )
 
 if size(spk_times,1) > size(spk_times,2)
     spk_times = spk_times'; %convert to rows are trials and columns are spike times
+end
+
+if isempty(condSep)
+    condSep = length(spk_times); %just separate to the single condition
 end
 
 % if size(spk_times,2)<2
@@ -53,7 +58,7 @@ if rainbowC
     end
     color=1;
 else
-    colorTempTest = {'#678CEC'}; %can change the color here to any hex code.#E4287C is pink lemonade. and here is a good three #678CEC #D49BAE and #BBCB50 which is blue/pink/green
+    colorTempTest = {'#678CEC', '#D49BAE'}; %can change the color here to any hex code.#E4287C is pink lemonade. and here is a good three #678CEC #D49BAE and #BBCB50 which is blue/pink/green
     for ii = 1:length(colorTempTest)
         str = colorTempTest{ii};
         C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
@@ -81,9 +86,9 @@ if ~nanPlot
             y = [i- hashWidth/2, i + hashWidth/2];
             if rainbowC
 
-                line(x, y, 'Color', C(color+idx,:), 'LineWidth', 2);
+                line(x, y, 'Color', C(color+idx,:), 'LineWidth', 4);
             else
-                line(x, y, 'Color', C(color,:), 'LineWidth', 2);
+                line(x, y, 'Color', C(color,:), 'LineWidth', 4);
             end
         end
         idx= idx+1;
@@ -106,21 +111,30 @@ end
 
 if nanPlot   
      tvec = 1:size(spk_times,2);  
+     if ~isempty(tm)
+         tvec = tvec+tm(1);
+     end
 
     [nTrials, nBins] = size(spk_times);
     hold on;
     for tr = 1:nTrials
         % find spike times (NaNs automatically ignored)
         st = tvec(~isnan(spk_times(tr,:)));
+        if tr < condSep
+            color = 1;
+        else
+            color = 2;
+        end
 
         % each spike is a short vertical line from trial-0.4 to trial+0.4
         for s = 1:numel(st)
-            line([st(s) st(s)], [tr-0.4 tr+0.4], 'Color', C(color,:), 'LineWidth', 2);
+            line([st(s) st(s)], [tr-0.4 tr+0.4], 'Color', C(color,:), 'LineWidth', 4);
         end
     end
     xlabel('Time (ms)')
     ylabel('Trial')
     ylim([0 nTrials+1])
+    
     
 
     set(gca, 'YDir','reverse') % trial 1 at top

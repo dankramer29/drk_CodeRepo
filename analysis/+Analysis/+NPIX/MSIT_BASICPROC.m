@@ -74,6 +74,7 @@ end
 startSpikeTime = min(firstSpikeTime);
 finalSpikeTime = max(lastSpikeTime);
 noSpikeTrial = find(taskData.trial_end_time>finalSpikeTime);
+%find the trials that have no spikes:
 endTrials = noSpikeTrial(1)-1;
 
 idx=1; 
@@ -107,110 +108,22 @@ spikeRate(:,3) = mean(spikeRateMoving(:, round(length(spikeRateMoving)/2):end),2
     responseTime] = Analysis.NPIX.parseTrials(unitSpikesF,...
                     taskData, 'shuffleFR', false, 'xshuffle', 100,...
                     'endTrials', endTrials, 'interval', interval, 'firstSpikeTime',...
-                    startSpikeTime, 'lastSpikeTime', finalSpikeTime, 'shuffleHist', shuffleHist);
-tt= -500:1499;
-for ii = 1:10
-    mn = spkStimOn.smMean(ii,:);
-    std= spkStimOn.smSTD(ii,:);
-    shP= shuffleHist{ii,2};
-    shN= shuffleHist{ii,3};
-    shPplt= repmat(shP,1,length(mn));
-    shNplt= repmat(shN,1,length(mn));
-    rst = spkStimOn.spk{ii}(:, 501:1500);
-
-    figure
-    subplot(2,1,1)
-    shadedErrorBar(tt,mn,std);
-    hold on
-    plot(tt, shPplt)
-    plot(tt, shNplt)
-    subplot(2,1,2)
-    plt.raster_plot(rst);
-end
+                    startSpikeTime, 'lastSpikeTime', finalSpikeTime);
 
 
-% for jj = 1:length(spkITI.spkRateSm)
-%     spkITI.smMean(jj,:) = mean(spkITI.spkRateSm{jj}(:,250:end-250),1); %create unit x time matrix and remove the 250ms buffer I created for edge effects
-%     spkITI.smStd(jj,:) = std(spkITI.spkRateSm{jj}(:,250:end-250));
-%     spkStimOn.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
-%     spkStimOn.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
-%     spkResp.smMean(jj,:) = mean(spkResp.spkRateSm{jj}(:,250:end-250),1);
-%     spkResp.smStd(jj,:) = std(spkResp.spkRateSm{jj}(:,250:end-250));
-%     spkITI.posSection(jj,:) = spkITI.smMean(jj,:) > shuffleHist{jj,2}; %greater than 97.5th of the mean
-%     spkIti.negSection(jj,:)  = spkITI.smMean(jj,:) < shuffleHist{jj,3}; %less that 2.5th of the mean
-%     for ii = sigWindow:length(spkITI.posSection(jj,:))
-%         if spkITI.posSection(jj,ii) ==1
-%             if sum(spkITI.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkITI.negSection(jj,ii) ==1
-%             if sum(spkITI.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end 
-%         if spkStimOn.posSection(jj,ii) ==1
-%             if sum(spkStimOn.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.StimOn(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkStimOn.negSection(jj,ii) ==1
-%             if sum(spkStimOn.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end 
-%         if spkResp.posSection(jj,ii) ==1
-%             if sum(spkResp.posSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end
-%         if spkResp.negSection(jj,ii) ==1
-%             if sum(spkResp.negSection(jj,ii-sigWindow:ii)) == sigWindow % so if they are all 1s over the window
-%                 sigUnits.ITI(jj) = 1; %counts any unit with significant firing over or under baseline firing
-%             end
-%         end    
-%     end
-% end
+%% break up into conditions
 
-spkStimOn.spkTime(end+1) = 1750;
-tt = spkStimOn.spkTime;
+[spkITI.cong, spkITI.incong, spkITI.congMean,...
+    spkITI.incongMean, spkITI.congSE, spkITI.incongSE,...
+    spkITI.congSpk, spkITI.incongSpk]...
+    = Analysis.NPIX.conditionParsing(spkITI, taskData, endTrials);
 
-%this one just plots a single trial and a single raster to make sure they
-%line up(they do as far as I can tell)
-spikeId = 5;
-for ii = 1:10
-    figure
-    subplot(2,1,1)
-    plot(tt, spkStimOn.spkRateSm{spikeId}(ii,:))
-    axis tight
-    subplot(2,1,2)
-    plt.raster_plot(spkStimOn.spk{spikeId}(ii,:), 'tm', tt, 'halfWidth', 0.4 )
-end
+[spkStimOn.cong, spkStimOn.incong, spkStimOn.congMean,...
+    spkStimOn.incongMean, spkStimOn.congSE, spkStimOn.incongSE,...
+    spkStimOn.congSpk, spkStimOn.incongSpk]...
+    = Analysis.NPIX.conditionParsing(spkStimOn, taskData, endTrials);
 
-%for plotting multiple units BUT NEEDS WORK
-pltXxX = 3; 
-idx1 = [1,2,3,7,8,9,13,14,15]; %top rows programmatically is 1:pltXxX, then that + pltXxX*2, then +pltXxX*4 until the end but i don't have time to codeit
-idx2 = idx1+pltXxX;
-for ii = 1:length(idx1)
-    subplot(pltXxX*2,pltXxX,idx1(ii))
-    spkMean = mean(spkStimOn.spkRateSm{ii}); 
-    spkSD = std(spkStimOn.spkRateSm{ii});
-    shadedErrorBar(tt, spkMean, spkSD);
-    mygca(idx1(ii)) = gca;
-    subplot(8,4,idx2(ii))
-    plt.raster_plot(spkStimOn.spk{ii}, 'tm', spkStimOn.spkTime, 'halfWidth', 0.4 )
-end
-
-%for plotting any individual unit
-ii = 108;
-subplot(2,1,1)
-spkMean = mean(spkStimOn.spkRateSm{ii});
-spkSD = std(spkStimOn.spkRateSm{ii});
-shadedErrorBar(tt(250:end-250), spkMean(250:end-250), spkSD(250:end-250));
-subplot(2,1,2)
-plt.raster_plot(spkStimOn.spk{ii}(:,(250:end-250)), 'tm', spkStimOn.spkTime(250:end-250), 'halfWidth', 0.4 )
-
-
-if shuffleBaseline
-    %need to make a shuffle baseline
-end
+[spkResp.cong, spkResp.incong, spkResp.congMean,...
+    spkResp.incongMean, spkResp.congSE, spkResp.incongSE,...
+    spkResp.congSpk, spkResp.incongSpk]...
+    = Analysis.NPIX.conditionParsing(spkResp, taskData, endTrials);

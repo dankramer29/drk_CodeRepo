@@ -1,0 +1,90 @@
+function [PCdata] = suaPCA(data, varargin)
+%runs a pca including a normalization (soft), mean center, and has some
+%plotting. much of this is taken from tangleAnalysis
+
+%inputs
+% * Data (struct) - a C-dimensional structure where C is the number of
+% conditions. For a given condition, Data(c).A should hold the data (e.g.
+% firing rates). Each column of A corresponds to a neuron, and each row to
+% a timepoint. Data(c).times and Data(c).analyzeTimes are optional
+% fields. size(Data(c).times,1) should equal size(Data(c).A,1). 
+
+
+[varargin, plt3d]=util.argkeyval('plt3d', varargin, true); %do a 3d plot
+[varargin, pltMultD]=util.argkeyval('pltMultD', varargin, true); %do a multidimensional plot up to a certain number of dimensions NOT GOING TO MAKE THIS SECOND.
+[varargin, eventIdx]=util.argkeyval('eventIdx', varargin, []); %add timepoints to the figures
+[varargin, eventLbl]=util.argkeyval('eventLbl', varargin, []); %add timepoints to the figures with label
+[varargin, fracVar]=util.argkeyval('timePoints', varargin, .85); %can find how many pcs explain the fracVar of fractional variance (this is also in expVar)
+
+[varargin, softenNorm]=util.argkeyval('softenNorm', varargin, 5); 
+% * softenNorm (scalar, default: 5) - In the usual Churchlandian fashion,
+% soft normalization is performed on the neural data such that each neuron
+% is devided by its range (across all times and conditions) + some constant
+% indicated by softenNorm. EMG data should be fully normalized (i.e.
+% softenNorm set to 0)
+
+datalength1 = length(data(1).A); %for splitting the data later
+datalength2 = length(data(2).A);
+
+% Ensure data is formatted correctly
+if size(data(1).A,1) < size(data(1).A,2)
+   warning('Data(c).A should be a t x n matrix containing the firing rates for condition c. Ensure that this is the case')
+end
+
+% Unwrap all data into a ct X n matrix 
+A = [];
+conditionMask = [];
+for cc = 1:length(data)
+   theseData = data(cc).A;
+   A = [A; theseData];
+   conditionMask = [conditionMask; cc*ones(size(theseData,1),1)];
+end
+
+% soft-normalize firing rates in the usual Churchland way
+if ~isempty(softenNorm)
+   normFactors = range(A,1)+softenNorm;
+   A = bsxfun(@times, A, 1./normFactors);
+elseif any(range(A,1) > 1) && isempty(softenNorm)
+   warning('A should be normalized or soft-normalized such that the range of each neuron <= 1')
+end
+A = bsxfun(@minus, A, mean(A,1)); % mean center
+
+% reduce to numPCs or however many PCs capture fracVar of the variance
+[PCs, pcXtime, v, ~, expVar] = pca(A); %the third variable is the eigen values of the variance, and the 5th is the explained percentage of the variance.
+V = cumsum(v)./sum(v);
+%this is if you want to gather only the pcs that explain x of the variance,
+%right now just returning it all.
+if ~isempty(fracVar)
+   % determine how many PCs to use
+   vcum = cumsum(var(A*PCs))./sum(var(A*PCs));
+   idx = 1:size(v,2);
+   numPCs = idx(v > fracVar);
+   numPCs = numPCs(1);
+end
+if numPCs > size(PCs,2)
+   topPCs = PCs;
+else
+   topPCs = PCs(:,1:numPCs);
+end
+
+PCdata.pc = PCs;
+PCdata.PCxTime1 = pcXtime(1:datalength1,:);
+PCdata.PCxTime2 = pcXtime(datalength1+1:end,:);
+PCdata.eigen = v;
+PCdata.cumulativeExpVar = vcum;
+PCdata.expVar = expVar;
+
+if plt3d
+    pc1 = PCdata.PCxTime1(:,1);
+    pc2 = PCdata.PCxTime1(:,2);
+    pc3 = PCdata.PCxTime1(:,3);
+    plt.PCAcolorplt(pc1, pc2, 'data3', pc3, 'colorChoice', {'#395886', '#B1C9EF'}, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+
+    pc1 = PCdata.PCxTime2(:,1);
+    pc2 = PCdata.PCxTime2(:,2);
+    pc3 = PCdata.PCxTime2(:,3);
+    plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#341514', '#E17888'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+
+end
+
+end

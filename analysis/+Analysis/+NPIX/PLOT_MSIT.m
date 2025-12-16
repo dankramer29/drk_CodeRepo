@@ -63,6 +63,7 @@ idx = 1;
 unitSt = 70; unitEnd = unitSt + 9;
 figure
 for ii = unitSt:unitEnd
+
     mnC = spkStimOn.congMean(ii,251:end-250);    
     mnI = spkStimOn.incongMean(ii,251:end-250);
     sEC = spkStimOn.congSE(ii,251:end-250);    
@@ -149,3 +150,10 @@ for ii = unitSt:unitEnd
     plt.raster_plot(rst,'tm', tt, 'condSep', size(rstC, 1)+1);
     idx = idx+1;
 end
+
+
+%% plot pca
+plt.PCAcolorplt(out.score(1:2500,1), out.score(1:2500,2), 'data3', out.score(1:2500,3), 'colorChoice', {'#395886', '#B1C9EF'});
+
+plt.PCAcolorplt(out.score(2501:end,1), out.score(2501:end,2), 'data3', out.score(2501:end,3), 'colorChoice', {'#341514', '#E17888'}, 'newFig', false);
+

@@ -21,6 +21,8 @@
 %taskData = task data
 
 sigWindow = 30; %lenght of ms that the firing rate needs to be positive for to count it (probably 30-50ms)
+qshuffles = 100; %number of shuffles to do for the tangling
+
 
 interval.preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
 interval.postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
@@ -127,3 +129,32 @@ spikeRate(:,3) = mean(spikeRateMoving(:, round(length(spikeRateMoving)/2):end),2
     spkResp.incongMean, spkResp.congSE, spkResp.incongSE,...
     spkResp.congSpk, spkResp.incongSpk]...
     = Analysis.NPIX.conditionParsing(spkResp, taskData, endTrials);
+
+%% set up data for pca/tangling
+tt = -interval.preStim:interval.postStim-1;
+
+%convert to a struct expected for tangle analysis
+condData = struct;
+condData(1).A = spkStimOn.congMean';
+condData(2).A = spkStimOn.incongMean';
+condData(1).congruent = 'congruent';
+condData(2).incongruent = 'incongruent';
+condData(1).times = tt';
+condData(2).times = tt';
+
+
+%run PCA separately because tangling will end up being the data
+%bootstrapped.
+
+[PCAdata] = Analysis.BasicDataProc.suaPCA(condData, 'eventIdx', 750, 'eventLbl', {'Image on'});
+
+% tangling with shuffled tangles
+%congruent
+   
+
+for ii = 1:qshuffles
+    r = randperm(endTrials); 
+    condDataTemp(1).A = condData(1).A;
+[ Q, out] = tangleAnalysis(condData, .001, 'softenNorm', 5); % for data collected at 1kHz
+
+end

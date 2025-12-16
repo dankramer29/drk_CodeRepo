@@ -250,3 +250,39 @@ bb.FaceColor = 'flat';
 for ii = 1:length(C)
     bb.CData(ii,:) = C(ii,:);
 end
+
+%% a two color version of red and blue
+clear colorTempTest C
+colorTempTest = { '#DA3068', '#14469F'};
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+
+figure
+X = repmat(10,1,length(C));
+Y = 1:length(C);
+bb = bar(Y,X);
+bb.FaceColor = 'flat';
+for ii = 1:length(C)
+    bb.CData(ii,:) = C(ii,:);
+end
+
+%% three color blue to light blue to red 
+clear colorTempTest 
+clear C
+
+colorTempTest = { '#769FCB', '#DDF0F7', '#FF6C65'}; %blue red combo
+for ii = 1:length(colorTempTest)
+    str = colorTempTest{ii};
+    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+end
+
+figure
+X = repmat(10,1,length(C));
+Y = 1:length(C);
+bb = bar(Y,X);
+bb.FaceColor = 'flat';
+for ii = 1:length(C)
+    bb.CData(ii,:) = C(ii,:);
+end

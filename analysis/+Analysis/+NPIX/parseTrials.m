@@ -10,6 +10,7 @@ function [spkITI, spkStimOn, spkResp, sigUnits, shuffleHist, itiEnd, responseTim
 %           spkITI etc- has spikes in an array of 0s/1s each spot is a ms.
 %           then binned spikes at 
 
+
 [varargin, shuffleFR]=util.argkeyval('shuffleFR', varargin, true); %run a basic average fr calculation
 [varargin, xshuffle]=util.argkeyval('xshuffle', varargin, 1000); %number of shuffles
 [varargin, endTrials]=util.argkeyval('endTrials', varargin, []); %if the trials should end at a certain spot because the recording ended
@@ -52,9 +53,9 @@ if isempty(interval)
     interval.preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
     interval.postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
     interval.preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-    interval.postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
-    interval.preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-    interval.postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+    interval.postITI = 2500; %ms post to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+    interval.preResp = 1250; %ms prior to Response on (includes a ramp to cut off for edge effects)
+    interval.postResp = 750; %ms after Resonse on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
 end
 
 preStim = interval.preStim; %ms prior to stim on (includes a ramp to cut off for edge effects)

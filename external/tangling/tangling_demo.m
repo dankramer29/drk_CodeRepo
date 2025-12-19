@@ -104,7 +104,7 @@ set(gca,'XTick',ticks,'XTickLabels',[],'XLim',[0 T])
 set(gca,'XTick',ticks,'XTickLabels',tickLabels)
 xlabel('time from movement onset (s)')
 
-suptitle('Example kinematics from 8 recording sessions')
+subtitle('Example kinematics from 8 recording sessions')
 
 %% Analyze tangling
 load M1_sampleData

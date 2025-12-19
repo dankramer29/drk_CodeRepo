@@ -218,7 +218,7 @@ end
 
 
 if timeEst < 60
-   fprintf('Estimated computation time: %1.0f seconds\n', timeEst)
+  % fprintf('Estimated computation time: %1.0f seconds\n', timeEst)
 elseif timeEst < 300 % 5 minues
    fprintf('Estimated computation time: %1.0f seconds\n', timeEst)
    warning('Computation time is long. Consider increasing the parameter timeStep')

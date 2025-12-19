@@ -20,6 +20,9 @@
 %unitSpikesCl = spike times
 %taskData = task data
 
+% TO DO: LABEL THE LOCATIONS OF EACH 
+% PARSE BASED ON TRIAL TYPE
+
 sigWindow = 30; %lenght of ms that the firing rate needs to be positive for to count it (probably 30-50ms)
 qshuffles = 100; %number of shuffles to do for the tangling
 
@@ -27,9 +30,9 @@ qshuffles = 100; %number of shuffles to do for the tangling
 interval.preStim = 750; %ms prior to stim on (includes a ramp to cut off for edge effects)
 interval.postStim = 1750; %ms post to stim on (includes a ramp to cut off for edge effects)
 interval.preITI = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-interval.postITI = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
-interval.preResp = 250; %ms prior to iti on (includes a ramp to cut off for edge effects)
-interval.postResp = 2500; %ms prior to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+interval.postITI = 2500; %ms post to iti on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
+interval.preResp = 1250; %ms prior to Response on (includes a ramp to cut off for edge effects)
+interval.postResp = 750; %ms after Resonse on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
 
 %load the patient data
 subjectId = '004';
@@ -44,17 +47,22 @@ run Analysis.NPIX.NWB_NPIX_BASICPROC.m
 %%
 %trial parsing
 
+%% behavioral information
 %find the longest trial
 trialLength = taskData.trial_end_time-taskData.fixaton_time;
 longestTrial = max(trialLength);
 
 %get the reaction time
-reactionTime = taskData.response_time-taskData.stimulus_time;
-maxReactionTime = max(reactionTime);
-if maxReactionTime*1000 > interval.postStim
+behavioral.reactionTime = taskData.response_time-taskData.stimulus_time;
+behavioral.mnRT = mean(reactionTime); %mean rt
+behavioral.mnRT(:,2) = min(reactionTime); %range
+behavioral.mnRT(:,3) = max(reactionTime);
+if behavioral.mnRT(:,3)*1000 > interval.postStim
     warning('the window around stim does not include the longest reaction time')
 end
 
+%correct trials
+behavioral.accuracy = sum(taskData.ResponseAccuracy)/length(taskData.ResponseAccuracy);
 
 %% GET BASIC SPIKE RATE DATA AND REMOVE LOW SPIKE RATE NEURONS
 %evaluate the spike rate of each neuron and the mean spiking rate with SD
@@ -114,7 +122,8 @@ spikeRate(:,3) = mean(spikeRateMoving(:, round(length(spikeRateMoving)/2):end),2
 
 
 %% break up into conditions
-
+%for cong/incong, cell 1 is all, 2-4 are the different button presses (1,
+%2, 3)
 [spkITI.cong, spkITI.incong, spkITI.congMean,...
     spkITI.incongMean, spkITI.congSE, spkITI.incongSE,...
     spkITI.congSpk, spkITI.incongSpk]...
@@ -133,28 +142,37 @@ spikeRate(:,3) = mean(spikeRateMoving(:, round(length(spikeRateMoving)/2):end),2
 %% set up data for pca/tangling
 tt = -interval.preStim:interval.postStim-1;
 
-%convert to a struct expected for tangle analysis
-condData = struct;
-condData(1).A = spkStimOn.congMean';
-condData(2).A = spkStimOn.incongMean';
-condData(1).congruent = 'congruent';
-condData(2).incongruent = 'incongruent';
-condData(1).times = tt';
-condData(2).times = tt';
-
+centerDataOn{1} = 1; %toggle on for stimOn
+centerDataOn{2} = {'Image On'};
 
 %run PCA separately because tangling will end up being the data
 %bootstrapped.
+centerDataOn{1} = 1; %toggle on for stimOn
+centerDataOn{2} = {'Image On'};
+timeEval = [-250 1000];
+[PCAdataStimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval',  interval, 'centerDataOn', centerDataOn, 'tt', timeEval);
+[PCAdata123StimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2);
 
-[PCAdata] = Analysis.BasicDataProc.suaPCA(condData, 'eventIdx', 750, 'eventLbl', {'Image on'});
+centerDataOn{1} = 2; %toggle on for stimOn
+centerDataOn{2} = {'Response'};
+[PCAdataResp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval', interval, 'centerDataOn', centerDataOn);
+[PCAdata123Resp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
+
+centerDataOn{1} = 3; %toggle on for stimOn
+centerDataOn{2} = {'ITI'};
+[PCAdataITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval, 'centerDataOn', centerDataOn);
+[PCAdata123ITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
 
 % tangling with shuffled tangles
 %congruent
-   
+analyzett = 0:1499; %times to analyze the tangling between 
 
-for ii = 1:qshuffles
-    r = randperm(endTrials); 
-    condDataTemp(1).A = condData(1).A;
-[ Q, out] = tangleAnalysis(condData, .001, 'softenNorm', 5); % for data collected at 1kHz
+[Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
 
-end
+%2 cond 2 data sets.
+%2 cond 1 data set. but i think our plan is a decent one which is that we
+%will look at the q for all of the data sets and time points (scatter) and
+%show it's lower for dlPFC but high in congruent, lower in incongruent.
+
+[qT, outT] = tangleAnalysis(D_m1, .001, 'softenNorm', 5); % for data collected at 1kHz
+[qTe, outTe] = tangleAnalysis(D_emg, .001, 'softenNorm', 5); % for data collected at 1kHz

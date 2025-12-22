@@ -8,6 +8,7 @@ function [outputArg1,outputArg2] = PCAcolorplt(data1, data2, varargin)
 [varargin, newFig] = util.argkeyval('newFig',varargin, true);  %creates a new figure, so can do hold on and no new figure if two pcas
 [varargin, eventIdx] = util.argkeyval('eventIdx',varargin, 1);  %mark an event index can be several spots
 [varargin, eventLbl] = util.argkeyval('eventLbl',varargin, 'start');  %mark an event index with a label, 
+[varargin, dataLbl] = util.argkeyval('dataLbl',varargin, '1');  %mark an event index with a label, 
 
 if ~isempty(data3)
     Plot3D = 1;
@@ -118,6 +119,12 @@ if Plot3D
     ylabel('PC2')
     zlabel('PC3')
     title('PCA')
+    % WILL PLACE A LEGEND BUT IF YOU ARE PLOTTING MULTIPLE ON THE SAME
+    % FIGURE, IT WILL REPLACE THE LEGEND (SO DO IT OUTSIDE THIS FUNCTION OR
+    % MAKE THIS FUNCTION PLOT ALL THREE)
+    % hold on
+    % h1 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', colors(end,:)); % dummy
+    % legend(h1, {dataLbl});
 else
     hold on
     for i = 1:n
@@ -130,11 +137,41 @@ else
             eventLbl, ...
             'FontSize', 10, ...
             'Color', 'k')
+        %% to label multiple events but I have not checked this
+        % events = [200 400 600];
+        % labels = {'Stim','Go','Reward'};
+        % 
+        % for i = 1:numel(events)
+        %     idx = events(i);
+        %     plot3(pc1(idx), pc2(idx), pc3(idx), 'ko', 'MarkerFaceColor','k')
+        %     text(pc1(idx), pc2(idx), pc3(idx), labels{i}, ...
+        %          'FontSize',9, 'FontWeight','bold')
+        %   end
     end
 
     xlabel('PC1')
     ylabel('PC2')
     title('PCA')
+    %for plotting a legend, will pick a color midway through the transition
+
+   
+    %plot dummy lines and then can do a location for each, change the
+    %color. currently i am running each independently with a hold on, so
+    %need to make the legend outside of this function, but if want to do it
+    %within.
+    %     h1 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', [0 0 1]); % dummy
+    % plotGradientTrajectory(pc1a, pc2a, pc3a, [0 0 1], [1 0 0]);
+    % 
+    % % ---- Trajectory 2 ----
+    % h2 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', [0 1 0]);
+    % plotGradientTrajectory(pc1b, pc2b, pc3b, [0 1 0], [1 0 1]);
+    % 
+    % % ---- Trajectory 3 ----
+    % h3 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', [0 0 0]);
+    % plotGradientTrajectory(pc1c, pc2c, pc3c, [0.5 0.5 0.5], [0 0 0]);
+    % 
+    % legend([h1 h2 h3], {'Condition A','Condition B','Condition C'}, ...
+    %        'Location','best')
 end
 
 end

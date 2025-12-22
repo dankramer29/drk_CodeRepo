@@ -146,33 +146,55 @@ centerDataOn{1} = 1; %toggle on for stimOn
 centerDataOn{2} = {'Image On'};
 
 %run PCA separately because tangling will end up being the data
-%bootstrapped.
+%
 centerDataOn{1} = 1; %toggle on for stimOn
 centerDataOn{2} = {'Image On'};
-timeEval = [-250 1000];
+timeEval = [-250 1000]; %pick what time to actually plot, since the trials are pretty long
 [PCAdataStimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval',  interval, 'centerDataOn', centerDataOn, 'tt', timeEval);
-[PCAdata123StimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2);
+[PCAdata123StimOn, dataCond123StimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2);
 
 centerDataOn{1} = 2; %toggle on for stimOn
 centerDataOn{2} = {'Response'};
+timeEval = [-750 250]; %pick what time to actually plot, since the trials are pretty long
 [PCAdataResp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval', interval, 'centerDataOn', centerDataOn);
-[PCAdata123Resp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
+[PCAdata123Resp, dataCond123Resp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
 
 centerDataOn{1} = 3; %toggle on for stimOn
 centerDataOn{2} = {'ITI'};
+timeEval = [500 1500]; %pick what time to actually plot, since the trials are pretty long
 [PCAdataITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval, 'centerDataOn', centerDataOn);
-[PCAdata123ITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
+[PCAdata123ITI, dataCond123ITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval, 'centerDataOn', centerDataOn, 'pcaRun', 2);
 
-% tangling with shuffled tangles
-%congruent
-analyzett = 0:1499; %times to analyze the tangling between 
 
-[Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
+%tangling. the pca doubles up here, (done in tangling and in pca above) but
+%it's fast
+[tangling.qCStimOn, outCStimOn] = tangleAnalysis(dataCond123StimOn(1:3), .001, 'softenNorm', 5 ); % for data collected at 1kHz
+[tangling.qIStimOn, outIStimOn] = tangleAnalysis(dataCond123StimOn(4:6), .001, 'softenNorm', 5); % for data collected at 1kHz
 
-%2 cond 2 data sets.
-%2 cond 1 data set. but i think our plan is a decent one which is that we
-%will look at the q for all of the data sets and time points (scatter) and
-%show it's lower for dlPFC but high in congruent, lower in incongruent.
+[tangling.pctOverUnityStimOn, tangling.pStimOn] = formattedScatter(qC, qI, {'Q_Congruent','Q_Incongruent'});
 
-[qT, outT] = tangleAnalysis(D_m1, .001, 'softenNorm', 5); % for data collected at 1kHz
-[qTe, outTe] = tangleAnalysis(D_emg, .001, 'softenNorm', 5); % for data collected at 1kHz
+[tangling.qCResp, outCResp] = tangleAnalysis(dataCond123SResp(1:3), .001, 'softenNorm', 5 ); % for data collected at 1kHz
+[tangling.qIResp, outIResp] = tangleAnalysis(dataCond123Resp(4:6), .001, 'softenNorm', 5); % for data collected at 1kHz
+
+[tangling.pctOverUnityResp, tangling.pResp] = formattedScatter(qC, qI, {'Q_Congruent','Q_Incongruent'});
+
+[tangling.qCITI, outCITI] = tangleAnalysis(dataCond123ITI(1:3), .001, 'softenNorm', 5 ); % for data collected at 1kHz
+[tangling.qIITI, outIITI] = tangleAnalysis(dataCond123ITI(4:6), .001, 'softenNorm', 5); % for data collected at 1kHz
+
+[tangling.pctOverUnityITI, tangling.pITI] = formattedScatter(qC, qI, {'Q_Congruent','Q_Incongruent'});
+
+
+%run an LDA on congruent vs incongruent
+
+[acc.StimOn] = Analysis.BasicDataProc.suaLDA(spkStimOn);
+[acc.Resp] = Analysis.BasicDataProc.suaLDA(spkResp);
+[acc.ITI] = Analysis.BasicDataProc.suaLDA(spkITI);
+
+
+
+% % tangling with shuffled tangles
+% %congruent
+% analyzett = 0:1499; %times to analyze the tangling between 
+% 
+% [Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
+

@@ -1,4 +1,4 @@
-function [PCdata] = suaPCA(spk, varargin)
+function [PCdata, data, dataLength] = suaPCA(spk, varargin)
 %runs a pca including a normalization (soft), mean center, and has some
 %plotting. much of this is taken from tangleAnalysis
 
@@ -167,6 +167,10 @@ switch pcaRun
             plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#341514', '#E17888'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
 
         end
+
+        data(1).length = datalengthC1;
+        data(2).length = datalengthI1;
+        
     case 2 %TO DO, IS INCONGRUENT THE SEPARATED ONE? NEED TO DOUBLE CHECK THAT
         PCdata.pc = PCs;
         PCdata.PCxTimeC1 = pcXtime(1:datalengthC1,:);
@@ -184,36 +188,68 @@ switch pcaRun
             pc1 = PCdata.PCxTimeC1(:,1);
             pc2 = PCdata.PCxTimeC1(:,2);
             pc3 = PCdata.PCxTimeC1(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3, 'colorChoice', {'#395886', '#B1C9EF'}, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3, 'colorChoice',...
+                {'#395886', '#B1C9EF'}, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 1');
 
             pc1 = PCdata.PCxTimeC2(:,1);
             pc2 = PCdata.PCxTimeC2(:,2);
             pc3 = PCdata.PCxTimeC2(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#38000A', '#FFA896'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice',...
+                {'#38000A', '#FFA896'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 2');
         
             pc1 = PCdata.PCxTimeC3(:,1);
             pc2 = PCdata.PCxTimeC3(:,2);
             pc3 = PCdata.PCxTimeC3(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#253D2C', '#CFFFDC'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
-        
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice',...
+                {'#253D2C', '#CFFFDC'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 3');
+          
+            colorTempTest = {'#B1C9EF', '#FFA896', '#CFFFDC'}; %dark to light red
+            for ii = 1:length(colorTempTest)
+                str = colorTempTest{ii};
+                C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+            end
+            hold on
+            h1 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(1,:)); % dummy
+            h2 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(2,:)); % dummy
+            h3 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(3,:)); % dummy
+
+            legend([h1, h2, h3], {'Response 1', 'Response 2', 'Response 3'});
+
             pc1 = PCdata.PCxTimeI1(:,1);
             pc2 = PCdata.PCxTimeI1(:,2);
             pc3 = PCdata.PCxTimeI1(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3, 'colorChoice', {'#395886', '#B1C9EF'}, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3, 'colorChoice',...
+                {'#395886', '#B1C9EF'}, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 1');
 
             pc1 = PCdata.PCxTimeI2(:,1);
             pc2 = PCdata.PCxTimeI2(:,2);
             pc3 = PCdata.PCxTimeI2(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#38000A', '#FFA896'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice',...
+                {'#38000A', '#FFA896'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 2');
         
             pc1 = PCdata.PCxTimeI3(:,1);
             pc2 = PCdata.PCxTimeI3(:,2);
             pc3 = PCdata.PCxTimeI3(:,3);
-            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice', {'#253D2C', '#CFFFDC'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl);
+            plt.PCAcolorplt(pc1, pc2, 'data3', pc3,'colorChoice',...
+                {'#253D2C', '#CFFFDC'}, 'newFig', false, 'eventIdx', eventIdx, 'eventLbl', eventLbl, 'dataLbl', 'Response 3');
         
-        
+            hold on
+            h1 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(1,:)); % dummy
+            h2 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(2,:)); % dummy
+            h3 = plot3(nan, nan, nan, 'LineWidth', 3, 'Color', C(3,:)); % dummy
+
+            legend([h1, h2, h3], {'Response 1', 'Response 2', 'Response 3'});
         
         end
+
+        data(1).length = datalengthC1;
+        data(2).length = datalengthC2;
+        data(3).length = datalengthC3;
+        data(4).length = datalengthI1;
+        data(5).length = datalengthI2;
+        data(6).length = datalengthI3;
+
 end
+
 
 end

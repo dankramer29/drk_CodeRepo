@@ -1,4 +1,4 @@
-function pctOverUnity = tangleScatter( tangle_1, tangle_2, labels, varargin )
+function [pctOverUnity, p] = tangleScatter( tangle_1, tangle_2, labels, varargin )
 % marker = 'o'; color = 'k';
 % plotDataOnly = false;
 

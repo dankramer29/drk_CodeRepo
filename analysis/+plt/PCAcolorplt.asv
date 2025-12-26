@@ -9,7 +9,7 @@ function PCAcolorplt(data1, data2, varargin)
 [varargin, eventIdx] = util.argkeyval('eventIdx',varargin, 1);  %mark an event index can be several spots
 [varargin, eventLbl] = util.argkeyval('eventLbl',varargin, 'start');  %mark an event index with a label, 
 [varargin, dataLbl] = util.argkeyval('dataLbl',varargin, '1');  %mark an event index with a label, 
-[varargin, titlePCA]=util.argkeyval('titlePCA', varargin, {'PCA'}); %run it either congruent vs incongruent (1) or as choice 123 (2). which will be one figure of each but all put together for concat pcas.
+[varargin, titlePCA]=util.argkeyval('titlePCA', varargin, []); %run it either congruent vs incongruent (1) or as choice 123 (2). which will be one figure of each but all put together for concat pcas.
 
 if ~isempty(data3)
     Plot3D = 1;
@@ -120,9 +120,8 @@ if Plot3D
     xlabel('PC1')
     ylabel('PC2')
     zlabel('PC3')
-    if newFig
+    
     title( titlePCA{1})
-    end
     % WILL PLACE A LEGEND BUT IF YOU ARE PLOTTING MULTIPLE ON THE SAME
     % FIGURE, IT WILL REPLACE THE LEGEND (SO DO IT OUTSIDE THIS FUNCTION OR
     % MAKE THIS FUNCTION PLOT ALL THREE)
@@ -155,9 +154,7 @@ else
 
     xlabel('PC1')
     ylabel('PC2')
-    if newFig
     title(titlePCA{1})
-    end
     %for plotting a legend, will pick a color midway through the transition
 
    

@@ -77,7 +77,7 @@ spkResp = struct;
 
 spkITI.spkTime= -preITI+1:1:postITI;
 spkStimOn.spkTime= -preStim+1:1:postStim;
-spkResp.spkTime = -preResp+1:1:postStim;
+spkResp.spkTime = -preResp+1:1:postResp;
 
 for jj = 1:length(unitSpikesCl) 
     clear spikeTimesTemp tempAllSize
@@ -105,7 +105,7 @@ for jj = 1:length(unitSpikesCl)
         spkITI.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,itiSt-preITI+1:itiSt+postITI); %smoothed
         spkStimOn.spk{jj,1}(ii,:) = spkAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim); 
         spkStimOn.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim);
-        spkResp.spk{jj,1}(ii,:) = spkAll{jj,1}(1,respSt-preResp+1:respSt+postITI); 
+        spkResp.spk{jj,1}(ii,:) = spkAll{jj,1}(1,respSt-preResp+1:respSt+postResp); 
         spkResp.spkRateSm{jj,1}(ii,:) = spkRateSmoothAll{jj,1}(1,respSt-preResp+1:respSt+postResp);       
         
     end
@@ -119,20 +119,8 @@ for jj = 1:length(unitSpikesCl)
             for ii = 1:length(r)
                 stimSt = round(r(ii)); %take random start times
                 shuffleMatrix{jj,1}(ii,:,kk) = spkRateSmoothAll{jj,1}(1,stimSt-preStim+1:stimSt+postStim); %get random times
-
-                % epochSt = stimSt-(preStim/1000); epochEnd = stimSt + (postStim/1000);
-                % tempSpikeTimes = unitSpikesCl{jj}(unitSpikesCl{jj} >= epochSt & unitSpikesCl{jj} <= epochEnd); %find spikes in this window
-                % tempSpikeTimesConverted = round((tempSpikeTimes - epochSt)*1000); %convert to per trial time and ms to put a spike in the cell
-                % if ~isempty(tempSpikeTimesConverted)
-                %     tempSpikeTimesConverted(tempSpikeTimesConverted == 0) = 1;
-                %     tempSpikeTimesConverted(tempSpikeTimesConverted >= preStim+postStim) = preStim+postStim; %if round puts a spike at 0 or after the trial, move it to 1 or end
-                %     shuffleSpikes(ii, tempSpikeTimesConverted) = 1;
-                % end
-                % [~, ~, shuffleSpikesSm(ii,:), ~] = Analysis.BasicDataProc.spikeRateGauss(shuffleSpikes(ii,:));
-                % 
-                % clear tempSpikeTimes; clear tempSpikeTimesConverted
+               
             end
-            %shuffleMatrix{jj,1}(:,:,kk) = shuffleSpikesSm; %positive deviation
         end
         shuffleTemp1 = mean(shuffleMatrix{jj},1);
         shuffleTemp2 = mean(shuffleTemp1, 2);        

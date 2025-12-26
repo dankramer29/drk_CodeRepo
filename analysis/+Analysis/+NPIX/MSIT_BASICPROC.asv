@@ -239,7 +239,6 @@ timeEval = [500 1500]; %pick what time to actually plot, since the pre/post stim
 [acc.ITI] = Analysis.BasicDataProc.suaLDA(spkITI,  'tt', timeEval, 'st', interval.preITI, 'myTitle', 'ITI' );
 
 
-[acc.StimOn] = Analysis.BasicDataProc.suaLDA(spkStimOn, 'tt', timeEval, 'st', interval.preStimOn, 'myTitle', 'Image on');
 
 % % tangling with shuffled tangles
 % %congruent

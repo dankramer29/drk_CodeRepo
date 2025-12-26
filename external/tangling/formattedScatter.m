@@ -2,7 +2,10 @@ function [pctOverUnity, p] = tangleScatter( tangle_1, tangle_2, labels, varargin
 % marker = 'o'; color = 'k';
 % plotDataOnly = false;
 
-% myTitle = sprintf('%s  vs  %s', data1{:}, data2{:});
+
+[varargin, myTitle]=util.argkeyval('myTitle', varargin, 'data 1 vs data 2'); %title for the plot
+
+ 
 % if nargin == 1
 %    myTitle = '';
 % elseif nargin == 2
@@ -119,8 +122,14 @@ plot([0 maxAxis],[0 maxAxis],'b','LineWidth',1.5)
 end
 pctOverUnity = sum((tangle_1./tangle_2)>1)/length(tangle_1);
 pctOverUnity = pctOverUnity*100;
-% text(step/4, maxAxis/2, sprintf('%1.1f%% points > 1', pctOverUnity),'FontSize',14,'Color', gray);
-set(gca,'Visible','off')
+annotation('textbox',[.8 .5 .1 .2], ...
+    'String',[' p = ' num2str(p), newline, sprintf('%1.1f%% points > 1', pctOverUnity)],'EdgeColor','none')
+dd = annotation('textbox', [.43 .91 .4 .1], 'String', myTitle, 'EdgeColor', 'none', 'FontSize', 18); %adds a title because you get rid of the other title
+%get(dd, 'Position'); %do this if you want to find the position, move it
+%and then find the position of where you moved it to.
+%text(step/4, maxAxis/2, sprintf('%1.1f%% points > 1', pctOverUnity),'FontSize',14,'Color', gray);
+set(gca,'Visible','off') %this gets rid of the background which includes
+%the text
 set(gcf,'Color','w')
 end
 

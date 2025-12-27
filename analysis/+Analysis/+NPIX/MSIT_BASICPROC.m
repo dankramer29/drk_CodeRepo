@@ -230,17 +230,101 @@ timeEval = [500 1500]; %pick what time to actually plot, since the pre/post stim
 [tangling.pctOverUnityITI, tangling.pITI] = formattedScatter(tangling.qCITI, tangling.qIITI, {'Q Congruent','Q Incongruent'},'myTitle', 'ITI');
 
 
-%run an LDA on congruent vs incongruent
+%% run an LDA on congruent vs incongruent, and on each response (so answer is 1 vs 2 vs 3) for congruent vs incongruent.
+
+%% Stim centered
 timeEval = [-250 1000]; %pick what time to actually plot, since the trials are pretty long
-[acc.StimOn] = Analysis.BasicDataProc.suaLDA(spkStimOn, 'tt', timeEval, 'st', interval.preStimOn, 'myTitle', 'Image on');
+myTitle = 'Image On Congruent v Incongruent';
+for jj = 1:length(spkStimOn.cong)
+    spk1{jj,1} = spkStimOn.cong{jj,1};
+    spk2{jj,1} = spkStimOn.incong{jj,1};
+end
+[acc.StimOnCongIncong] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+
+clear spk1 spk2
+
+myTitle = 'Image On Congruent by Response';
+for jj = 1:length(spkStimOn.cong) %congruent different responses
+    spk1{jj,1} = spkStimOn.cong{jj,2};
+    spk2{jj,1} = spkStimOn.cong{jj,3};
+    spk3{jj,1} = spkStimOn.cong{jj,4};
+end
+[acc.StimOnCongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3,...
+    'plt', true, 'tt', timeEval, 'st', interval.preStim, 'myTitle', my);
+
+clear spk1 spk2 spk3
+
+myTitle = 'Image On Congruent by Response';
+for jj = 1:length(spkStimOn.incong) %congruent different responses
+    spk1{jj,1} = spkStimOn.incong{jj,2};
+    spk2{jj,1} = spkStimOn.incong{jj,3};
+    spk3{jj,1} = spkStimOn.incong{jj,4};
+end
+[acc.StimOnIncongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3,...
+    'plt', true, 'tt', timeEval, 'st', interval.preStim, 'myTitle', my);
+
+clear spk1 spk2 spk3
+%% Response centered. 
 timeEval = [-750 250]; %pick what time to actually plot, since the trials are pretty long
-[acc.Resp] = Analysis.BasicDataProc.suaLDA(spkResp, 'tt', timeEval, 'st', interval.preResp, 'myTitle', 'Response');
-timeEval = [500 1500]; %pick what time to actually plot, since the pre/post stim are made long to include a lot
-[acc.ITI] = Analysis.BasicDataProc.suaLDA(spkITI,  'tt', timeEval, 'st', interval.preITI, 'myTitle', 'ITI' );
+myTitle = 'Response Centered Congruent v Incongruent';
+for jj = 1:length(spkResp.cong)
+    spk1{jj,1} = spkResp.cong{jj,1};
+    spk2{jj,1} = spkResp.incong{jj,1};
+end
+[acc.Resp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
 
+clear spk1 spk2
 
-[acc.StimOn] = Analysis.BasicDataProc.suaLDA(spkStimOn, 'tt', timeEval, 'st', interval.preStimOn, 'myTitle', 'Image on');
+myTitle = 'Response Centered Congruent by Response';
+for jj = 1:length(spkResp.cong) %congruent different responses
+    spk1{jj,1} = spkResp.cong{jj,2};
+    spk2{jj,1} = spkResp.cong{jj,3};
+    spk3{jj,1} = spkResp.cong{jj,4};
+end
+[acc.RespCongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
 
+clear spk1 spk2 spk3
+
+myTitle = 'Response Centered Incongruent by Response';
+for jj = 1:length(spkResp.incong) %congruent different responses
+    spk1{jj,1} = spkResp.incong{jj,2};
+    spk2{jj,1} = spkResp.incong{jj,3};
+    spk3{jj,1} = spkResp.incong{jj,4};
+end
+[acc.RespIncongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+
+clear spk1 spk2 spk3
+
+%% ITI cntered
+timeEval = [500 1500]; %pick what time to actually plot, since the trials are pretty long
+myTitle = 'ITI Congruent v Incongruent';
+for jj = 1:length(spkResp.cong)
+    spk1{jj,1} = spkResp.cong{jj,1};
+    spk2{jj,1} = spkResp.incong{jj,1};
+end
+[acc.ITI] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+
+clear spk1 spk2
+
+myTitle = 'ITI Congruent by Response';
+for jj = 1:length(spkResp.cong) %congruent different responses
+    spk1{jj,1} = spkResp.cong{jj,2};
+    spk2{jj,1} = spkResp.cong{jj,3};
+    spk3{jj,1} = spkResp.cong{jj,4};
+end
+[acc.ITICongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+
+clear spk1 spk2 spk3
+
+myTitle = 'ITI Incong by Response';
+for jj = 1:length(spkResp.incong) %congruent different responses
+    spk1{jj,1} = spkResp.incong{jj,2};
+    spk2{jj,1} = spkResp.incong{jj,3};
+    spk3{jj,1} = spkResp.incong{jj,4};
+end
+[acc.ITIIncongXResp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+
+clear spk1 spk2 spk3
 % % tangling with shuffled tangles
 % %congruent
 % analyzett = 0:1499; %times to analyze the tangling between 

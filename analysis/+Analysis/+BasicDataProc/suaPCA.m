@@ -19,12 +19,14 @@ function [PCdata, data, dataLength] = suaPCA(spk, varargin)
 [varargin, tt]=util.argkeyval('tt', varargin, []); %time to run the PC over do it in adjusted time (so -50 to 1000)
 [varargin, pcaRun]=util.argkeyval('pcaRun', varargin, 1); %run it either congruent vs incongruent (1) or as choice 123 (2). which will be one figure of each but all put together for concat pcas.
 
-[varargin, softenNorm]=util.argkeyval('softenNorm', varargin, 5); 
-% * softenNorm (scalar, default: 5) - In the usual Churchlandian fashion,
+[varargin, softenNorm]=util.argkeyval('softenNorm', varargin, 1); 
+% * softenNorm (scalar, default: 1) - In the usual Churchlandian fashion,
 % soft normalization is performed on the neural data such that each neuron
 % is devided by its range (across all times and conditions) + some constant
 % indicated by softenNorm. EMG data should be fully normalized (i.e.
-% softenNorm set to 0)
+% softenNorm set to 0). FOR SOME REASON IF YOU MAKE IT 0, PCA DOESN'T WORK,
+% WHICH NEEDS SOME INVESTIGATION, HOWEVER, 1 WHICH PRESUMABLY IS NEARLY A
+% STANDARD NORM, IS MUCH BETTER.
 
 
 

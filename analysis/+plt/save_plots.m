@@ -25,8 +25,15 @@ else
     plotTypeT = plotType;
 end
 
-if ~isempty(subjName)
-    folder_create=strcat(folderName, '\', sessionName);    
+if isempty(subjName)
+    subjName = 'OOX';
+else
+
+    if isempty(sessionName)
+        folder_create=strcat(folderName);
+    else
+        folder_create=strcat(folderName, '\', sessionName);
+    end
     folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
     %make the directory folder
 

@@ -1,4 +1,4 @@
-function [acc,fracZeroVar] = suaLDA(spk1, spk2, varargin)
+function [acc,fracZeroVar, h] = suaLDA(spk1, spk2, varargin)
 %LDA for single unit activity over time
 %   runs an LDA across 2 conditions
 
@@ -19,11 +19,15 @@ function [acc,fracZeroVar] = suaLDA(spk1, spk2, varargin)
     %more than 20% or so
 
 [varargin, spk3]=util.argkeyval('spk3', varargin, []); %enter a third set of data if you want (and expand from there if you want)
+[varargin, win]=util.argkeyval('win', varargin, 50); %window over which to do the LDA
 
 [varargin, plt]=util.argkeyval('plt', varargin, true); %toggle plotting the decode on and off
+[varargin, multPlt]=util.argkeyval('multPlt', varargin, false); %if you are trying to do multiple plots on the same figure
+
 [varargin, tt]=util.argkeyval('tt', varargin, []); %time vector [-500 1000] means 500 before st (below variable) and 1000 after, for plotting, put in as start and end time compared to start, but need to enter start (below variable)
 [varargin, st]=util.argkeyval('st', varargin, []); %time from the start of the data when the center event occurs (so like 750 if the data starts 750 before the stim on. i.e. put in interval.preStimOn)
 [varargin, myTitle]=util.argkeyval('myTitle', varargin, 'Image On Congruent v Incongruent'); %optional title
+[varargin, lineColor]=util.argkeyval('lineColor', varargin, [.10, .22, .43]); %optional title
 
 
 %TO DO NEED TO FIX THIS BECAUSE THE LABELS ARE ACTUALLY
@@ -56,9 +60,11 @@ end
 k = 5;                                  % k-fold CV
 cvp = cvpartition(labels,'KFold',k); %~20% test
 
-acc = nan(nTime,1);
+acc = nan(round(nTime/win),1);
 
-for ii = 1:nTime
+%windows to decode over, default 50 ms
+idx = 1;
+for ii = 1:win:nTime-win-1
     % for each time point, get each unit across all trials
     % Build feature matrix: trials x units
     X1 = nan(nTr1, nUnits);
@@ -68,12 +74,12 @@ for ii = 1:nTime
     end
 
     for jj = 1:nUnits        
-        X1(:,jj) = spk1{jj,1}(:,ii);
-        X2(:,jj) = spk2{jj,1}(:,ii);
+        X1(:,jj) = mean(spk1{jj,1}(:,ii:ii+win),2);
+        X2(:,jj) = mean(spk2{jj,1}(:,ii:ii+win),2);
         if ~isempty(spk3) 
-            X1(:,jj) = spk1{jj,1}(:,ii);
-            X2(:,jj) = spk2{jj,1}(:,ii);
-            X3(:,jj) = spk3{jj,1}(:,ii);        
+            X1(:,jj) = mean(spk1{jj,1}(:,ii:ii+win),2);
+            X2(:,jj) = mean(spk2{jj,1}(:,ii:ii+win),2);
+            X3(:,jj) = mean(spk3{jj,1}(:,ii:ii+win),2);        
         end
     end
 
@@ -115,13 +121,14 @@ for ii = 1:nTime
         end
     end
 
-    acc(ii) = mean(foldAcc);
+    acc(idx) = mean(foldAcc);
     if ~isempty(spk3)
-            confMat(:,:,t) = foldCM ./ sum(foldCM,2);
+            confMat(:,:,idx) = foldCM ./ sum(foldCM,2);
     end
+    idx = idx+1;
 end
 
-if plt %TO DO IS UPDATE THE PLOTTING FOR 3
+if plt 
     if isempty(tt)
         tt(1) = 0;
         tt(2) = length(acc)-1;
@@ -129,13 +136,20 @@ if plt %TO DO IS UPDATE THE PLOTTING FOR 3
     if isempty(st)
         st=1;
     end
-    ttt = tt(1):tt(2)-1;
-    ttidx(1) = st+tt(1);
-    ttidx(2) = st+tt(2);
+    timeAdjIdx = 0-st:win:nTime-st-win;
+    ttt = tt(1):win:tt(2)-1;   
+    [~, ttidx(1)] = min(abs(timeAdjIdx - tt(1)));    
+    [~, ttidx(2)] = min(abs(timeAdjIdx - tt(2)));    
 
-    figure;
-    set(0, 'DefaultAxesFontSize', 16)
-    plot(ttt, acc(ttidx(1)+1:ttidx(2)),'LineWidth',2);
+    if multPlt == false
+        myTitleTemp = erase(myTitle, newline);
+        figure('Name', ['LDA decoding ', myTitleTemp])
+    else
+        hold on
+        
+    end
+    set(0, 'DefaultAxesFontSize', 14)
+    h = plot(ttt, acc(ttidx(1)+1:ttidx(2)),'LineWidth',1.2, 'Color', lineColor);
     xlabel('Time',  'FontSize', 18 , 'FontWeight' , 'bold' );
     ylabel('Decoding accuracy', 'FontSize', 18 , 'FontWeight' , 'bold');
     ylim([0 1]);
@@ -145,8 +159,134 @@ if plt %TO DO IS UPDATE THE PLOTTING FOR 3
     else
         yline(1/3, 'k--');
     end
-    title(['LDA decoding ' myTitle], 'FontSize', 18 , 'FontWeight' , 'bold');
+    title(['LDA decoding ', newline, myTitle], 'FontSize', 14 , 'FontWeight' , 'bold');
 end
 
+% for ii = 1:nTime
+%     % for each time point, get each unit across all trials
+%     % Build feature matrix: trials x units
+%     X1 = nan(nTr1, nUnits);
+%     X2 = nan(nTr2, nUnits);
+%     if ~isempty(spk3)
+%         X3 = nan(nTr3, nUnits);
+%     end
+% 
+%     for jj = 1:nUnits        
+%         X1(:,jj) = spk1{jj,1}(:,ii);
+%         X2(:,jj) = spk2{jj,1}(:,ii);
+%         if ~isempty(spk3) 
+%             X1(:,jj) = spk1{jj,1}(:,ii);
+%             X2(:,jj) = spk2{jj,1}(:,ii);
+%             X3(:,jj) = spk3{jj,1}(:,ii);        
+%         end
+%     end
+% 
+%     X = [X1; X2];
+%     if ~isempty(spk3)
+%         X = [X1; X2; X3];
+%     end
+% 
+%     foldAcc = nan(k,1);
+%     foldCM  = zeros(3,3);
+% 
+% 
+%     for fold = 1:k
+%         trainIdx = training(cvp,fold);
+%         fracZeroVar(ii,fold) = mean(var(X(trainIdx,:),[],1) == 0); %measure how mny units have no variance (>20% problem)
+% 
+%         testIdx  = test(cvp,fold);
+% 
+%         %z-score using training spk (only)
+%         mu = mean(X(trainIdx,:),1);
+%         sd = std(X(trainIdx,:),[],1);
+%         sd(sd==0) = 1;
+% 
+%         Xz = (X - mu) ./ sd;
+% 
+%         %pseudolinear uses Moore–Penrose pseudoinverse for when a unit has
+%         %no variance (and therefore makes the matrix singular) 
+%         % "We used a diagonal/regularized linear discriminant classifier to
+%         % ensure stable covariance estimation given the limited trial counts and sparse firing."
+%         lda = fitcdiscr(Xz(trainIdx,:), labels(trainIdx), ...
+%                 'DiscrimType','pseudoLinear');
+% 
+%         % test
+%         yhat = predict(lda, Xz(testIdx,:)); %predicts which are in which label
+%         foldAcc(fold) = mean(yhat == labels(testIdx)); %mean of percent that match
+%         if ~isempty(spk3)
+%             foldCM = foldCM + confusionmat(labels(testIdx), yhat, ...
+%                 'Order',[1 2 3]);
+%         end
+%     end
+% 
+%     acc(ii) = mean(foldAcc);
+%     if ~isempty(spk3)
+%             confMat(:,:,ii) = foldCM ./ sum(foldCM,2);
+%     end
+% end
+% 
+% if plt %TO DO IS UPDATE THE PLOTTING FOR 3
+%     if isempty(tt)
+%         tt(1) = 0;
+%         tt(2) = length(acc)-1;
+%     end
+%     if isempty(st)
+%         st=1;
+%     end
+%     ttt = tt(1):tt(2)-1;
+%     ttidx(1) = st+tt(1);
+%     ttidx(2) = st+tt(2);
+%     if multPlt == false
+%         myTitleTemp = erase(myTitle, newline);
+%         figure('Name', ['LDA decoding ', myTitleTemp])
+%     else
+%         hold on
+% 
+%     end
+%     set(0, 'DefaultAxesFontSize', 14)
+%     h = plot(ttt, acc(ttidx(1)+1:ttidx(2)),'LineWidth',1.2, 'Color', lineColor);
+%     xlabel('Time',  'FontSize', 18 , 'FontWeight' , 'bold' );
+%     ylabel('Decoding accuracy', 'FontSize', 18 , 'FontWeight' , 'bold');
+%     ylim([0 1]);
+%     xlim([ttt(1) ttt(end)]);
+%     if isempty(spk3)
+%         yline(0.5,'k--');
+%     else
+%         yline(1/3, 'k--');
+%     end
+%     title(['LDA decoding ', newline, myTitle], 'FontSize', 14 , 'FontWeight' , 'bold');
+% end
+
+% if plt 
+%     if isempty(tt)
+%         tt(1) = 0;
+%         tt(2) = length(acc)-1;
+%     end
+%     if isempty(st)
+%         st=1;
+%     end
+%     ttt = tt(1):tt(2)-1;
+%     ttidx(1) = st+tt(1);
+%     ttidx(2) = st+tt(2);
+%     if multPlt == false
+%         myTitleTemp = erase(myTitle, newline);
+%         figure('Name', ['LDA decoding ', myTitleTemp])
+%     else
+%         hold on
+% 
+%     end
+%     set(0, 'DefaultAxesFontSize', 14)
+%     h = plot(ttt, acc(ttidx(1)+1:ttidx(2)),'LineWidth',1.2, 'Color', lineColor);
+%     xlabel('Time',  'FontSize', 18 , 'FontWeight' , 'bold' );
+%     ylabel('Decoding accuracy', 'FontSize', 18 , 'FontWeight' , 'bold');
+%     ylim([0 1]);
+%     xlim([ttt(1) ttt(end)]);
+%     if isempty(spk3)
+%         yline(0.5,'k--');
+%     else
+%         yline(1/3, 'k--');
+%     end
+%     title(['LDA decoding ', newline, myTitle], 'FontSize', 14 , 'FontWeight' , 'bold');
+% end
 
 end

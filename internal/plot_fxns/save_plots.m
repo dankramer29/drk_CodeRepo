@@ -5,43 +5,47 @@ function save_plots( figs, varargin )
 %         3:5, 8], if you want all figures you can just put an empty set in
 %         [];
 %         varargin=     
-%                     'task', task  Input this if you want it to save it to the file that your data is in
+%                     'subj_name', task  Input this if you want it to save it to the file that your data is in
 
+%TO DO FIX IF THE INPUTS AREN'T ENTERED, RIGHT NOW THEY ARE NEEDED REALLY
 %%
 %find if task and folder was entered
-[varargin, task, ~, found]=util.argkeyval('task', varargin, []);
+[varargin, folderName, ~, found]=util.argkeyval('folderName', varargin, 'Z:\KramerEmotionID_2023\Data\EMU_nBack');
+[varargin, sessionName, ~, found]=util.argkeyval('sessionName', varargin, []);
+
 %Save the figures. Currently as jpg because the fig files are huge.
 %make it be a cell array
-[varargin, name, ~, found]=util.argkeyval('name', varargin, []);
+[varargin, subjName, ~, found]=util.argkeyval('subjName', varargin, []);
+[varargin, versionNum, ~, found]=util.argkeyval('versionNum', varargin, '_'); %if you want to do multiple versions of the same file
+[varargin, plotType, ~, found]=util.argkeyval('plotType', varargin, 'jpg'); %if you want to do multiple versions of the same file
 
-if ~isempty(task)
-    folder_create=strcat('C:\Users\Daniel\Documents\DATA\', task.subject);
-    folder_name=strcat(folder_create, '\', task.taskString, '\');  
-    %make the directory filder
-    mkdir (folder_create,   task.idString)
+if ~isstring(plotType)
+    plotTypeT = convertCharsToStrings(plotType);
+else
+    plotTypeT = plotType;
+end
+
+if isempty(subjName)
+    subjName = 'OOX';
+else
+
+    if isempty(sessionName)
+        folder_create=strcat(folderName);
+    else
+        folder_create=strcat(folderName, '\', sessionName);
+    end
+    folder_name=strcat(folder_create, '\', subjName, '\', versionNum, '_', date);  
+    %make the directory folder
+
+    mkdir(folder_name)
+    
     for ii=1:length(figs)
         h=figure(figs(ii));
-        saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
-    end
-    
-elseif isempty(task)
-    if ~isempty(name)
-        %NEED TO FIX THIS
-        folder_create=strcat('C:\Users\Daniel\Documents\DATA\', name);
-        folder_name=strcat(folder_create, '\', task.taskString, '\');
-        %make the directory filder
-        mkdir (folder_create,   task.idString)
-        for ii=1:length(figs)
-            h=figure(figs(ii));
-            saveas(h, fullfile(folder_name, get(h,'Name')), 'jpg');
-        end
-    else
-        for ii=1:length(figs)
-            h=figure(figs(ii));
-            saveas(h, get(h,'Name'), 'jpg');
-        end
+        %saveas(h, get(h,'Name'), 'jpg')
+        saveas(h, [fullfile(folder_name),'\', get(h,'Name')], plotTypeT);
     end
 end
+
 
 
 

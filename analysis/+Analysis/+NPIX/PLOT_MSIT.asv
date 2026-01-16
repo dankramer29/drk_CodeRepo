@@ -88,7 +88,6 @@ tt=-ttSt_realTime:ttEnd_realTime;
 
 idx1 = [1,2,5,6,9,10];
 idx2 = idx1+2;
-unitSt = 7; unitEnd = unitSt + 5;
 subplotSz = 6;
 
 idx = 1;
@@ -190,12 +189,13 @@ end
 
 
 %% plot a single unit
+ii = 49; %choose the unit
 
 colorTempTest = {'#374d7c', '#46edc8'}; %mint and blue, can change the color here to any hex code.#E4287C is pink lemonade. and here is a good three #678CEC #D49BAE and #BBCB50 which is blue/pink/green
 %colorTempTest = {'#678CEC', '#D49BAE'}; %blue pink
 for jj = 1:length(colorTempTest)
-    str = colorTempTest{ii};
-    C(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
+    str = colorTempTest{jj};
+    C(jj,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
 
 ttSt_realTime = 100; %ms before the center you want 
@@ -204,7 +204,6 @@ ttEnd_realTime = 1000;
 ttEnd = +interval.preStim + ttEnd_realTime;
 tt=-ttSt_realTime:ttEnd_realTime;
 
-ii = 55; %choose the unit
 
 mnC = spkStimOn.congMean{1}(ii,ttSt:ttEnd);
 mnI = spkStimOn.incongMean{1}(ii,ttSt:ttEnd);

@@ -190,6 +190,11 @@ edit Analysis.NPIX.PLOT_MSIT
 %% set up data for pca/tangling
 tt = -interval.preStim:interval.postStim-1;
 
+%clr12 = {'#CD1111', '#F79797', '#3a53a4', '#AEBAf8' }; %this is a red blue
+clr12 = {'#58126A', '#F6B2E1', '#07A3B2', '#D9ECC7'}; %pink and sea green,
+%looks very nice so keep this one around (although default in the function)
+clr3 = {'#9600FF', '#C795FD', '#0941CD', '#6F96F9', '#07B17C', '#8FFBDA'...
+    '#C40013', '#FF7D89', '#C63102', '#FEA68A', '#C38F1B', '#F1D699'}; %THESE COLORS SUCK, NEED TO CHANGE THEM. 
 
 %run PCA separately because tangling will end up being the data
 %
@@ -197,25 +202,25 @@ centerDataOn{1} = 1; %toggle on for stimOn
 centerDataOn{2} = {'Image On'};
 timeEval = [-250 1000]; %pick what time to actually plot, since the trials are pretty long
 [PCAdataStimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn, 'interval',...
-    interval, 'centerDataOn', centerDataOn, 'tt', timeEval);
+    interval, 'centerDataOn', centerDataOn, 'tt', timeEval, 'clr12', clr12);
 [PCAdata123StimOn, dataCond123StimOn] = Analysis.BasicDataProc.suaPCA(spkStimOn,...
-    'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2);
+    'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2, 'clr3', clr3);
 
 centerDataOn{1} = 2; %toggle 2 for response
 centerDataOn{2} = {'Response'};
 timeEval = [-750 250]; %pick what time to actually plot, since the trials are pretty long
 [PCAdataResp] = Analysis.BasicDataProc.suaPCA(spkResp, 'interval',...
-    interval, 'centerDataOn', centerDataOn, 'tt', timeEval);
+    interval, 'centerDataOn', centerDataOn, 'tt', timeEval, 'clr12', clr12);
 [PCAdata123Resp, dataCond123Resp] = Analysis.BasicDataProc.suaPCA(spkResp,...
-    'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2);
+    'interval', interval, 'centerDataOn', centerDataOn,'tt', timeEval, 'pcaRun', 2, 'clr3', clr3);
 
 centerDataOn{1} = 3; %toggle 3 for iti
 centerDataOn{2} = {'ITI'};
 timeEval = [500 1500]; %pick what time to actually plot, since the pre/post stim are made long to include a lot
 [PCAdataITI] = Analysis.BasicDataProc.suaPCA(spkITI, 'interval', interval,...
-    'centerDataOn', centerDataOn, 'tt', timeEval);
+    'centerDataOn', centerDataOn, 'tt', timeEval, 'clr12', clr12);
 [PCAdata123ITI, dataCond123ITI] = Analysis.BasicDataProc.suaPCA(spkITI,...
-    'interval', interval, 'centerDataOn', centerDataOn, 'tt', timeEval, 'pcaRun', 2);
+    'interval', interval, 'centerDataOn', centerDataOn, 'tt', timeEval, 'pcaRun', 2, 'clr3', clr3);
 
 
 %tangling. the pca doubles up here, (done in tangling and in pca above) but
@@ -316,7 +321,7 @@ for jj = 1:length(spkResp.cong)
     spk1{jj,1} = spkResp.cong{jj,1};
     spk2{jj,1} = spkResp.incong{jj,1};
 end
-[acc.Resp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+[acc.Resp] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'tt', timeEval, 'st', interval.preResp, 'myTitle', myTitle);
 
 clear spk1 spk2
 %--------------------------------
@@ -330,7 +335,7 @@ for jj = 1:length(spkResp.cong) %congruent different responses
     spk3{jj,1} = spkResp.cong{jj,4};
 end
 [acc.RespCongXResp, ~, H1] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3,...
-    'plt', pltLDA, 'lineColor', C1(1,:), 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+    'plt', pltLDA, 'lineColor', C1(1,:), 'tt', timeEval, 'st', interval.preResp, 'myTitle', myTitle);
 
 clear spk1 spk2 spk3
 
@@ -340,7 +345,7 @@ for jj = 1:length(spkResp.incong) %incongruent different responses
     spk3{jj,1} = spkResp.incong{jj,4};
 end
 [acc.RespIncongXResp, ~, H2] = Analysis.BasicDataProc.suaLDA(spk1, spk2, 'spk3', spk3,...
-    'plt', pltLDA, 'multPlt', multPlt, 'lineColor', C1(2,:), 'tt', timeEval, 'st', interval.preStim, 'myTitle', myTitle);
+    'plt', pltLDA, 'multPlt', multPlt, 'lineColor', C1(2,:), 'tt', timeEval, 'st', interval.preResp, 'myTitle', myTitle);
 legend([H1, H2], {'Congruent', 'Incongruent'})
 
 %--------------------------------
@@ -359,7 +364,7 @@ for rr = 2:4
         multPlt = 1; %there is a weird double negative here, toggle off if the first plot and on if the subsequent plots
     end
     [acc.RespIncongXResp, ~, H{rr-1}] = Analysis.BasicDataProc.suaLDA(spk1, spk2,...
-        'plt', pltLDA, 'multPlt', multPlt, 'tt', timeEval, 'st', interval.preStim,...
+        'plt', pltLDA, 'multPlt', multPlt, 'tt', timeEval, 'st', interval.preResp,...
         'myTitle', myTitle, 'lineColor', C2(rr-1,:));
 
     clear spk1 spk2
@@ -380,7 +385,7 @@ end
 clear spk1 spk2
 
 %----------------------------------
-myTitle = ['Keypress Aligned', newline, 'Decoding Each Response during Congruent Condition v Incongruent Condition'];
+myTitle = ['ITI', newline, 'Decoding Each Response during Congruent Condition v Incongruent Condition'];
 for jj = 1:length(spkResp.cong) %congruent different responses
     spk1{jj,1} = spkResp.cong{jj,2};
     spk2{jj,1} = spkResp.cong{jj,3};
@@ -413,16 +418,12 @@ clear spk1 spk2 spk3
 % [Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
 
 %% save the figures
+savePlot = true;
+if savePlot
+    hh =  findobj('type','figure');
+    nh = length(hh);
+    plt.save_plots([1:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT\004', 'subjName', subjName, 'versionNum', '1');
+end
 
-
-plt.save_plots([1:9], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT\004', 'subjName', subjName, 'versionNum', '1', 'plotType', 'm');
-
-% savePlot = true;
-% if savePlot
-%     hh =  findobj('type','figure'); 
-%     nh = length(hh);
-%     plt.save_plots([1:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', 'subjName', subjName);
-% end
-% 
 
 

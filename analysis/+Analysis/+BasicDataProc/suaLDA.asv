@@ -20,6 +20,8 @@ function [acc,fracZeroVar, h] = suaLDA(spk1, spk2, varargin)
 
 [varargin, spk3]=util.argkeyval('spk3', varargin, []); %enter a third set of data if you want (and expand from there if you want)
 [varargin, win]=util.argkeyval('win', varargin, 50); %window over which to do the LDA
+[varargin, decPCA]=util.argkeyval('decPCA', varargin, true); %do a pca and then decode (remember must do the pca only on the training data
+[varargin, numPCs]=util.argkeyval('numPCs', varargin, 20); %number of PCs to do. can get fancier later about variance or to maximize.
 
 [varargin, plt]=util.argkeyval('plt', varargin, true); %toggle plotting the decode on and off
 [varargin, multPlt]=util.argkeyval('multPlt', varargin, false); %if you are trying to do multiple plots on the same figure
@@ -96,7 +98,8 @@ for ii = 1:win:nTime-win-1
         trainIdx = training(cvp,fold);
         fracZeroVar(ii,fold) = mean(var(X(trainIdx,:),[],1) == 0); %measure how mny units have no variance (>20% problem)
 
-        testIdx  = test(cvp,fold);
+        testIdx  = test(cvp,fold);       
+
 
         %z-score using training spk (only)
         mu = mean(X(trainIdx,:),1);
@@ -105,20 +108,45 @@ for ii = 1:win:nTime-win-1
 
         Xz = (X - mu) ./ sd;
 
+        if decPCA %if going to do a pca and then decode (
+            [coeff, scoreTrain] = pca(Xz(trainIdx,:));
+            %  test data in same PC space
+            scoreTest = Xz(testIdx,:) * coeff;
+
+            % Keep top PCs
+            Ztrain = scoreTrain(:,1:numPC);
+            Ztest  = scoreTest(:,1:numPC);
+        else
+            Ztrain = Xz(trainIdx,:);
+            Ztest = Xz(testIdx,:);
+        end
+
+
+
         %pseudolinear uses Moore–Penrose pseudoinverse for when a unit has
         %no variance (and therefore makes the matrix singular) 
         % "We used a diagonal/regularized linear discriminant classifier to
         % ensure stable covariance estimation given the limited trial counts and sparse firing."
-        lda = fitcdiscr(Xz(trainIdx,:), labels(trainIdx), ...
+        lda = fitcdiscr(Ztrain, labels(trainIdx), ...
                 'DiscrimType','pseudoLinear');
-
-        % test
-        yhat = predict(lda, Xz(testIdx,:)); %predicts which are in which label
+         % test
+        yhat = predict(lda, Ztest); %predicts which are in which label
         foldAcc(fold) = mean(yhat == labels(testIdx)); %mean of percent that match
         if ~isempty(spk3)
             foldCM = foldCM + confusionmat(labels(testIdx), yhat, ...
                 'Order',[1 2 3]);
         end
+        
+        % lda = fitcdiscr(Xz(trainIdx,:), labels(trainIdx), ...
+        %         'DiscrimType','pseudoLinear');
+        % 
+        % % test
+        % yhat = predict(lda, Xz(testIdx,:)); %predicts which are in which label
+        % foldAcc(fold) = mean(yhat == labels(testIdx)); %mean of percent that match
+        % if ~isempty(spk3)
+        %     foldCM = foldCM + confusionmat(labels(testIdx), yhat, ...
+        %         'Order',[1 2 3]);
+        % end
     end
 
     acc(idx) = mean(foldAcc);

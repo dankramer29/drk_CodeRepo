@@ -286,3 +286,12 @@ bb.FaceColor = 'flat';
 for ii = 1:length(C)
     bb.CData(ii,:) = C(ii,:);
 end
+
+% pink brown, yellow, green, purple blue
+colorTempTest = {'#fee327', '#47181e',  '#f08ab1',  '#927db6', '#00b3e1',  '#87bf54' };
+
+
+% red brown, yellow, green, purple blue (same as above)
+
+colorTempTest = {'#9B4923', '#C31704',  '#F4C500', '#927db6', '#00b3e1',  '#87bf54'};
+

@@ -12,7 +12,8 @@ function  raster_plot( spk_times, varargin )
 [varargin, condSep]=util.argkeyval('condSep', varargin, []); % if some are in one condition and others are in another condition, list the number where the trials separate
 [varargin, colorChoice]=util.argkeyval('colorChoice', varargin, []); %enter as hexcodes, put in one or two or more color choices
 
-[varargin, hashWidth]=util.argkeyval('hashWidth', varargin, 0.8); % set the width. 0.8 is good if doing a lot of trials but bad if only one or two
+[varargin, yWidth]=util.argkeyval('yWidth', varargin, 2); % set the width of the ticks. 0.8 is good if doing a lot of trials but bad if only one or two
+[varargin, xWidth]=util.argkeyval('xWidth', varargin, 1.5); % set the width of the ticks. 0.8 is good if doing a lot of trials but bad if only one or two
 
 
 %figure if you need a blank figure
@@ -87,12 +88,12 @@ if ~nanPlot
         spikeIdx = find(spk_times(i,:));
         for s = 1:length(spikeIdx)
             x = [spikeIdx(s) + Time(1) , spikeIdx(s) + Time(1)];
-            y = [i- hashWidth/2, i + hashWidth/2];
+            y = [i- yWidth/2, i + yWidth/2];
             if rainbowC
 
-                line(x, y, 'Color', C(color+idx,:), 'LineWidth', 4);
+                line(x, y, 'Color', C(color+idx,:), 'LineWidth', xWidth);
             else
-                line(x, y, 'Color', C(color,:), 'LineWidth', 4);
+                line(x, y, 'Color', C(color,:), 'LineWidth', xWidth);
             end
         end
         idx= idx+1;
@@ -132,7 +133,7 @@ if nanPlot
 
         % each spike is a short vertical line from trial-0.4 to trial+0.4
         for s = 1:numel(st)
-            line([st(s) st(s)], [tr-0.4 tr+0.4], 'Color', C(color,:), 'LineWidth', 6);
+            line([st(s) st(s)], [tr-yWidth tr+yWidth], 'Color', C(color,:), 'LineWidth', xWidth);
         end
     end
     xlabel('Time (ms)')

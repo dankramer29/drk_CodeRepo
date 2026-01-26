@@ -191,12 +191,21 @@ edit Analysis.NPIX.PLOT_MSIT
 tt = -interval.preStim:interval.postStim-1;
 
 %clr12 = {'#CD1111', '#F79797', '#3a53a4', '#AEBAf8' }; %this is a red blue
-clr12 = {'#58126A', '#F6B2E1', '#07A3B2', '#D9ECC7'}; %pink and sea green, (this is a good combo too '#C38F1B', '#F1D699')
+%clr12 = {'#58126A', '#F6B2E1', '#07A3B2', '#D9ECC7'}; %pink and sea green, (this is a good combo too '#C38F1B', '#F1D699')
+clr12 = {'#0D7AB2', '#F2BAE9', '#FF0078', '#F6EFA7'}; %Blue and neon pink, (this is a good combo too '#C38F1B', '#F1D699')
+
 %looks very nice so keep this one around (although default in the function)
-clr3 = {'#D00014', '#FF8B96', '#B62D02', '#FE906E', '#B78619', '#F3DAA3'...
-    '#5402AE', '#CB9CFE', '#0734A5', '#5E8AF8','#12BA7A', '#93F5D0' }; %CLOSER! BUT THE FIRST THREE RED-ORANGE NEED TO BE FARTHER APART.
+clr3 = {'#52396B', '#D783DD', '#A42E4D', '#E296AA', '#C59307', '#EEC96E'... %top three are the congruent colors, bottom incongruent
+    '#4B0274', '#C663FD', '#166462', '#8EE6E4','#792B56', '#DA96BB' };%purple teal pink 90s colors
+
+%'#7B03BD', '#BE4DFD', '#2ED0CB', '#BDF1F0','#C9669C', '#E2ACCA' }; %good
+%but these three NEED TO BE FARTHER APART start to finish
 %clr3 = {'#395886', '#B1C9EF', '#38000A', '#FFA896', '#253D2C', '#CFFFDC'}; %standard red, blue, green and same for both. 
 %run PCA separately because tangling will end up being the data
+
+%clr3 = {'#700B0B', '#FF7CA4', '#D76406', '#F8C4A6', '#D60653', '#FCBDF9'... %top three are the congruent colors, bottom incongruent
+%    '#5402AE', '#CB9CFE', '#0734A5', '#5E8AF8','#12BA7A', '#93F5D0' }; %CLOSER! BUT THE FIRST THREE RED-ORANGE NEED TO BE FARTHER APART.
+
 %
 centerDataOn{1} = 1; %toggle on for stimOn
 centerDataOn{2} = {'Image On'};
@@ -250,8 +259,8 @@ for ii = 1:length(colorTempTest)
     str = colorTempTest{ii};
     C1(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
-colorTempTest = {'#81CAD6', '#EDCD44', '#DC3E26'};
-for ii = 1:length(colorTempTest)
+colorTempTest = {'C7395F', '#EDCD44', '#DC3E26'}; % 
+for ii = 1:length(colorTempTest)asdf
     str = colorTempTest{ii};
     C2(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
@@ -425,7 +434,29 @@ savePlot = false;
 if savePlot
     hh =  findobj('type','figure');
     nh = length(hh);
-    plt.save_plots([1:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT\004', 'subjName', subjName, 'versionNum', '1');
+    plt.save_plots([1:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', 'subjName', subjName, 'versionNum', '1');
+
+%%
+    %for saving svg of rotations plots, rotate the plot how you want, then
+    %do this and it will save
+    ii=31; %change to the figure number one at a time, do this.
+    mkdir(fullfile(['\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', '\', subjName, '\', '1', '_', date]));
+    for ii = 24:26 %the first 9 are all pcas, but if you make new ones, save like this
+        h=figure(ii);
+        outDir = 'C:\Users\Daniel\Documents\Figures';   % or relative path
+        fname  = get(h,'Name');
+
+        print(gcf, '-vector', '-dsvg', fullfile(['\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', '\', subjName, '\', '1', '_', date, '\' fname, '.svg']));
+    end
+    
+    %NOTE:
+    %Lots of plots seem to not save as svg. if you want to do it
+    %individually (not bulk as above), put the name in the brackets below
+    %and run that line. it will save to the current folder and you can just
+    %cut it and move it to whatever folder, or use the folder above as
+    %well. it will just do whatever the current fig is
+    %print(gcf,'-vector','-dsvg',['Unit 49 and 55 cong v incong','.svg']) % svg
+
 end
 
 

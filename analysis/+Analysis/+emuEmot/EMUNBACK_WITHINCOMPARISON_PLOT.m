@@ -47,10 +47,11 @@ MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
 %  allEmotions and allIdentities are the same since it's just all images
 %  shown
 tTot = tic;
+xshuffles = 100; %CHANGE TO 100 WHEN YOU ARE READY FOR REAL ANALYSIS.
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2); %eventChoice should be image
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 3); %eventChoice should be response
 toc(tTot)
 
 

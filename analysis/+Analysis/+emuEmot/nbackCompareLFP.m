@@ -11,13 +11,15 @@ function [nback,sigComparison] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,
 [varargin, comparedToITI]=util.argkeyval('comparedToITI', varargin, true); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI)
 [varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 100); %number of shuffles for permutation test if needed
 [varargin, threshold]=util.argkeyval('threshold', varargin, []); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI) and have the thresholds done for comparison outside of this function
-[varargin, eventChoice]=util.argkeyval('eventChoice', varargin, 1); %1 is when the image comes on, 2 is the response
+[varargin, eventChoice]=util.argkeyval('eventChoice', varargin, 2); %2 is when the image comes on, 3 is the response
 [varargin, itiOptions]=util.argkeyval('itiOptions', varargin, 1); %case swithc for 3 options, option 1 and 2 generate 1 threshold for each channel. 1 is do the iti with the iti between images. 2 is iti from random 1 second intervals, and 3 is just run it between conditions with a new threshold each time
 [varargin, comparedToSubtractionITI]=util.argkeyval('comparedToSubtractionITI', varargin,1); %run the iti difference comparison (subtract data 1 from data 2 and shuffle compare that difference)
 %for the bandpass analysis
 [varargin, freqOfInterest]=util.argkeyval('freqOfInterest', varargin,[50 150]); %find the frequency of interest for the band passed analysis
 [varargin, fs]=util.argkeyval('fs', varargin, 500); %sampling frequency
 [varargin, bandpassRange]=util.argkeyval('bandpassRange', varargin,5); %how big do we want the frequency range to be
+
+
 
 if comparedToITI ==1
     if isempty(itiDataFilt)
@@ -115,7 +117,7 @@ if comparedToSubtractionITI == 1
 
         [~, ~, ~, ~, nback.(chName{ii}).subtraction.largestCluster,...
                 tstatPos_sumsStatSig, tstatNeg_sumsStatSig] = stats.cluster_permutation_Subtraction_Ttest_gpu3d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
-                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0, 'chName', chName{ii} );
+                'xshuffles', xshuffles, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0, 'chName', chName{ii} );
 
        
 

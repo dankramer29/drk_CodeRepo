@@ -1,4 +1,4 @@
-function [nback,significantComparisons] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
+function [nback,sigComparison] = nbackCompareLFP(identityTaskLFP,emotionTaskLFP,varargin)
 %UNTITLED2 Summary of this function goes here
 %   lfp1/2 = expects output of nwbLFPchProc for the emotion relevant task
 %   and the identity relevant task
@@ -11,13 +11,15 @@ function [nback,significantComparisons] = nbackCompareLFP(identityTaskLFP,emotio
 [varargin, comparedToITI]=util.argkeyval('comparedToITI', varargin, true); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI)
 [varargin, xshuffles]=util.argkeyval('xshuffles', varargin, 100); %number of shuffles for permutation test if needed
 [varargin, threshold]=util.argkeyval('threshold', varargin, []); %if you are going to compare condition to iti (i.e. emotion task to random generated ITI) and have the thresholds done for comparison outside of this function
-[varargin, eventChoice]=util.argkeyval('eventChoice', varargin, 1); %1 is when the image comes on, 2 is the response
+[varargin, eventChoice]=util.argkeyval('eventChoice', varargin, 2); %2 is when the image comes on, 2 is the response
 [varargin, itiOptions]=util.argkeyval('itiOptions', varargin, 1); %case swithc for 3 options, option 1 and 2 generate 1 threshold for each channel. 1 is do the iti with the iti between images. 2 is iti from random 1 second intervals, and 3 is just run it between conditions with a new threshold each time
 [varargin, comparedToSubtractionITI]=util.argkeyval('comparedToSubtractionITI', varargin,1); %run the iti difference comparison (subtract data 1 from data 2 and shuffle compare that difference)
 %for the bandpass analysis
 [varargin, freqOfInterest]=util.argkeyval('freqOfInterest', varargin,[50 150]); %find the frequency of interest for the band passed analysis
 [varargin, fs]=util.argkeyval('fs', varargin, 500); %sampling frequency
 [varargin, bandpassRange]=util.argkeyval('bandpassRange', varargin,5); %how big do we want the frequency range to be
+
+
 
 if comparedToITI ==1
     if isempty(itiDataFilt)
@@ -56,7 +58,8 @@ event = fieldnames(identityTaskLFP.byemotion.(chName{1}));
 
 nback = struct;
 significantComparisons = [];
-
+significantshuffleBP = [];
+significantSubtractionBP = [];
 
 %% compares a subtraction of the two conditions as clusters compared to iti TRYING THIS OUT
 
@@ -114,7 +117,7 @@ if comparedToSubtractionITI == 1
 
         [~, ~, ~, ~, nback.(chName{ii}).subtraction.largestCluster,...
                 tstatPos_sumsStatSig, tstatNeg_sumsStatSig] = stats.cluster_permutation_Subtraction_Ttest_gpu3d(dataEmotionTaskAllIdentities, itiDataEm, dataIdentityTaskAllIdentities, itiDataId,...
-                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0 );
+                'xshuffles', 100, 'tt', identityTaskLFP.tPlotImage, 'ff', identityTaskLFP.freq, 'flipData', 0, 'chName', chName{ii} );
 
        
 
@@ -129,7 +132,7 @@ if comparedToSubtractionITI == 1
                                                                         dataIdentityTaskAllIdentities, dataIdentityTaskAllIdentitiesBP,...
                                                                             'data1itibp', itiDataEmBp, 'data2itibp', itiDataIdBp, 'ff',...
                                                                                 identityTaskLFP.freq, 'freqOfInterest', freqOfInterest,...
-                                                                                    'tt', identityTaskLFP.tPlotImageBandPass); 
+                                                                                    'tt', identityTaskLFP.tPlotImageBandPass, 'chName', chName{ii}); 
       
         if tstatPos_sumsStatSig>0 %this is only taking the positive
             significantSubtractionCluster{idxcomp1,1} = chName{ii};
@@ -153,9 +156,9 @@ if comparedToSubtractionITI == 1
         end
         if nback.(chName{ii}).freqPeak.subtBinary>0 %subtraction t test
             significantSubtractionBP{idxcomp3,1} = chName{ii};
-            if nback.(chName{ii}).freqPeak.shuffleTtestMaxBinary == 1 %1 is data 1 is larger, 2 is data 2 is larger
+            if nback.(chName{ii}).freqPeak.subtBinary == 1 %1 is data 1 is larger, 2 is data 2 is larger
                 significantSubtractionBP{idxcomp3,2} = 'emotionTask';
-            elseif tstatPos_sumsStatSig == 2
+            elseif nback.(chName{ii}).freqPeak.subtBinary == 2
                 significantSubtractionBP{idxcomp3,2} = 'identityTask';
             end                
             significantSubtractionBP{idxcomp3,3} = nback.(chName{ii}).freqPeak.subtractionTtest.thresh_tmaxDiff{1,1}; %take the difference

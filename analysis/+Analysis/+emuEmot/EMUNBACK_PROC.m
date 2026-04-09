@@ -356,7 +356,7 @@ fsFull = 4000;
 %time in seconds to add before and after the events
 preTime = 0.5; %time before and after image on
 postTime = 2; 
-preTimeRes = 1; %time befoe and after response
+preTimeRes = 1; %time befoRe and after response
 postTimeRes = 0.5;
 % sets the shuffling parameters, so it's stitching post multi-tapered data,
 % then smoothing it.
@@ -911,7 +911,7 @@ end
     PresentedIdentityIdxEm, behavioralIndexImageOnEm, behavioralIndexResponseEm, ...
     'fs', fs, 'chNum', chInterest, 'itiTime', itiTimeEmotion,...
     'ImpreTime', preTime, 'ImpostTime', postTime, 'RespreTime', preTimeRes, 'RespostTime', postTimeRes, 'multiTaperWindow',...
-    multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion);
+    multiTaperWindow, 'CorrectTrials', CorrectTrialsEm, 'ResponseTimesAdj', ResponseTimesDiffEmotion, 'chLocationName', chLocationName);
 
 
 %this is an option to make an iti that is a bunch of random times chosen.

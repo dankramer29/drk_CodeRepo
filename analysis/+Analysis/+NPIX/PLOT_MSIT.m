@@ -535,7 +535,7 @@ end
 % NOTE NEED TO WORK ON LEGENDS BUT DON'T HAVE TIME AND WILL DO BY HAND
 unitSt = 56; 
 unitEnd = 56;
-colorTempTest = {'#F4C500', '#47181e',  '#f08ab1',  '#927db6', '#00b3e1',  '#87bf54' }; %orange, pink, brown, blue, purple, green, unsure of order
+colorTempTest = {'#F4C500', '#47181e',  '#f08ab1',  '#927db6', '#00b3e1',  '#87bf54' };  %orange, brown, pink, purple, blue, green, confirmed order
 
 %colorTempTest = {'#678CEC', '#D49BAE'}; %blue pink
 for fignum = 1:length(colorTempTest)
@@ -543,9 +543,9 @@ for fignum = 1:length(colorTempTest)
     C(fignum,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
 
-ttSt_realTime = 750; %ms before the center you want 
+ttSt_realTime = 300; %ms before the center you want 
 ttSt = interval.preResp-ttSt_realTime;
-ttEnd_realTime = 500;
+ttEnd_realTime = 200;
 ttEnd = ttEnd_realTime+interval.preResp;
 tt=-ttSt_realTime:ttEnd_realTime;
 
@@ -566,8 +566,8 @@ for fignum = unitSt:unitEnd
 
     shP= shuffleHist{fignum,2};
     shN= shuffleHist{fignum,3};
-    shPplt= repmat(shP,1,length(mnC));
-    shNplt= repmat(shN,1,length(mnC));
+    shPplt= repmat(shP,1,length(tt));
+    shNplt= repmat(shN,1,length(tt));
     subplot(subplotSz,2,idx1(idx))
     for rr = 1:3
         mnC = spkResp.congMean{rr+1}(fignum,ttSt:ttEnd);

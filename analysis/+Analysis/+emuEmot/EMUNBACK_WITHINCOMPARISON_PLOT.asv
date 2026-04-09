@@ -48,7 +48,7 @@ MWX.statsAllTrials = vertcat(statsAllTrialsEm, statsAllTrialsId);
 %  shown
 tTot = tic;
 [nbackCompareImageOn, sigComparisonImageOn] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
-    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 1);
+    'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 1); %these event choices got switched at some point to 2 is image and 3 is response.
 [nbackCompareResponse, sigComparisonResponse] = Analysis.emuEmot.nbackCompareLFP(identityTaskLFP, emotionTaskLFP,...
     'chInterest', channelNameFinal, 'itiDataFilt', itiDataReal, 'xshuffles', xshuffles, 'itiOptions', 2, 'eventChoice', 2);
 toc(tTot)
@@ -57,10 +57,10 @@ toc(tTot)
 amygdalaEmtSpectrogram = [];
 amygdalaIdtSpectrogram = [];
 
-for ii = 1:length(chLocationName)
+for ii = 1:length(chLocationName) %bascially do this for all of them and then run the shuffle with the itis and the freakpeak
     if strcmp('R Amygdala',chLocationName{ii}) || strcmp('L Amygdala',chLocationName{ii})
         amygdalaIdtSpectrogram = cat(3, amygdalaIdtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).identityTaskData);
-       amygdalaIdtSpectrogram = cat(3, amygdalaIdtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).identityTaskData);
+        amygdalaEmtSpectrogram = cat(3, amygdalaEmtSpectrogram, nbackCompareImageOn.(channelNameFinal{ii}).emotionTaskData);
 
     end
 end

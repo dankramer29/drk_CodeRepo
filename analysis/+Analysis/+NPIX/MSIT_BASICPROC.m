@@ -231,7 +231,7 @@ timeEval = [500 1500]; %pick what time to actually plot, since the pre/post stim
 [PCAdata123ITI, dataCond123ITI] = Analysis.BasicDataProc.suaPCA(spkITI,...
     'interval', interval, 'centerDataOn', centerDataOn, 'tt', timeEval, 'pcaRun', 2, 'clr3', clr3);
 
-%% tangling
+%% tangling %CAN IGNORE THIS FOR NOW
 %tangling. the pca doubles up here, (done in tangling and in pca above) but
 %it's fast
 [tangling.qCStimOn, outCStimOn] = tangleAnalysis(dataCond123StimOn(1:3), .001, 'softenNorm', 1 ); % for data collected at 1kHz
@@ -429,7 +429,7 @@ clear spk1 spk2 spk3
 % 
 % [Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
 
-%% save the figures
+%% save the figures %THIS IS JUST TO SAVE PLOTS, CAN MAKE YOUR OWN VERSION OR I CAN SEND YOU MINE BUT IT BARELY WORKS AS IS
 savePlot = false;
 if savePlot
     hh =  findobj('type','figure');

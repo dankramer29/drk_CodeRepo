@@ -22,7 +22,7 @@
 
 % TO DO: LABEL THE LOCATIONS OF EACH UNIT
 
-subjName = 'NPIX_MSIT_004'; %subject name
+
 
 sigWindow = 30; %lenght of ms that the firing rate needs to be positive for to count it (probably 30-50ms)
 qshuffles = 100; %number of shuffles to do for the tangling (100 is for speed, but can do 1000 or more and then save it once). Currently does not do a separate firing rate mean for congruent and incongruent, but shouldn't matter)
@@ -35,9 +35,19 @@ interval.postITI = 2500; %ms post to iti on (includes a ramp to cut off for edge
 interval.preResp = 1250; %ms prior to Response on (includes a ramp to cut off for edge effects)
 interval.postResp = 750; %ms after Resonse on (includes a ramp to cut off for edge effects), the shortest iti is 2s so adding pad on that, but will likely take the middle of the iti
 
+
+% subjName = 'NPIX_MSIT_004'; %subject name
+ subjName = 'NPIX_MSIT_005'; %subject name
+%subjName = 'NPIX_MSIT_010'; %subject name
+
 %load the patient data
-subjectId = '004';
-dataName = 'NPIX_MSIT_004.nwb';
+% subjectId = '004'; %010 %050
+% dataName = 'NPIX_MSIT_004.nwb'; 
+subjectId = '005';
+dataName = 'NPIX_MSIT_005_filteredUnits.nwb';
+% subjectId = '010';
+%  dataName = 'NPIX_MSIT_010_filteredUnits.nwb';
+
 
 %will load all of the data into unitDataCl and unitSpikesCl (meaning it
 %removes the noise spikes) and task data in taskData
@@ -92,7 +102,11 @@ startSpikeTime = min(firstSpikeTime);
 finalSpikeTime = max(lastSpikeTime);
 noSpikeTrial = find(taskData.trial_end_time>finalSpikeTime);
 %find the trials that have no spikes:
-endTrials = noSpikeTrial(1)-1;
+if ~isempty(noSpikeTrial)
+    endTrials = noSpikeTrial(1)-1;
+else
+    endTrials = length(taskData.trial_end_time); %if that is not the case, just end at the last trial
+end
 
 idx=1; 
 for ii = 1:length(unitSpikesCl)
@@ -260,7 +274,7 @@ for ii = 1:length(colorTempTest)
     C1(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
 colorTempTest = {'C7395F', '#EDCD44', '#DC3E26'}; % 
-for ii = 1:length(colorTempTest)asdf
+for ii = 1:length(colorTempTest)
     str = colorTempTest{ii};
     C2(ii,:) = sscanf(str(2:end),'%2x%2x%2x',[1 3])/255;
 end
@@ -430,16 +444,16 @@ clear spk1 spk2 spk3
 % [Qsh] = Analysis.NPIX.shuffleTangling(spkStimOn, taskData, endTrials, 'tt', tt, 'analyzett', analyzett);
 
 %% save the figures %THIS IS JUST TO SAVE PLOTS, CAN MAKE YOUR OWN VERSION OR I CAN SEND YOU MINE BUT IT BARELY WORKS AS IS
-savePlot = false;
+savePlot = true;
 if savePlot
     hh =  findobj('type','figure');
     nh = length(hh);
-    plt.save_plots([1:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', 'subjName', subjName, 'versionNum', '1');
+    plt.save_plots([10:nh], 'folderName', '\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', 'subjName', subjName, 'versionNum', '1');
 
 %%
     %for saving svg of rotations plots, rotate the plot how you want, then
     %do this and it will save
-    ii=31; %change to the figure number one at a time, do this.
+    ii=5; %change to the figure number one at a time, do this.
     mkdir(fullfile(['\\SOM-NSG-R-AO1\DataMeta\KramerEmotionID_2023\Data\NPIX\MSIT', '\', subjName, '\', '1', '_', date]));
     for ii = 24:26 %the first 9 are all pcas, but if you make new ones, save like this
         h=figure(ii);

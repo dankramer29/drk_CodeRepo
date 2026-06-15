@@ -5,6 +5,8 @@ function [congspkSm, incongspkSm, congMean, incongMean, congSE, incongSE, congSp
 flds = fields(taskData);
 
 
+
+
     for jj = 1:size(spk.spkRateSm,1)
         congspkSm{jj,1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 1,:);
         incongspkSm{jj,1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 2,:);
@@ -14,10 +16,10 @@ flds = fields(taskData);
         %response 3. currently flds(6) is response, can do what it was
         %supposed to be as well although accuracy is generally high.
         for kk = 1:3
-            congspkSm{jj,kk+1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 1 & taskData.(flds{6})(1:endTrials) == kk,:);
-            incongspkSm{jj,kk+1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 2 & taskData.(flds{6})(1:endTrials) == kk,:);
-            congSpk{jj,kk+1} = spk.spk{jj}(taskData.Condition(1:endTrials) == 1 & taskData.(flds{6})(1:endTrials) == kk,:);
-            incongSpk{jj,kk+1} = spk.spk{jj}(taskData.Condition(1:endTrials) == 2 & taskData.(flds{6})(1:endTrials) == kk,:);
+            congspkSm{jj,kk+1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 1 & taskData.ResponseKey(1:endTrials) == kk,:);
+            incongspkSm{jj,kk+1} = spk.spkRateSm{jj}(taskData.Condition(1:endTrials) == 2 & taskData.ResponseKey(1:endTrials) == kk,:);
+            congSpk{jj,kk+1} = spk.spk{jj}(taskData.Condition(1:endTrials) == 1 & taskData.ResponseKey(1:endTrials) == kk,:);
+            incongSpk{jj,kk+1} = spk.spk{jj}(taskData.Condition(1:endTrials) == 2 & taskData.ResponseKey(1:endTrials) == kk,:);
         end
         for kk = 1:4
             congMean{1,kk}(jj,:) = mean(congspkSm{jj,kk}); %mean

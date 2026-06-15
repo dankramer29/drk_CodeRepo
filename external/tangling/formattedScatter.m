@@ -30,7 +30,7 @@ color = params.Results.color;
 plotDataOnly = params.Results.plotDataOnly;
 
 if ~plotDataOnly
-   figure;
+   figure('Name', ['Tangling ', myTitle]);
 end
 %%
 % if any(strcmp(varargin,'plotDataOnly')); plotDataOnly = true; end
